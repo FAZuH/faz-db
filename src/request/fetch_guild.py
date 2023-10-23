@@ -4,21 +4,12 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from discord.ext import tasks
 
-from .fetch_base import FetchBase
-from bot_logger import log_stalk
-from modules.database.constants import StalkerDatabaseTable
-from modules.database.objects import GuildMember, PlayerGeneral, TaskTimestamp
-from modules.database.stalker_databases import GuildMemberDatabase
-from modules.error_handler import ErrorHandler
-from modules.stalker.constants import StalkFetch
-from modules.utils import PaintLog
-
 if TYPE_CHECKING:
-    from cogs.stalker import Stalker
     from corkus.objects.guild import Guild
 
 
 class FetchGuild:
+
     def __init__(self, pcls: 'Stalker'):
         self.pcls: Stalker = pcls
         self.fetched_guilds: List['Guild'] = []

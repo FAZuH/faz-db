@@ -36,7 +36,7 @@ class RatelimitManager:
             await asyncio.sleep(self.reset)
 
     def update(self, headers: dict) -> None:
-        self.remaining -= 1
+        self._remaining -= 1
         # self._total = int(headers.get("ratelimit-limit", 180))
         # self._remaining = int(headers.get("ratelimit-remaining", 180))
         # self._reset = time() + int(headers.get("ratelimit-reset", 0))

@@ -32,7 +32,7 @@ class FetchOnline:
         td = perf_counter - t0
 
     async def update_online_info(self):
-        FetchOnline.online_players: Dict[str, str] = await Request.get_online_players()["players"]
+        FetchOnline.online_players: Dict[str, str] = await Request.get_online_player_response()["players"]
         self.timestamp = round(time())
 
         self.online_usernames = set(FetchOnline.online_players.keys())
@@ -48,5 +48,8 @@ class FetchOnline:
         for username in self.logons:
             self.logon_timestamps[username] = self.timestamp
 
-    async def convert_data(self):
+    async def to_db_player_general(self):
+        return
+
+    async def to_db_player_uptime(self):
         return

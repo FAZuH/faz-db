@@ -55,17 +55,17 @@ class Request(RequestBase):
         self.online_rlm = RatelimitManager()
         self.player_rlm = RatelimitManager()
 
-    async def get_guild_stats(self, guild_name: str, is_prefix: bool = False) -> 'ClientResponse':
+    async def get_guild_response(self, guild_name: str, is_prefix: bool = False) -> 'ClientResponse':
         url_parameters = f"guild/{'prefix/' if is_prefix else ''}{guild_name}"
         ret = await self.get(url_parameters, self.guild_rlm)
         return ret
 
-    async def get_online_players(self) -> 'ClientResponse':
+    async def get_online_player_response(self) -> 'ClientResponse':
         url_parameters = "player"
         ret = await self.get(url_parameters, self.online_rlm)
         return ret
 
-    async def get_player_stats(self, username_or_uuid: str) -> 'ClientResponse':
+    async def get_player_response(self, username_or_uuid: str) -> 'ClientResponse':
         url_parameters = f"player/{username_or_uuid}?fullResult=True"
         ret = await self.get(url_parameters, self.player_rlm)
         return ret
