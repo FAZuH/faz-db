@@ -1,18 +1,23 @@
 import asyncio
 
-from request.request import Request
+from .database.vindicator_database import VindicatorDatabase
+from .request.request_wynncraft import RequestWynncraft
 
 
 class Main:
     def __init__(self) -> None:
         pass
 
-    def main(self) -> None:
-        asyncio.run(self.start())
+    async def main(self) -> None:
+        pass
+
+    async def ainit(self) -> None:
+        pass
 
     async def start(self) -> None:
-        await Request.start()
+        await VindicatorDatabase.ainit()
+        await RequestWynncraft.ainit()
 
 
-# if __name__ == "__main__":
-#     Main().main()
+if __name__ == "__main__":
+    asyncio.run(Main().main())
