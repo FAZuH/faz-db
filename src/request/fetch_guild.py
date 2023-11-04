@@ -1,69 +1,148 @@
 from dataclasses import asdict
-from time import perf_counter
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from time import perf_counter, time
+from typing import *  # type: ignore
+# TODO: Do proper import
 
-from discord.ext import tasks
+from discord.ext.tasks import loop
+
+from database.vindicator_database import VindicatorDatabase
+from objects.vindicator_database import (
+    GuildMainInfo,
+    GuildMain,
+    GuildMember,
+    RawOnlineGuild,
+    RawRecentGuild
+)
+from request.fetch_player import FetchPlayer
+from request.wynncraft_api_request import WynncraftAPIRequest
+from settings import FETCH_GUILD_INTERVAL, VindicatorTables
+from utils.wynncraft_response_utils import WynncraftResponseUtils as WynnUtils
 
 if TYPE_CHECKING:
-    from corkus.objects.guild import Guild
+    from aiohttp import ClientResponse
+
+    from objects.wynncraft_response import GuildStats, PlayerStats
+
+FetchedGuild = TypedDict("FetchedGuild", {"response_datetime": float, "guild_stats": "GuildStats"})
 
 
 class FetchGuild:
 
-    def __init__(self, pcls: 'Stalker'):
-        self.pcls: Stalker = pcls
-        self.fetched_guilds: List['Guild'] = []
-        self.guild_members: List[Dict[str, Any]] = []
-        self.guilds: List[Dict[str, Any]] = []
+    guild_list: List[str] = []
+    fetch_queue: Dict[str, float] = {}
+    fetched_guilds: List[FetchedGuild] = []
+    fetching: bool = False
+    timestamp: float
+    requeue_schedule: Dict[str, float] = {}
 
-    @tasks.loop(seconds=StalkFetch.FETCH_GUILD_PERIOD)
-    async def run(self):
-        t0 = perf_counter()
-        self.fetched_guilds = []
-        self.guild_members = []
-        self.guilds = []
+    @classmethod
+    @loop(seconds=FETCH_GUILD_INTERVAL)
+    async def run(cls):
+        t0: float = perf_counter()
+        # await cls._request_api()
+        # await cls._update_fetch_queue()
 
-        try:
-            await self.fetch_guilds()
-            self.convert_guild_objs()
-            await self.to_db_guild_member()
+        if not cls.fetching:
+            await cls._fetch_guilds()
+            await cls._to_db()
 
-        except Exception as e:
-            await ErrorHandler.handle_loop_exc(self, e)
+        td: float = perf_counter() - t0
 
-        log_stalk.info(f'{PaintLog.self(self, "success")} {perf_counter()-t0:.1f}s')
+    @classmethod
+    async def _request_api(cls) -> None:
+        cls.guild_list = [record["name"] for record in await WynncraftAPIRequest.get_guild_list_json()]
+        cls.timestamp = time()
 
-    async def fetch_guilds(self):
-        fetched_guild_names: List[str] = []
-        online_pg = await PlayerGeneral.get_online()
-
-        for pg in online_pg:
-            if not pg.guild_name or pg.guild_name in fetched_guild_names:
+    @classmethod
+    async def _update_fetch_queue(cls) -> None:
+        """Updates cls.fetch_queue"""
+        # Adds online_guilds into fetch queue
+        for player_stat in FetchPlayer._latest_fetch.copy():
+            guild_name: str = player_stat[1]["guild"]["name"]
+            if guild_name in cls.fetch_queue:
                 continue
 
-            guild = await FetchBase.get_guild_stats(pg.guild_name)
-            if not guild:
+            cls.fetch_queue[guild_name] = time()
+
+        # Requeues fetched guilds (if passed schedule time)
+        for guild_name, requeue_time in cls.requeue_schedule.copy().items():
+            if guild_name in cls.fetch_queue or requeue_time > time():
                 continue
 
-            fetched_guild_names.append(guild.name)
-            self.fetched_guilds.append(guild)
+            cls.fetch_queue[guild_name] = cls.requeue_schedule.pop(guild_name)  # Requeue
 
-        await TaskTimestamp.update_db('fetch_guild')
 
-    def convert_guild_objs(self):
-        for guild in self.fetched_guilds:
-            # self.guilds.append(asdict(Guild.from_guild(guild)))
-            for member in guild.members:
-                try:
-                    self.guild_members.append(asdict(GuildMember.from_member(guild, member)))
+        # Adds guilds that's not saved in database yet
+        query: str = f"SELECT name FROM {VindicatorTables.GUILD_MAIN_INFO}"
+        saved_guild_names: List[str] = [record["name"] for record in await VindicatorDatabase.read_all(query)]
+        for guild_name in cls.guild_list:
+            if guild_name in cls.fetch_queue or guild_name in saved_guild_names:
+                continue
 
-                except Exception:
-                    continue
+            cls.fetch_queue[guild_name] = time()
 
-    async def to_db_guild_member(self):
-        query = (
-            f"INSERT OR REPLACE INTO {StalkerDatabaseTable.GUILD_MEMBER} "
-            "(username, uuid, rank, contributed_xp, join_date, guild_name, timestamp) VALUES "
-            "(:username, :uuid, :rank, :contributed_xp, :join_date, :guild_name, :timestamp)"
-        )
-        await GuildMemberDatabase.writemany(query, self.guild_members)
+    @classmethod
+    async def _fetch_guilds(cls):
+        """Requests guild stats from Wynncraft API. Saves into cls.fetched_guilds
+
+        Guilds-to-fetch are grabbed from:
+        - _latest_fetch class variable of FetchPlayer class
+        - guilds that's not saved in database
+        """
+        fetch_queue: Dict[str, float] = cls.fetch_queue.copy()
+        cls.fetch_queue.clear()  #
+        cls.fetched_guilds.clear()  #
+        guilds_to_fetch: List[str] = [guild_name for guild_name, _ in sorted(fetch_queue.items(), key=lambda item: item[1])]  # Get guild names sorted by timestamp
+
+        guilds_to_fetch = ["WynnContentTeam", "Holders Of LE", "Wynn Theory"]
+
+        cls.fetching = True
+        # t0: float = perf_counter()
+        # temp: int = len(guilds_to_fetch)
+        # excs: int = 0
+        # print("Fetching", temp, "guilds...")
+        while guilds_to_fetch:
+            concurrent_request: int = 25
+            guilds_to_fetch_ = guilds_to_fetch[:concurrent_request]  # Poll
+            guilds_to_fetch = guilds_to_fetch[concurrent_request:]  # Update queue
+
+            guild_stat_resps: List["ClientResponse"] = await WynncraftAPIRequest.get_many_guild_stats_response(guilds_to_fetch_)
+            # excs += (len(guilds_to_fetch_) - len(guild_stat_resps))
+            # print("Fetched", len(guild_stat_resps), "guilds")
+
+            for response in guild_stat_resps:
+                response_dt: float = WynnUtils.parse_datestr1(response.headers.get("Date", ""))
+                guild_stat: "GuildStats" = await response.json()
+                cls.fetched_guilds.append({"response_datetime": response_dt, "guild_stat": guild_stat})
+                cls.requeue_schedule[guild_stat["name"]] = response_dt + FETCH_GUILD_INTERVAL
+
+            # print(f"{perf_counter() - t0:.2f} | {len(cls.fetched_guilds)} out of {temp} guilds fetched. {len(guilds_to_fetch)} left.\n")
+
+        with open(f"{int(time())}guilds.json", "w") as f:
+            import json
+            json.dump(cls.fetched_guilds, f, indent=4)
+        # t0=perf_counter()
+        # for guild in guilds_to_fetch.copy():
+        #     t1=perf_counter()
+        #     cls.fetched_guilds.append((time(), await WynncraftAPIRequest.get_guild_stats_json(guild)))
+
+        cls.fetching = False
+
+    @classmethod
+    async def _to_db(cls):
+        import json
+        with open("1699075292guilds.json") as f:
+            data: List["FetchedGuild"] = json.load(f)
+
+        # TODO: to_database:
+        guild_main_info = GuildMainInfo.from_raw(data)  # - guild_main_info
+        guild_main = GuildMain.from_raw(data)  # - guild_main
+        guild_member = GuildMember.from_raw(data)  # - guild_member
+        raw_online_guild = RawOnlineGuild.from_raw(data)  # raw_online_guild
+        raw_recent_guild = RawRecentGuild.from_raw(data) # raw_recent_guild
+
+        await GuildMainInfo.to_db(guild_main_info)
+        await GuildMain.to_db(guild_main)
+        await GuildMember.to_db(guild_member)
+        await RawOnlineGuild.to_db(raw_online_guild)
+        await RawRecentGuild.to_db(raw_recent_guild)

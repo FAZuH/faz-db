@@ -11,7 +11,7 @@ FETCH_PLAYER_WEBHOOK: str = "https://discord.com/api/webhooks/116564595346270626
 FETCH_GUILD_INTERVAL: int = 600
 FETCH_ONLINE_INTERVAL: int = 30
 FETCH_PLAYER_INTERVAL: int = 600
-\
+
 class VindicatorTables:
     GUILD_MAIN = "guild_main"
     GUILD_MAIN_INFO = "guild_main_info"
