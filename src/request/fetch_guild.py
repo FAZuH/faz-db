@@ -6,16 +6,14 @@ from typing import *  # type: ignore
 from discord.ext.tasks import loop
 
 from database.vindicator_database import VindicatorDatabase
-from objects.vindicator_database import (
+from objects.database import (
     GuildMainInfo,
     GuildMain,
     GuildMember,
-    RawOnlineGuild,
-    RawRecentGuild
 )
 from request.fetch_player import FetchPlayer
-from request.wynncraft_api_request import WynncraftAPIRequest
-from settings import FETCH_GUILD_INTERVAL, VindicatorTables
+from request.wynncraft_request import WynncraftRequest
+from constants import FETCH_GUILD_INTERVAL, DatabaseTables
 from utils.wynncraft_response_utils import WynncraftResponseUtils as WynnUtils
 
 if TYPE_CHECKING:
@@ -23,7 +21,7 @@ if TYPE_CHECKING:
 
     from objects.wynncraft_response import GuildStats, PlayerStats
 
-FetchedGuild = TypedDict("FetchedGuild", {"response_datetime": float, "guild_stats": "GuildStats"})
+FetchedGuild = TypedDict("FetchedGuild", {"response_timestamp": float, "guild_stats": "GuildStats"})
 
 
 class FetchGuild:
@@ -50,14 +48,14 @@ class FetchGuild:
 
     @classmethod
     async def _request_api(cls) -> None:
-        cls.guild_list = [record["name"] for record in await WynncraftAPIRequest.get_guild_list_json()]
+        cls.guild_list = [record["name"] for record in await WynncraftRequest.get_guild_list_json()]
         cls.timestamp = time()
 
     @classmethod
     async def _update_fetch_queue(cls) -> None:
         """Updates cls.fetch_queue"""
         # Adds online_guilds into fetch queue
-        for player_stat in FetchPlayer._latest_fetch.copy():
+        for player_stat in FetchPlayer.latest_fetch.copy():
             guild_name: str = player_stat[1]["guild"]["name"]
             if guild_name in cls.fetch_queue:
                 continue
@@ -73,7 +71,7 @@ class FetchGuild:
 
 
         # Adds guilds that's not saved in database yet
-        query: str = f"SELECT name FROM {VindicatorTables.GUILD_MAIN_INFO}"
+        query: str = f"SELECT name FROM {DatabaseTables.GUILD_MAIN_INFO}"
         saved_guild_names: List[str] = [record["name"] for record in await VindicatorDatabase.read_all(query)]
         for guild_name in cls.guild_list:
             if guild_name in cls.fetch_queue or guild_name in saved_guild_names:
@@ -106,14 +104,14 @@ class FetchGuild:
             guilds_to_fetch_ = guilds_to_fetch[:concurrent_request]  # Poll
             guilds_to_fetch = guilds_to_fetch[concurrent_request:]  # Update queue
 
-            guild_stat_resps: List["ClientResponse"] = await WynncraftAPIRequest.get_many_guild_stats_response(guilds_to_fetch_)
+            guild_stat_resps: List["ClientResponse"] = await WynncraftRequest.get_many_guild_stats_response(guilds_to_fetch_)
             # excs += (len(guilds_to_fetch_) - len(guild_stat_resps))
             # print("Fetched", len(guild_stat_resps), "guilds")
 
             for response in guild_stat_resps:
                 response_dt: float = WynnUtils.parse_datestr1(response.headers.get("Date", ""))
                 guild_stat: "GuildStats" = await response.json()
-                cls.fetched_guilds.append({"response_datetime": response_dt, "guild_stat": guild_stat})
+                cls.fetched_guilds.append({"response_timestamp": response_dt, "guild_stats": guild_stat})
                 cls.requeue_schedule[guild_stat["name"]] = response_dt + FETCH_GUILD_INTERVAL
 
             # print(f"{perf_counter() - t0:.2f} | {len(cls.fetched_guilds)} out of {temp} guilds fetched. {len(guilds_to_fetch)} left.\n")
@@ -135,14 +133,14 @@ class FetchGuild:
             data: List["FetchedGuild"] = json.load(f)
 
         # TODO: to_database:
-        guild_main_info = GuildMainInfo.from_raw(data)  # - guild_main_info
-        guild_main = GuildMain.from_raw(data)  # - guild_main
-        guild_member = GuildMember.from_raw(data)  # - guild_member
-        raw_online_guild = RawOnlineGuild.from_raw(data)  # raw_online_guild
-        raw_recent_guild = RawRecentGuild.from_raw(data) # raw_recent_guild
+        # guild_main_info = GuildMainInfo.from_raw(data)  # - guild_main_info
+        # guild_main = GuildMain.from_raw(data)  # - guild_main
+        # guild_member = GuildMember.from_raw(data)  # - guild_member
+        # raw_online_guild = RawOnlineGuild.from_raw(data)  # raw_online_guild
+        # raw_recent_guild = RawRecentGuild.from_raw(data) # raw_recent_guild
 
-        await GuildMainInfo.to_db(guild_main_info)
-        await GuildMain.to_db(guild_main)
-        await GuildMember.to_db(guild_member)
-        await RawOnlineGuild.to_db(raw_online_guild)
-        await RawRecentGuild.to_db(raw_recent_guild)
+        # await GuildMainInfo.to_db(guild_main_info)
+        # await GuildMain.to_db(guild_main)
+        # await GuildMember.to_db(guild_member)
+        # await RawOnlineGuild.to_db(raw_online_guild)
+        # await RawRecentGuild.to_db(raw_recent_guild)

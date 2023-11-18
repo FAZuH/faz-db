@@ -1,46 +1,37 @@
 import asyncio
 
-from database.vindicator_database import VindicatorDatabase
-from request.fetch_guild import FetchGuild
+from request.fetch_online import FetchOnline
 from request.fetch_player import FetchPlayer
-from request.wynncraft_api_request import WynncraftAPIRequest
-
-from objects.vindicator_database import *
 
 
 class Main:
-    def __init__(self) -> None:
-        pass
-
-    async def main(self) -> None:
-        pass
-
-    async def ainit(self) -> None:
-        pass
-
-
-########################################################################################################################
-
-from time import perf_counter
-from pprint import pprint
-from dataclasses import asdict
-
-class Test:
-
-    @staticmethod
-    async def ainit() -> None:
-        await VindicatorDatabase.ainit()
-        await WynncraftAPIRequest.ainit()
 
     @staticmethod
     async def main() -> None:
-        await Test.ainit()
-        await FetchGuild.run()
+        fetch_online: FetchOnline = FetchOnline()
+        fetch_player: FetchPlayer = FetchPlayer()
+
+        t1: asyncio.Task = fetch_online.run.start()
+        await asyncio.sleep(10.0)
+        t2: asyncio.Task = fetch_player.loop_run.start()
+        await asyncio.sleep(10.0)
+        while True:
+            try:
+                if t1.done() and t1.exception():
+                    await t1
+                if t2.done() and t2.exception():
+                    await t2
+            except Exception as e:
+                from webhook.vindicator_webhook import VindicatorWebhook
+                from traceback import format_exception
+                await VindicatorWebhook.send(
+                    "error", "error", "Fatal error occured on Main.main. Program has been stopped\n"
+                    f"{format_exception(e)}"
+                )
+                raise
+            await asyncio.sleep(10.0)
+        return
+
 
 if __name__ == "__main__":
-    t0 = perf_counter()
-    asyncio.run(Test.main())
-    td = perf_counter() - t0
-    print(f"Time elapsed: {td:0.4f} seconds", "DONE", sep="\n")
-
-########################################################################################################################
+    asyncio.run(Main.main())

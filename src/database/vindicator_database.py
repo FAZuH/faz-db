@@ -2,8 +2,18 @@ from .database_base import DatabaseBase
 
 
 class VindicatorDatabase(DatabaseBase):
-    _database = "player_data"
+
+    def __init__(self) -> None:
+        return
 
     @classmethod
-    async def ainit(cls):
-        await VindicatorDatabase._ainit(cls)
+    def user(cls) -> str:
+        return "root"
+
+    @classmethod
+    def password(cls) -> str:
+        return "root"
+
+    @classmethod
+    def database(cls) -> str:
+        return "player_data"

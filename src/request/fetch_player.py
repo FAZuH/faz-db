@@ -1,207 +1,171 @@
 import asyncio
-from datetime import datetime
 from time import perf_counter, time
-from typing import TYPE_CHECKING, Dict, List, Set, Tuple, TypedDict
+from typing import TYPE_CHECKING, Dict, List, Set, TypeAlias, TypedDict
 from uuid import UUID
 
-from discord import Webhook
 from discord.ext.tasks import loop
-from mojang import API, TooManyRequests
-from database.vindicator_database import VindicatorDatabase
-from objects.vindicator_database import (
+from loguru import logger
+from objects.database import (
     PlayerCharacter,
     PlayerCharacterInfo,
     PlayerMain,
     PlayerMainInfo,
-    PlayerUptime,
-    RawLatestOthers,
-    RawOnlinePlayer,
-    RawRecentPlayer,
 )
-from request.wynncraft_api_request import WynncraftAPIRequest
-from settings import (
-    FETCH_ONLINE_INTERVAL,
-    FETCH_PLAYER_INTERVAL,
-    VindicatorTables
-)
-from webhook.vindicator_webhook import VindicatorWebhook
+
+from .fetch_online import FetchOnline
+from constants import FETCH_PLAYER_INTERVAL
+from database.vindicator_database import VindicatorDatabase
+from src.request.wynncraft_request import WynncraftRequest
 from utils.wynncraft_response_utils import WynncraftResponseUtils as WynnUtils
+from webhook.vindicator_webhook import VindicatorWebhook
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
 
-    from objects.wynncraft_response import OnlinePlayerList, PlayerStats
+    from objects.wynncraft_response import PlayerStats
 
+FetchedPlayer = TypedDict("FetchedPlayer", {"response_timestamp": float, "player_stats": "PlayerStats"})
 
-FetchedPlayer = TypedDict("FetchedPlayer", {"response_datetime": float, "player_stats": "PlayerStats"})
+Timestamp: TypeAlias = float
+Username: TypeAlias = str
+Uuid: TypeAlias = UUID
+
+lFetchedPlayers: TypeAlias = List[FetchedPlayer]
+lUsernames: TypeAlias = List[Username]
+lUuids: TypeAlias = List[Uuid]
+sUsernames: TypeAlias = Set[Username]
+sUuids: TypeAlias = Set[Uuid]
+
 
 class FetchPlayer:
 
-    _raw_online_player_list: "OnlinePlayerList"
-    _latest_fetch: List[FetchedPlayer] = []
+    latest_fetch: lFetchedPlayers = []
 
-    fetch_queue: Dict[UUID, float] = {}
-    fetched_players: List[FetchedPlayer] = []
-    fetching: bool = False
-    flagged_uuids: Set[UUID] = set()  # TODO: Implement this on a later stage
-    logoffs: Set[UUID] = set()
-    logons: Set[UUID] = set()
-    logon_timestamps: Dict[UUID, float] = {}
-    mojang_api: API = API()
-    online_player_count: int
-    online_usernames: Set[str] = set()
-    online_uuids: Set[UUID] = set()
-    previous_online_uuids: Set[UUID] = set()
-    requeue_schedule: Dict[UUID, float] = {}
-    timestamp: float
-    usernames_not_in_anywhere: Set[str] = set()
+    def __init__(self) -> None:
+        self._fetch_queue: Dict[UUID, Timestamp] = {}
+        self._fetched_players: lFetchedPlayers = []
+        self._fetching: bool = False
+        self._flagged_uuids: sUuids = set()  # TODO: Implement later
+        self._requeue_schedule: Dict[UUID, Timestamp] = {}
 
-    @classmethod
-    @loop(seconds=FETCH_ONLINE_INTERVAL)
-    async def run(cls) -> None:
-        print("self.fetch_api()")
-        await cls._request_api()
-        print("self.username_to_uuid()")
-        await cls._username_to_uuid()
-        print("self.update_online_info()")
-        await cls._update_online_info()
-        print("self.update_fetch_queue()")
-        await cls._update_fetch_queue()
+        self.request: WynncraftRequest = WynncraftRequest()
+        return
 
-        if not cls.fetching:
-            print("self.fetch_players()")
-            await cls._fetch_players()  # TODO: Need testing
-            print("self.to_db()")
-            await cls._to_db()  # TODO: Need testing
+    @loop(seconds=FETCH_PLAYER_INTERVAL)
+    async def loop_run(self) -> None:
+        asyncio.create_task(self.run())
+        return
 
-    @classmethod
-    async def _request_api(cls) -> None:
-        """ Gets self.raw_online_player_list, self.online_usernames, self.online_player_count """
-        cls.raw_online_player_list = await WynncraftAPIRequest.get_online_player_json()
-        cls.timestamp = time()  #
-        cls.online_usernames = set(cls.raw_online_player_list["players"].keys())  #
-        cls.online_player_count = cls.raw_online_player_list["total"]  #
+    async def run(self) -> None:
+        self._update_fetch_queue()
+        if not self._fetching and self._fetch_queue:
+            t0: float = perf_counter()
+            logger.info(f"Running loop")
 
-    @classmethod
-    async def _username_to_uuid(cls) -> None:
-        """ Gets self.online_uuids, self.usernames_not_in_anywhere """
-        usernames: Set[str] = cls.online_usernames.copy()
-        params: Dict[str, Set[str]] = {'usernames': usernames}
-        query: str = f"SELECT latest_username, uuid FROM {VindicatorTables.PLAYER_MAIN_INFO} WHERE latest_username IN %(usernames)s"
-        result = await VindicatorDatabase.read_all(query=query, params=params)  # TODO: TypedDict this
+            await asyncio.sleep(0.0)
+            await self._fetch_players()
+            await self._to_db()
+            await VindicatorWebhook.send("fetch_player", "success", f"**latest_fetched**={len(self._fetched_players)}:t={perf_counter()-t0:.2f} ")
+        return
 
-        online_uuids: Set[UUID] = {UUID(bytes=d["uuid"]) for d in result}
-        usernames_not_in_db: List[str] = list(usernames - {d["latest_username"] for d in result})
+    def _update_fetch_queue(self) -> None:
+        """Modifies
+        ---------
+            - `self._fetch_queue`
+        """
+        for uuid in FetchOnline.logons.copy():  # Adds logged on into queue (if not already)
+            if uuid not in self._fetch_queue:
+                self._fetch_queue[uuid] = FetchOnline._timestamp
 
-        temp: Set[str] = set(usernames_not_in_db.copy())
+        for uuid, requeue_time in self._requeue_schedule.copy().items():  # Requeues fetched players (if passed schedule time)
+            if uuid not in self._fetch_queue and requeue_time <= time():
+                self._fetch_queue[uuid] = self._requeue_schedule.pop(uuid)  # Requeue
+        return
 
-        n = 10
-        # Requests 10 UUIDs at a time
-        while usernames_not_in_db:
-            try:
-                uuids: Dict[str, str] = await asyncio.get_event_loop() \
-                    .run_in_executor(None, cls.mojang_api.get_uuids, usernames_not_in_db[:n])
-
-            except TooManyRequests:
-                print("mojang.TooManyRequests")
-                break  # TODO: Cannot afford to wait longer, need to find a way to handle this
-                # await asyncio.sleep(60)
-
-            temp = temp - {username for username in uuids}
-
-            online_uuids.update(set(map(UUID, uuids.values())))
-            usernames_not_in_db = usernames_not_in_db[n:]
-
-        cls.usernames_not_in_anywhere = temp.copy()
-        cls.online_uuids = online_uuids.copy()  #
-        print("len self.usernames_not_in_anywhere: ", len(cls.usernames_not_in_anywhere))
-        print("len self.online_uuids: ", len(cls.online_uuids))
-
-    @classmethod
-    async def _update_online_info(cls) -> None:
-        """ Gets self.logons, self.logoffs, self.previous_online_uuids. Updates self.logon_timestamps"""
-        online_uuids: Set[UUID] = cls.online_uuids.copy()
-
-        cls.logons: Set[UUID] = online_uuids - cls.previous_online_uuids  #
-        cls.logoffs: Set[UUID] = cls.previous_online_uuids - online_uuids  #
-
-        cls.previous_online_uuids: Set[UUID] = online_uuids.copy()  #
-
-        for uuid in cls.logoffs:
-            del cls.logon_timestamps[uuid]
-
-        for uuid in cls.logons:
-            cls.logon_timestamps[uuid] = cls.timestamp
-
-    @classmethod
-    async def _update_fetch_queue(cls) -> None:
-        """ Updates self.fetch_queue """
-        # Adds logged on into queue (if not already)
-        for uuid in cls.logons.copy():
-            if uuid in cls.fetch_queue:
-                continue
-
-            cls.fetch_queue[uuid] = cls.timestamp
-
-        # Requeues fetched players (if passed schedule time)
-        for uuid, requeue_time in cls.requeue_schedule.copy().items():
-            if uuid in cls.fetch_queue or requeue_time > time():
-                continue
-
-            cls.fetch_queue[uuid] = cls.requeue_schedule.pop(uuid)  # Requeue
-
-    @classmethod
-    async def _fetch_players(cls) -> None:
-        """Requests player stats from Wynncraft API. Saves into cls.fetched_guilds
+    async def _fetch_players(self) -> None:
+        """Requests player stats from Wynncraft API. Saves into self.fetched_guilds.
 
         Guilds-to-fetch are grabbed from:
-        - _latest_fetch class variable of FetchPlayer class
+        - latest_fetch class variable of FetchPlayer class
         - guilds that's not saved in database
+
+        Needs
+        -----------
+            - `self._fetch_queue`
+
+        Assigns
+        -----------
+            - `FetchPlayer.latest_fetch`
+
+        Clears
+        -----------
+            - `self._fetch_queue`
+
+        Modifies
+        -----------
+            - `self._fetched_players`
+            - `self._requeue_schedule`
         """
-        fetch_queue: Dict[UUID, float] = cls.fetch_queue.copy()
-        cls.fetch_queue.clear()  #
-        cls.fetched_players.clear()  #
-        uuids_to_fetch: List[UUID] = [uuid for uuid, _ in sorted(fetch_queue.items(), key=lambda item: item[1])]  # Get UUIDS sorted by timestamp
+        fetch_queue: Dict[UUID, float] = self._fetch_queue.copy()
+        self._fetch_queue.clear()  #
+        self._fetched_players.clear()  #
+        uuids_to_fetch: lUuids = [uuid for uuid, _ in sorted(fetch_queue.items(), key=lambda item: item[1])]  # Get UUIDS sorted by timestamp
 
-        cls.fetching = True
+        concurrent_request: int = 50
+        invalid_uuids: List[BaseException] = []
+        exceptions_: List[BaseException]
+        usernames_nowhere: List[BaseException] = []
+        responses: List["ClientResponse"] = []
+        responses_: List["ClientResponse"]
+
+        self._fetching = True
+        logger.info(f"uuids_to_fetch={len(uuids_to_fetch)}")
+        t0: float = perf_counter()
+
         while uuids_to_fetch:
-            concurrent_request: int = 275
-            uuids_to_fetch_ = uuids_to_fetch[:concurrent_request]  # Poll
+            exceptions_, responses_ = await self.request.get_many_player_stats_response(uuids_to_fetch[:concurrent_request])
             uuids_to_fetch = uuids_to_fetch[concurrent_request:]  # Update queue
+            invalid_uuids.extend(exceptions_)
+            responses.extend(responses_)
 
-            player_stat_resps: List["ClientResponse"] = await WynncraftAPIRequest.get_many_player_stats_response(uuids_to_fetch_)
+        while FetchOnline.usernames_nowhere:
+            exceptions_, responses_ = await self.request.get_many_player_stats_response(FetchOnline.usernames_nowhere[:concurrent_request])
+            FetchOnline.usernames_nowhere = FetchOnline.usernames_nowhere[concurrent_request:]
+            usernames_nowhere.extend(exceptions_)
+            responses.extend(responses_)
 
-            for response in player_stat_resps:
-                response_dt: float = WynnUtils.parse_datestr1(response.headers.get("Date", ""))
+        for response in responses:
+            response_dt: float = WynnUtils.parse_datestr1(response.headers.get("Expires", "")) - float(response.headers.get("Cache-Control", "_=0").split('=')[-1])
+            player_stat: "PlayerStats" = await response.json()
+            player_uuid: UUID = UUID(player_stat["uuid"])
+            self._fetched_players.append({"response_timestamp": response_dt, "player_stats": player_stat})
+            self._requeue_schedule[player_uuid] = response_dt + (120.0 if player_uuid in self._flagged_uuids else 600.0)
 
-                player_stat: "PlayerStats" = await response.json()
-                player_uuid: UUID = UUID(player_stat["uuid"])
-                cls.fetched_players.append({"response_datetime": response_dt, "player_stats": player_stat})
+        await VindicatorWebhook.send("fetch_player", "info",
+            f"**player_stat_resps**={len(responses)}\n"
+            f"**fetched_players**={len(self._fetched_players)}\n"
+            f"**invalid_uuids**={len(invalid_uuids)}\n"
+            f"**usernames_nowhere**={len(usernames_nowhere)}"
+            f"**t**={perf_counter()-t0:.2f}"
+        )
+        FetchPlayer.latest_fetch = self._fetched_players.copy()
+        self._fetching = False
+        return
 
-                cls.requeue_schedule[player_uuid] = response_dt + (120 if player_uuid in cls.flagged_uuids else 600)
+    async def _to_db(self) -> None:
+        """Saves fetched players data into database.
 
-        cls._latest_fetch = cls.fetched_players.copy()
-        cls.fetching = False
+        Needs
+        -----------
+            - `self._fetched_players`
+        """
+        # with open("C:/Users/user/VSCodeProjects/Vindicator/tests/fetched_player.json") as f:
+        #     import json
+        #     self._fetched_players = json.load(f)
 
-    @classmethod
-    async def _to_db(cls) -> None:
-        ################################################################################################################
-        import json
-        with open("onlineplayers11.4.23-2.21am.json") as f:
-            cls.fetched_players = json.load(f)
-        ################################################################################################################
-
-        player_character = PlayerCharacter.from_raw(cls.fetched_players)
-        player_character_info = PlayerCharacterInfo.from_raw(cls.fetched_players)
-        player_main = PlayerMain.from_raw(cls.fetched_players)
-        player_main_info = PlayerMainInfo.from_raw(cls.fetched_players)
-        # TODO: Add to databases. Figure out a way to do these
-        # - player_uptime
-        # - raw_latest_others: online_player_list
-        # - raw_online_player
-        # - raw_recent_player
-
-        await PlayerMainInfo.to_db(player_main_info)
-        await PlayerCharacterInfo.to_db(player_character_info)
-        await PlayerMain.to_db(player_main)
-        await PlayerCharacter.to_db(player_character)
+        await PlayerMainInfo.to_db(self._fetched_players)
+        await PlayerCharacterInfo.to_db(self._fetched_players)
+        await PlayerMain.to_db(self._fetched_players)
+        await PlayerCharacter.to_db(self._fetched_players)
+        # TODO: raw_latest_others: online_player_list
+        return

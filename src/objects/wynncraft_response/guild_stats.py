@@ -27,12 +27,12 @@ GuildMemberInfo = TypedDict("GuildMember", {
 })
 GuildMembers = TypedDict("GuildMembers", {
     "total": int,
-    "owner": Dict[Username, GuildMember],
-    "chief": Dict[Username, GuildMember],
-    "strategist": Dict[Username, GuildMember],
-    "captain": Dict[Username, GuildMember],
-    "recruiter": Dict[Username, GuildMember],
-    "recruit": Dict[Username, GuildMember]
+    "owner": Dict[Username, GuildMemberInfo],
+    "chief": Dict[Username, GuildMemberInfo],
+    "strategist": Dict[Username, GuildMemberInfo],
+    "captain": Dict[Username, GuildMemberInfo],
+    "recruiter": Dict[Username, GuildMemberInfo],
+    "recruit": Dict[Username, GuildMemberInfo]
 })
 GuildStats = TypedDict("GuildStats", {  # NOTE: Main
     "name": str,

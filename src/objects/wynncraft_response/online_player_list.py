@@ -1,7 +1,9 @@
-from typing import Dict, TypedDict
+from typing import Dict, TypeAlias, TypedDict
 
 
-Username = Server = str
+Server: TypeAlias = str
+Username: TypeAlias = str
+
 
 OnlinePlayerList = TypedDict("OnlinePlayerList", {
     "total": int,
