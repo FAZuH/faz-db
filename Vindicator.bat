@@ -1,7 +1,7 @@
 @echo off
 
 call .venv/Scripts/activate
-python src/main.py
+python -m vindicator
 call .venv/Scripts/deactivate
 
 pause

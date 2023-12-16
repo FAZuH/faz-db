@@ -2,9 +2,9 @@ from pprint import pprint
 from time import perf_counter
 from datetime import datetime
 import asyncio
-from request.request_wynncraft import RequestWynncraft
-from request.request_uuid import RequestMojang
-from database.vindicator_database import VindicatorDatabase
+from vindicator.request.request_wynncraft import RequestWynncraft
+from vindicator.request.request_uuid import RequestMojang
+from vindicator.database.vindicator_database import VindicatorDatabase
 import mojang
 
 
