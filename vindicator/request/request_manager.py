@@ -1,6 +1,6 @@
 from __future__ import annotations
 import asyncio
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -8,19 +8,17 @@ from vindicator import (
     __version__,
     BadRequest,
     Forbidden,
+    HTTPError,
     NotFound,
     ServerError,
     TooManyRequests,
     Unauthorized,
-    HTTPError,
     VindicatorError,
     VindicatorWebhook
 )
 
 if TYPE_CHECKING:
-    from .ratelimit import Ratelimit
-    from aiohttp import ClientResponse
-
+    from vindicator.types import *
 
 class RequestManager:
 

@@ -1,4 +1,4 @@
-from typing import Optional, TypedDict
+from typing import Optional
 
 
 __version__: str = "0.0.1"
@@ -29,28 +29,3 @@ class Webhooks:
     FETCH_ONLINE_WEBHOOK: str = "https://discord.com/api/webhooks/1175279388670042162/ymcM1IbmcEVKLgznxBLVRfbiGQqnw18hvyM14VzV_FGA3QdJPE-Y9N6Twqrqmcj_nGtK"
     FETCH_PLAYER_WEBHOOK: str = "https://discord.com/api/webhooks/1165645953462706266/AoIOMYmY9pdP8kCWqNFjjBZjCPGmVVeuSqoOjexi2mKbNSCBubGw5nRcP_EiARxWBK-T"
     WYNNCRAFT_REQUEST_WEBHOOK: str = "https://discord.com/api/webhooks/1185935055453945918/X0cgZ9H6jSm5tDbS1w1XXJ7s7xJD2e7Ng7ZqWQUJuIK-2oTRxoyQfFxuPK2eoYxbNC4O"
-
-CacheInfo = TypedDict("CacheInfo", {
-    "ttl": int
-})
-CacheSettings = TypedDict("CacheSettings", {
-    "online_player_list": CacheInfo,
-    "guild_stats": CacheInfo,
-    "player_stats": CacheInfo,
-    "guild_list": CacheInfo,
-})
-
-CACHE_SETTINGS: CacheSettings = {
-    "online_player_list": {
-        "ttl": 300
-    },
-    "guild_stats": {
-        "ttl": 259_200
-    },
-    "player_stats": {
-        "ttl": 259_200
-    },
-    "guild_list": {
-        "ttl": 10_800
-    }
-}

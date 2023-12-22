@@ -1,21 +1,17 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeAlias
+from typing import TYPE_CHECKING, Optional
 from warnings import filterwarnings
 
-import aiomysql
 from aiomysql import connect, DictCursor, Warning
 
 from vindicator.utils.error_handler import ErrorHandler
 
-Record: TypeAlias = Dict[str, Any]
-lRecords: TypeAlias = List[Record]
-
 if TYPE_CHECKING:
-    from aiomysql import Connection, Cursor
+    from vindicator.types import *
 
 
-filterwarnings('ignore', category=Warning)
+filterwarnings("ignore", category=Warning)
 
 
 class DatabaseBase(ABC):

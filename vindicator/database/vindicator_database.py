@@ -1,4 +1,4 @@
-from .database_base import DatabaseBase
+from vindicator import DatabaseBase
 
 
 class VindicatorDatabase(DatabaseBase):

@@ -16,8 +16,7 @@ from vindicator import (
 
 if TYPE_CHECKING:
     from asyncio import Task
-
-    from vindicator import OnlinePlayerList, sUuid, Timestamp
+    from vindicator.types import *
 
 
 class FetchOnline:

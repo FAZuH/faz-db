@@ -20,8 +20,7 @@ from vindicator import (
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
-
-    from vindicator import FetchedGuild, lFetchedGuilds
+    from vindicator.types import *
 
 
 class FetchGuild:

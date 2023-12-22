@@ -21,7 +21,7 @@ from vindicator import (
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
-    from vindicator import PlayerStats, lFetchedPlayers, lUuids, Timestamp
+    from vindicator.types import *
 
 
 class FetchPlayer:
@@ -85,7 +85,7 @@ class FetchPlayer:
             - `cls._requeue_schedule`
         """
         fetch_queue: Dict[UUID, float] = cls._fetch_queue.copy()
-        uuids_to_fetch: lUuids = [uuid for uuid, _ in sorted(fetch_queue.items(), key=lambda item: item[1])]  # Get UUIDS sorted by timestamp
+        uuids_to_fetch: lUuid = [uuid for uuid, _ in sorted(fetch_queue.items(), key=lambda item: item[1])]  # Get UUIDS sorted by timestamp
         cls._fetch_queue.clear()  #
         cls._fetched_players.clear()  #
 

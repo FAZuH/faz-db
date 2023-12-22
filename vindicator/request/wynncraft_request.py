@@ -1,6 +1,6 @@
 from __future__ import annotations
 from asyncio import gather
-from typing import TYPE_CHECKING, Any, Coroutine, Iterable, List, Tuple, TypeAlias, Union
+from typing import TYPE_CHECKING, Any, Coroutine, Iterable, List, Tuple, Union
 
 from aiohttp import ClientResponse, ClientSession
 
@@ -11,11 +11,7 @@ from vindicator import (
 from vindicator.constants import __version__
 
 if TYPE_CHECKING:
-    from uuid import UUID
-    from vindicator import GuildList, GuildStats, OnlinePlayerList, PlayerStats
-
-ReturnGather: TypeAlias = Union[BaseException, ClientResponse]
-tReturnGather: TypeAlias = Tuple[ReturnGather]
+    from vindicator.types import *
 
 
 class WynncraftRequest:
