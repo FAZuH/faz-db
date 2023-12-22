@@ -7,13 +7,17 @@ class VindicatorDatabase(DatabaseBase):
         return
 
     @classmethod
-    def user(cls) -> str:
-        return "root"
+    def database(cls) -> str:
+        return "player_data"
 
     @classmethod
     def password(cls) -> str:
         return "root"
 
     @classmethod
-    def database(cls) -> str:
-        return "player_data"
+    def retries(cls) -> int:
+        return 3
+
+    @classmethod
+    def user(cls) -> str:
+        return "root"

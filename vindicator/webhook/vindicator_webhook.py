@@ -1,48 +1,68 @@
-from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Literal
+from time import time
+from typing import Any, Dict, Literal
 
-import aiohttp
-import discord
-from discord import Webhook
+from aiohttp import ClientSession
+from discord import Colour, Embed, Webhook
 
-from constants import Webhooks
-
-if TYPE_CHECKING:
-    from discord import Colour
+from vindicator import DEVELOPER_DISCORD_ID, Webhooks
 
 
 class VindicatorWebhook:
 
     MATCH_WEBHOOK_TYPE: Dict[str, str] = {
+        "database": Webhooks.DATABASE_WEBHOOK,
+        "error": Webhooks.ERROR_WEBHOOK,
         "fetch_guild": Webhooks.FETCH_GUILD_WEBHOOK,
         "fetch_online": Webhooks.FETCH_ONLINE_WEBHOOK,
         "fetch_player": Webhooks.FETCH_PLAYER_WEBHOOK,
-        "database": Webhooks.DATABASE_WEBHOOK,
-        "error": Webhooks.ERROR_WEBHOOK
+        "wynncraft_request": Webhooks.WYNNCRAFT_REQUEST_WEBHOOK
     }
-    MATCH_MESSAGE_TYPE: Dict[str, "Colour"] = {
-        "success": discord.Colour.green(),
-        "error": discord.Colour.red(),
-        "info": discord.Colour.yellow(),
-        "connection": discord.Colour.dark_purple(),
-        "discord": discord.Colour.blue(),
+    MATCH_MESSAGE_TYPE: Dict[str, Colour] = {
+        "success": Colour.green(),
+        "error": Colour.red(),
+        "info": Colour.dark_grey(),
+        "request": Colour.dark_purple(),
+        "read": Colour.teal(),
+        "write": Colour.dark_teal(),
+        "update": Colour.dark_green(),
     }
 
     @staticmethod
     async def send(
         webhook_type: Literal["fetch_guild", "fetch_online", "fetch_player", "database", "error"],
-        message_type: Literal["success", "error", "info", "connection", "discord"],
-        message: str,
-        /
+        message_type: Literal["success", "error", "info", "request", "read", "write", "update"],
+        message: str
     ) -> None:
         url: str = VindicatorWebhook.MATCH_WEBHOOK_TYPE[webhook_type]
-        embed_content = discord.Embed(
-            title=f"Vindicator/{webhook_type}/{message_type}",
+        embed_content = Embed(
+            title=message_type,
             description=message,
             colour=VindicatorWebhook.MATCH_MESSAGE_TYPE[message_type],
         )
-        embed_content.add_field(name="time", value=f"<t:{int(datetime.now().timestamp())}:R>")
+        embed_content.add_field(name="", value=f"<t:{int(time())}:R>")
 
-        async with aiohttp.ClientSession() as session:
+        async with ClientSession() as session:
+            webhook = Webhook.from_url(url, session=session)
+            await webhook.send(embed=embed_content)
+
+    @staticmethod
+    async def log(
+        webhook_type: Literal["database", "error", "fetch_guild", "fetch_online", "fetch_player", "wynncraft_request"],
+        message_type: Literal["success", "error", "info", "request", "read", "write", "update"],
+        stats: Dict[str, Any],
+        title: str = ''
+    ) -> None:
+        url: str = VindicatorWebhook.MATCH_WEBHOOK_TYPE[webhook_type]
+        embed_content = Embed(
+            title=message_type,
+            colour=VindicatorWebhook.MATCH_MESSAGE_TYPE[message_type],
+        )
+        embed_content.description = f"**{title}**\n" if title else ''
+        embed_content.description += f"<@{DEVELOPER_DISCORD_ID}>\n" if message_type == "error" else ''
+        embed_content.description += '\n'.join([f"`{k:15}:`**{v}**" for k, v in stats.items()])
+
+        embed_content.add_field(name="", value=f"<t:{int(time())}:R>")
+        print(f"{title:_<50}" if title else '', ", ".join([f"{k.replace(' ', '-')}={v}" for k, v in stats.items()]))
+        async with ClientSession() as session:
             webhook = Webhook.from_url(url, session=session)
             await webhook.send(embed=embed_content)

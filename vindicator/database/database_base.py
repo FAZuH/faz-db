@@ -1,12 +1,18 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypeAlias
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeAlias
 from warnings import filterwarnings
 
 import aiomysql
-from aiomysql import Warning, connect
+from aiomysql import connect, DictCursor, Warning
+
+from vindicator.utils.error_handler import ErrorHandler
 
 Record: TypeAlias = Dict[str, Any]
 lRecords: TypeAlias = List[Record]
+
+if TYPE_CHECKING:
+    from aiomysql import Connection, Cursor
 
 
 filterwarnings('ignore', category=Warning)
@@ -16,49 +22,59 @@ class DatabaseBase(ABC):
 
     @classmethod
     async def read_all(cls, query: str, params: Optional[dict] = None) -> lRecords:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as connection:
-            connection: aiomysql.Connection
-            async with connection.cursor(aiomysql.DictCursor) as cursor:
-                cursor: aiomysql.DictCursor
-                await cursor.execute(query, params)
-                return await cursor.fetchall()
+        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
+            conn: Connection
+            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
+            async def _read_all() -> lRecords:
+                async with conn.cursor(DictCursor) as curs:
+                    curs: DictCursor
+                    await curs.execute(query, params)
+                    return await curs.fetchall()
+            return await _read_all()
 
     @classmethod
     async def read_many(cls, query: str, args: List[dict]) -> lRecords:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as connection:
-            connection: aiomysql.Connection
-            async with connection.cursor(aiomysql.DictCursor) as cursor:
-                cursor: aiomysql.DictCursor
-                ret: lRecords = []
-
-                for arg in args:
-                    await cursor.execute(query, arg)
-                    result: lRecords = await cursor.fetchall()
-                    if result:
-                        ret.append(result[0])
+        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
+            conn: Connection
+            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
+            async def _read_many() -> lRecords:
+                async with conn.cursor(DictCursor) as curs:
+                    curs: DictCursor
+                    ret: lRecords = []
+                    for arg in args:
+                        await curs.execute(query, arg)
+                        res: lRecords = await curs.fetchall()
+                        if res:
+                            ret.append(res[0])
                 return ret
+            return await _read_many()
 
     @classmethod
     async def write(cls, query: str, params: Optional[dict] = None) -> None:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as connection:
-            connection: aiomysql.Connection
-            async with connection.cursor(aiomysql.DictCursor) as cursor:
-                cursor: aiomysql.Cursor
-                await cursor.execute(query, params)
-                await connection.commit()
-
+        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
+            conn: Connection
+            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
+            async def _write() -> None:
+                async with conn.cursor(DictCursor) as curs:
+                    curs: Cursor
+                    await curs.execute(query, params)
+                    await conn.commit()
+            await _write()
     @classmethod
     async def write_many(cls, query: str, seq_of_params: List[dict]) -> None:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as connection:
-            connection: aiomysql.Connection
-            async with connection.cursor(aiomysql.DictCursor) as cursor:
-                cursor: aiomysql.Cursor
-                await cursor.executemany(query, seq_of_params)
-                await connection.commit()
+        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
+            conn: Connection
+            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
+            async def _write_many() -> None:
+                async with conn.cursor(DictCursor) as curs:
+                    curs: Cursor
+                    await curs.executemany(query, seq_of_params)
+                    await conn.commit()
+            await _write_many()
 
     @classmethod
     @abstractmethod
-    def user(cls) -> str:
+    def database(cls) -> str:
         ...
 
     @classmethod
@@ -68,5 +84,10 @@ class DatabaseBase(ABC):
 
     @classmethod
     @abstractmethod
-    def database(cls) -> str:
+    def retries(cls) -> int:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def user(cls) -> str:
         ...

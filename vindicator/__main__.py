@@ -1,44 +1,59 @@
+from __future__ import annotations
 import asyncio
+from traceback import format_exception
+from typing import TYPE_CHECKING
 
-from request.fetch_online import FetchOnline
-from request.fetch_player import FetchPlayer
+from vindicator import FetchGuild, FetchOnline, FetchPlayer, VindicatorWebhook
+
+if TYPE_CHECKING:
+    from asyncio import Task
 
 
 class Main:
 
     @staticmethod
     async def main() -> None:
-        fetch_online: FetchOnline = FetchOnline()
-        fetch_player: FetchPlayer = FetchPlayer()
+        fetch_online_task: Task = FetchOnline().run.start(); await asyncio.sleep(10.0)
+        fetch_player_task: Task = FetchPlayer().run.start(); await asyncio.sleep(10.0)
+        fetch_guild_task: Task = FetchGuild().run.start(); await asyncio.sleep(10.0)
+        fetch_online_task.set_name("FetchOnline")
+        fetch_player_task.set_name("FetchPlayer")
+        fetch_guild_task.set_name("FetchGuild")
 
-        t1: asyncio.Task = fetch_online.run.start()
-        await asyncio.sleep(10.0)
-        t2: asyncio.Task = fetch_player.run.start()
-        await asyncio.sleep(10.0)
         while True:
             try:
-                if t1.done() and t1.exception():
-                    await t1
-                if t2.done() and t2.exception():
-                    await t2
+                if fetch_online_task.done() and fetch_online_task.exception():
+                    await fetch_online_task
+                if fetch_player_task.done() and fetch_player_task.exception():
+                    await fetch_player_task
+                if fetch_guild_task.done() and fetch_guild_task.exception():
+                    await fetch_guild_task
+                await asyncio.sleep(10.0)
             except Exception as e:
-                from webhook.vindicator_webhook import VindicatorWebhook
-                from traceback import format_exception
                 await VindicatorWebhook.send(
-                    "error", "error", "Fatal error occured on Main.main. Program has been stopped\n"
-                    f"{format_exception(e)}"
+                    "error", "error", "Fatal error occured on Main.main(). Program has stopped\n"
+                    f"```{''.join(format_exception(e))}```"
                 )
                 raise
-            await asyncio.sleep(10.0)
 
 
 class Test:
 
     @staticmethod
     async def main() -> None:
-        fetch_online: FetchOnline = FetchOnline()
-        await fetch_online.run()
+        from time import perf_counter
+        print('start')
+        t0=perf_counter(); await Test.test(); t1=perf_counter()
+        print('stop, elapsed', f"{t1-t0:.2f}")
+
+    from vindicator.utils.error_handler import ErrorHandler
+    @staticmethod
+    @ErrorHandler.aretry(times=3, exceptions=Exception)
+    async def test() -> None:
+        from vindicator import WynncraftRequest
+        async with WynncraftRequest._rm.session as s:
+            resp = await WynncraftRequest.get_player_stats_coro(s, "ee24ee2c-7f01-4f65-b598-5c67cd3f97e5")
 
 
 if __name__ == "__main__":
-    asyncio.run(Test.main())
+    asyncio.run(Main.main())

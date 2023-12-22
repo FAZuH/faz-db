@@ -20,6 +20,7 @@ class WynncraftResponseUtils:
 
     @staticmethod
     def parse_datestr1(datestr: str) -> float:
+        """Parses a date string in the format of `Sat, 16 Dec 2023 15:15:37 GMT` and returns a timestamp"""
         return datetime.strptime(datestr, "%a, %d %b %Y %H:%M:%S %Z").replace(tzinfo=tzutc()).timestamp()
 
     @staticmethod

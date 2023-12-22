@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "module": "vindicator",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "Python: Current File",

@@ -1,7 +1,5 @@
 from typing import Optional
 
-import aiohttp
-
 
 class VindicatorError(Exception):
     """Base error class for all library-related exceptions in this file.
@@ -17,27 +15,31 @@ class VindicatorError(Exception):
         super().__init__(message)
 
 
-class BadRequest(VindicatorError):
+class HTTPError(VindicatorError):
+    """Base error class for all HTTP-related exceptions in this file."""
+
+
+class BadRequest(HTTPError):
     """HTTP 400. The server could not process our request, likely due to an error of ours."""
 
 
-class Unauthorized(VindicatorError):
+class Unauthorized(HTTPError):
     """HTTP 401. We are not authorized to access the requested resource.
     This can occur due to an invalid or expired Bearer token.
     """
 
 
-class Forbidden(VindicatorError):
+class Forbidden(HTTPError):
     """HTTP 403. We do not have permission to access the requested resource."""
 
 
-class NotFound(VindicatorError):
+class NotFound(HTTPError):
     """HTTP 404. This resource does not exist."""
 
 
-class TooManyRequests(VindicatorError):
+class TooManyRequests(HTTPError):
     """HTTP 429. The server is ratelimiting us. Please wait for a bit before trying again."""
 
 
-class ServerError(VindicatorError):
+class ServerError(HTTPError):
     """HTTP 5xx. The server encountered an unexpected condition that prevented it from fulfilling the request."""
