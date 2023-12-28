@@ -17,7 +17,7 @@ filterwarnings("ignore", category=Warning)
 class DatabaseBase(ABC):
 
     @classmethod
-    async def read_all(cls, query: str, params: Optional[dict] = None) -> lRecords:
+    async def read(cls, query: str, params: Optional[dict] = None) -> lRecords:
         async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
             conn: Connection
             @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)

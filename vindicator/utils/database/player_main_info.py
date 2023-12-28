@@ -1,17 +1,18 @@
 from __future__ import annotations
 from asyncio import create_task
 from time import time
-from typing import TYPE_CHECKING, List, Optional, TypedDict
+from typing import TYPE_CHECKING, List
 
 from vindicator import (
     DatabaseTables,
-    VindicatorDatabase,
+    ErrorHandler,
+    WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
 
 if TYPE_CHECKING:
-    from vindicator import PlayerStats, lFetchedPlayers, PlayerMainInfoT
+    from vindicator.types import *
 
 
 class PlayerMainInfo:
@@ -44,6 +45,7 @@ class PlayerMainInfo:
         return ret
 
     @classmethod
+    @ErrorHandler.alock("deadlock_1")
     async def to_db(cls, fetched_players: lFetchedPlayers) -> None:
         params: List[PlayerMainInfoT] = PlayerMainInfo.from_raw(fetched_players)
         query = (
@@ -54,4 +56,4 @@ class PlayerMainInfo:
            "ON DUPLICATE KEY UPDATE "  # NOTE: This might change. Update duplicates.
            "latest_username = VALUES(latest_username)"
         )
-        await VindicatorDatabase.write_many(query, params)  # type: ignore
+        await WynncraftDataDatabase.write_many(query, params)  # type: ignore

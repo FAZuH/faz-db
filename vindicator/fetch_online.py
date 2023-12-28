@@ -9,13 +9,13 @@ from discord.ext.tasks import loop
 from vindicator import (
     FETCH_ONLINE_INTERVAL,
     DatabaseTables,
-    VindicatorDatabase,
+    ErrorHandler,
+    WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftRequest,
 )
 
 if TYPE_CHECKING:
-    from asyncio import Task
     from vindicator.types import *
 
 
@@ -79,6 +79,7 @@ class FetchOnline:
         }, title="Get online UUIDs"))
 
     @classmethod
+    @ErrorHandler.alock("deadlock_1")
     async def _update_db_player_main_info(cls) -> None:
         """Updates server column in player_main_info table.
 
@@ -86,11 +87,11 @@ class FetchOnline:
         -----------
             - `cls.raw_online_player_list`
         """; t0: float = perf_counter()
-        await VindicatorDatabase.write(f"UPDATE {DatabaseTables.PLAYER_MAIN_INFO} SET server = NULL")
-        await VindicatorDatabase.write_many(
+        await WynncraftDataDatabase.write(f"UPDATE {DatabaseTables.PLAYER_MAIN_INFO} SET server = NULL")
+        await WynncraftDataDatabase.write_many(
             f"UPDATE {DatabaseTables.PLAYER_MAIN_INFO} SET server = %(server)s WHERE uuid = %(uuid)s",
             [{"server": server, "uuid": uuid}
-             for uuid, server in cls._raw_online_uuids["players"].items()]
+            for uuid, server in cls._raw_online_uuids["players"].items()]
         ); t1: float = perf_counter()
 
         create_task(VindicatorWebhook.log("database", "update", {
@@ -107,12 +108,12 @@ class FetchOnline:
 
         Assigns
         -----------
-            - `cls._logoffs`
-            - `cls._logons`
+            - `cls._logged_off`
+            - `cls._logged_on`
 
         Modifies
         -----------
-            - `cls._logons_timestamp`
+            - `cls._online_req_timestamp`
         """
         online_uuids: sUuid = cls._online_uuids.copy()
 
@@ -133,8 +134,7 @@ class FetchOnline:
         """Needs
         -----------
             - `cls._logon_timestamps`
-            - `cls._online_uuids`
-            - `cls._timestamp`
+            - `cls._online_req_timestamp`
         """
         params: List[dict] = [{
                 "uuid": uuid.bytes,
@@ -150,7 +150,7 @@ class FetchOnline:
             "    logoff_timestamp = VALUES(logoff_timestamp)"
         )
         t0: float = perf_counter()
-        await VindicatorDatabase.write_many(query, params); t1: float = perf_counter()
+        await WynncraftDataDatabase.write_many(query, params); t1: float = perf_counter()
 
         create_task(VindicatorWebhook.log("database", "write", {
             "table": "player_activity",

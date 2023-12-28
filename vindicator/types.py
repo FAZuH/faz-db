@@ -5,6 +5,7 @@ from aiohttp import ClientResponse
 from uuid import UUID
 
 if TYPE_CHECKING:
+    from asyncio import Task
     from aiomysql import Connection, Cursor
     from vindicator.request.ratelimit import Ratelimit
 
@@ -84,7 +85,7 @@ PlayerCharacterT = TypedDict(("PlayerCharacter"), {
     "level": float,  # decimal(5, 2) unsigned
     "logins": int,  # int unsigned
     "mobs_killed": int,  # int unsigned
-    "playtime": int,  # int unsigned
+    "playtime": float,  # decimal(7, 2) unsigned
     "wars": int,  # int unsigned
     "xp": int,  # bigint unsigned
     "dungeon_completions": int,  # int unsigned
@@ -106,8 +107,9 @@ PlayerMainInfoT = TypedDict(("PlayerMainInfo"), {
 PlayerMainT = TypedDict("PlayerMain", {
     "guild_name": Optional[str],  # varchar(30)
     "guild_rank": Optional[str],  # enum('OWNER', 'CHIEF', 'STRATEGIST', 'CAPTAIN', 'RECRUITER', 'RECRUIT)
-    "playtime": int,  # int unsigned
+    "playtime": float,  # decimal(7, 2) unsigned
     "support_rank": Optional[str],  # varchar(45)
+    "rank": str,  # varchar(30)
     "username": str,  # varchar(16)
     "uuid": bytes,  # binary(16)
 
@@ -117,6 +119,8 @@ PlayerMainT = TypedDict("PlayerMain", {
 class RawResponsesT(TypedDict):
     endpoint: str  # NOTE: enum('guild_list', 'territory_list', 'online_player_list')
     response: dict  # NOTE: json
+
+
 GuildRecord = TypedDict("GuildRecord", {
     "name": str,
     "prefix": str
@@ -252,7 +256,7 @@ CharacterInfo = TypedDict("CharacterInfo", {
 
     "totalLevel": int,
     "wars": int,
-    "playtime": int,
+    "playtime": float,
     "mobsKilled": int,
     "chestsFound": int,
     "blocksWalked": int,
@@ -299,7 +303,7 @@ PlayerStats = TypedDict("PlayerStats", {
     "supportRank": Optional[str],  # TODO: INCOMPLETE
     "firstJoin": str,
     "lastJoin": str,
-    "playtime": int,
+    "playtime": float,
     "guild": GuildInfo,
     "global_data": GlobalData,
     "forumLink": ForumLinkInfo,

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, Type, Union
+from typing import Any, Awaitable, Callable, Iterable, Type, Union
 
 from loguru import logger
 
@@ -38,5 +38,35 @@ class ErrorHandler:
                         if attempt >= times:
                             logger.error(f"\n{f.__name__} failed. Raising exception to main thread...\nargs:{args}\nkwargs:{kwargs}\n")
                             raise
+            return wrapper
+        return decorator
+
+    @staticmethod
+    def lock(lock_name: str) -> Any:
+        """ Locks the wrapped function/method until the lock is released """
+        def decorator(f: Callable):
+            def wrapper(*args, **kwargs):
+                while getattr(f, lock_name, False):
+                    pass
+                setattr(f, lock_name, True)
+                try:
+                    return f(*args, **kwargs)
+                finally:
+                    setattr(f, lock_name, False)
+            return wrapper
+        return decorator
+
+    @staticmethod
+    def alock(lock_name: str):
+        """ Locks the wrapped async function/method until the lock is released """
+        def decorator(f: Callable[..., Awaitable[Any]]):
+            async def wrapper(*args, **kwargs):
+                while getattr(f, lock_name, False):
+                    pass
+                setattr(f, lock_name, True)
+                try:
+                    return await f(*args, **kwargs)
+                finally:
+                    setattr(f, lock_name, False)
             return wrapper
         return decorator

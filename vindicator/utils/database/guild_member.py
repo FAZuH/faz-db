@@ -1,17 +1,17 @@
 from __future__ import annotations
 from asyncio import create_task
 from time import time
-from typing import TYPE_CHECKING, List, TypedDict
+from typing import TYPE_CHECKING, List
 
 from vindicator import (
     DatabaseTables,
-    VindicatorDatabase,
+    WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
 
 if TYPE_CHECKING:
-    from vindicator import GuildMemberT, GuildStats, lFetchedGuilds
+    from vindicator.types import *
 
 
 class GuildMember:
@@ -20,12 +20,13 @@ class GuildMember:
     def from_raw(cls, fetched_guilds: lFetchedGuilds) -> List[GuildMemberT]:
         ret: List[GuildMemberT] = []
         for fetched_guild in fetched_guilds:
-            guild_stats: "GuildStats" = fetched_guild["guild_stats"]
+            guild_stats: GuildStats = fetched_guild["guild_stats"]
             try:
                 for rank, guild_members in guild_stats["members"].items():
                     if rank == "total":
                         continue
                     for guild_member_info in guild_members.values():  # type: ignore
+                        guild_member_info: GuildMemberInfo
                         guild_member: GuildMemberT = {  # type: ignore
                             "joined": int(WynncraftResponseUtils.parse_datestr2(guild_member_info["joined"])),
                             "uuid": WynncraftResponseUtils.format_uuid(guild_member_info["uuid"]),
@@ -52,8 +53,8 @@ class GuildMember:
     async def to_db(cls, fetched_guilds: lFetchedGuilds) -> None:
         params: List[GuildMemberT] = cls.from_raw(fetched_guilds)
         query: str = (
-            f"INSERT IGNORE INTO {DatabaseTables.GUILD_MEMBER} (joined, uuid, contributed) "
-            "VALUES (%(joined)s, %(uuid)s, %(contributed)s)"
+            f"INSERT IGNORE INTO {DatabaseTables.GUILD_MEMBER} (joined, uuid, contributed, timestamp, unique_hash) "
+            "VALUES (%(joined)s, %(uuid)s, %(contributed)s, %(timestamp)s, %(unique_hash)s)"
         )
-        await VindicatorDatabase.write_many(query, params)  # type: ignore
+        await WynncraftDataDatabase.write_many(query, params)  # type: ignore
 

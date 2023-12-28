@@ -1,17 +1,17 @@
 from __future__ import annotations
 from asyncio import create_task
 from time import time
-from typing import TYPE_CHECKING, List, Optional, TypedDict
+from typing import TYPE_CHECKING, List
 
 from vindicator import (
     DatabaseTables,
-    VindicatorDatabase,
+    WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
 
 if TYPE_CHECKING:
-    from vindicator import PlayerStats, lFetchedPlayers, PlayerMainT
+    from vindicator.types import *
 
 
 class PlayerMain:
@@ -27,6 +27,7 @@ class PlayerMain:
                     "guild_rank" : player_stats["guild"]["rank"].upper() if player_stats["guild"] else None,
                     "playtime" : player_stats["playtime"],
                     "support_rank" : player_stats["supportRank"],
+                    "rank": player_stats["rank"],
                     "username" : player_stats["username"],
                     "uuid" : WynncraftResponseUtils.format_uuid(player_stats["uuid"])
                 }
@@ -52,10 +53,10 @@ class PlayerMain:
         params: List[PlayerMainT] = PlayerMain.from_raw(fetched_players)
         query = (
             f"INSERT INTO {DatabaseTables.PLAYER_MAIN} "
-            "(guild_name, guild_rank, playtime, support_rank, timestamp, unique_hash, username, uuid) "
+            "(guild_name, guild_rank, playtime, support_rank, `rank`, timestamp, unique_hash, username, uuid) "
             "VALUES "
-            "(%(guild_name)s, %(guild_rank)s, %(playtime)s, %(support_rank)s, %(timestamp)s, %(unique_hash)s, %(username)s, %(uuid)s) "
+            "(%(guild_name)s, %(guild_rank)s, %(playtime)s, %(support_rank)s, %(rank)s, %(timestamp)s, %(unique_hash)s, %(username)s, %(uuid)s) "
             "ON DUPLICATE KEY UPDATE "
             "timestamp = VALUES(timestamp)"
         )
-        await VindicatorDatabase.write_many(query, params)  # type: ignore
+        await WynncraftDataDatabase.write_many(query, params)  # type: ignore

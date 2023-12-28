@@ -13,6 +13,8 @@ class Main:
 
     @staticmethod
     async def main() -> None:
+        from time import time
+        t0 = time()
         fetch_online_task: Task = FetchOnline().run.start(); await asyncio.sleep(10.0)
         fetch_player_task: Task = FetchPlayer().run.start(); await asyncio.sleep(10.0)
         fetch_guild_task: Task = FetchGuild().run.start(); await asyncio.sleep(10.0)
@@ -21,6 +23,10 @@ class Main:
         fetch_guild_task.set_name("FetchGuild")
 
         while True:
+            # if time() > t0 + 3600.0:
+            #     from loguru import logger
+            #     logger.success("Exiting program")
+            #     exit(0)
             try:
                 if fetch_online_task.done() and fetch_online_task.exception():
                     await fetch_online_task

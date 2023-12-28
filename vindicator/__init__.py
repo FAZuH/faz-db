@@ -4,7 +4,7 @@ from .errors import *
 from .types import *
 
 from .database.database_base import DatabaseBase
-from .database.vindicator_database import VindicatorDatabase  # needs DatabaseBase
+from .database.wynncraft_data_database import WynncraftDataDatabase  # needs DatabaseBase
 from .request.ratelimit import Ratelimit
 from .utils.error_handler import ErrorHandler
 from .utils.wynncraft_response_utils import WynncraftResponseUtils

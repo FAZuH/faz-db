@@ -4,7 +4,7 @@ from datetime import datetime
 import asyncio
 from vindicator.request.request_wynncraft import RequestWynncraft
 from vindicator.request.request_uuid import RequestMojang
-from vindicator.database.vindicator_database import VindicatorDatabase
+from vindicator.database.wynncraft_data_database import WynncraftDataDatabase
 import mojang
 
 
@@ -29,7 +29,7 @@ class Test:
         print(f"Done in {td:.2f} seconds.")
 
     async def ainit(self):
-        await VindicatorDatabase.ainit()
+        await WynncraftDataDatabase.ainit()
         await self.request_wynn.start()
         await self.request_uuid.start()
 

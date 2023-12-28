@@ -1,17 +1,17 @@
 from __future__ import annotations
 from asyncio import create_task
 from time import time
-from typing import TYPE_CHECKING, List, TypedDict
+from typing import TYPE_CHECKING, List
 
 from vindicator import (
     DatabaseTables,
-    VindicatorDatabase,
+    WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
 
 if TYPE_CHECKING:
-    from vindicator import GuildStats, lFetchedGuilds, GuildMainInfoT
+    from vindicator.types import *
 
 
 class GuildMainInfo:
@@ -48,4 +48,4 @@ class GuildMainInfo:
             f"INSERT IGNORE INTO {DatabaseTables.GUILD_MAIN_INFO} (created, name, prefix) "
             "VALUES (%(created)s, %(name)s, %(prefix)s)"
         )
-        await VindicatorDatabase.write_many(query, params)  # type: ignore
+        await WynncraftDataDatabase.write_many(query, params)  # type: ignore

@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING, List
 from vindicator import (
     DatabaseTables,
     ProfessionsData,
-    VindicatorDatabase,
+    WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
 
 if TYPE_CHECKING:
-    from vindicator import PlayerCharacterT, PlayerStats, lFetchedPlayers
+    from vindicator.types import *
 
 
 class PlayerCharacter:
@@ -85,4 +85,4 @@ class PlayerCharacter:
             "%(logins)s, %(mobs_killed)s, %(playtime)s, %(wars)s, %(xp)s, %(dungeon_completions)s, "
             "%(quest_completions)s, %(raid_completions)s, %(gamemode)s, %(timestamp)s, %(unique_hash)s)"
         )
-        await VindicatorDatabase.write_many(query, params)  # type: ignore
+        await WynncraftDataDatabase.write_many(query, params)  # type: ignore

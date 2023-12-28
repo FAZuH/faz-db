@@ -1,14 +1,14 @@
 from vindicator import DatabaseBase
 
 
-class VindicatorDatabase(DatabaseBase):
+class WynncraftDataDatabase(DatabaseBase):
 
     def __init__(self) -> None:
         return
 
     @classmethod
     def database(cls) -> str:
-        return "player_data"
+        return "wynncraft_data"
 
     @classmethod
     def password(cls) -> str:

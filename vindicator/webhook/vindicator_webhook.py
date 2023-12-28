@@ -33,17 +33,18 @@ class VindicatorWebhook:
         message_type: Literal["success", "error", "info", "request", "read", "write", "update"],
         message: str
     ) -> None:
-        url: str = VindicatorWebhook.MATCH_WEBHOOK_TYPE[webhook_type]
-        embed_content = Embed(
-            title=message_type,
-            description=message,
-            colour=VindicatorWebhook.MATCH_MESSAGE_TYPE[message_type],
-        )
-        embed_content.add_field(name="", value=f"<t:{int(time())}:R>")
+        return
+        # url: str = VindicatorWebhook.MATCH_WEBHOOK_TYPE[webhook_type]
+        # embed_content = Embed(
+        #     title=message_type,
+        #     description=message,
+        #     colour=VindicatorWebhook.MATCH_MESSAGE_TYPE[message_type],
+        # )
+        # embed_content.add_field(name="", value=f"<t:{int(time())}:R>")
 
-        async with ClientSession() as session:
-            webhook = Webhook.from_url(url, session=session)
-            await webhook.send(embed=embed_content)
+        # async with ClientSession() as session:
+        #     webhook = Webhook.from_url(url, session=session)
+        #     await webhook.send(embed=embed_content)
 
     @staticmethod
     async def log(
@@ -52,17 +53,17 @@ class VindicatorWebhook:
         stats: Dict[str, Any],
         title: str = ''
     ) -> None:
-        url: str = VindicatorWebhook.MATCH_WEBHOOK_TYPE[webhook_type]
-        embed_content = Embed(
-            title=message_type,
-            colour=VindicatorWebhook.MATCH_MESSAGE_TYPE[message_type],
-        )
-        embed_content.description = f"**{title}**\n" if title else ''
-        embed_content.description += f"<@{DEVELOPER_DISCORD_ID}>\n" if message_type == "error" else ''
-        embed_content.description += '\n'.join([f"`{k:15}:`**{v}**" for k, v in stats.items()])
+        # url: str = VindicatorWebhook.MATCH_WEBHOOK_TYPE[webhook_type]
+        # embed_content = Embed(
+        #     title=message_type,
+        #     colour=VindicatorWebhook.MATCH_MESSAGE_TYPE[message_type],
+        # )
+        # embed_content.description = f"**{title}**\n" if title else ''
+        # embed_content.description += f"<@{DEVELOPER_DISCORD_ID}>\n" if message_type == "error" else ''
+        # embed_content.description += '\n'.join([f"`{k:15}:`**{v}**" for k, v in stats.items()])
 
-        embed_content.add_field(name="", value=f"<t:{int(time())}:R>")
+        # embed_content.add_field(name="", value=f"<t:{int(time())}:R>")
         print(f"{title:_<50}" if title else '', ", ".join([f"{k.replace(' ', '-')}={v}" for k, v in stats.items()]))
-        async with ClientSession() as session:
-            webhook = Webhook.from_url(url, session=session)
-            await webhook.send(embed=embed_content)
+        # async with ClientSession() as s:
+        #     webhook = Webhook.from_url(url, session=s)
+        #     await webhook.send(embed=embed_content)
