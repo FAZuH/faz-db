@@ -4,12 +4,12 @@ from time import time
 from typing import TYPE_CHECKING, List
 
 from vindicator import (
-    DatabaseTables,
     ErrorHandler,
     WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
+from vindicator.constants import *
 
 if TYPE_CHECKING:
     from vindicator.types import *
@@ -34,7 +34,7 @@ class PlayerMainInfo:
                 try:
                     error_message = {
                         "error": str(e),
-                        "data recipient": DatabaseTables.PLAYER_CHARACTER,
+                        "data recipient": PLAYER_CHARACTER,
                         "username": player_stats["username"],
                         "timestamp": f"<t:{int(time())}>",
                     }
@@ -49,11 +49,11 @@ class PlayerMainInfo:
     async def to_db(cls, fetched_players: lFetchedPlayers) -> None:
         params: List[PlayerMainInfoT] = PlayerMainInfo.from_raw(fetched_players)
         query = (
-           f"INSERT INTO {DatabaseTables.PLAYER_MAIN_INFO} "
+           f"INSERT INTO {PLAYER_MAIN_INFO} "
            "(first_join, latest_username, server, uuid) "
            "VALUES "
            "(%(first_join)s, %(latest_username)s, %(server)s, %(uuid)s) "
-           "ON DUPLICATE KEY UPDATE "  # NOTE: This might change. Update duplicates.
+           "ON DUPLICATE KEY UPDATE "
            "latest_username = VALUES(latest_username)"
         )
         await WynncraftDataDatabase.write_many(query, params)  # type: ignore

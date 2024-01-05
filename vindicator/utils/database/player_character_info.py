@@ -4,14 +4,14 @@ from time import time
 from typing import TYPE_CHECKING, List
 
 from vindicator import (
-    DatabaseTables,
     WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
+from vindicator.constants import *
 
 if TYPE_CHECKING:
-    from vindicator import *
+    from vindicator.types import *
 
 
 class PlayerCharacterInfo:
@@ -32,7 +32,7 @@ class PlayerCharacterInfo:
                 try:
                     error_message = {
                         "error": str(e),
-                        "data recipient": DatabaseTables.PLAYER_CHARACTER,
+                        "data recipient": PLAYER_CHARACTER,
                         "username": player_stats["username"],
                         "timestamp": f"<t:{int(time())}>",
                     }
@@ -46,7 +46,7 @@ class PlayerCharacterInfo:
     async def to_db(cls, fetched_players: lFetchedPlayers) -> None:
         params: List[PlayerCharacterInfoT] = PlayerCharacterInfo.from_raw(fetched_players)
         query: str = (  # NOTE: This doesn't change. Ignore duplicates.
-            f"INSERT IGNORE INTO {DatabaseTables.PLAYER_CHARACTER_INFO} (character_uuid, type, uuid) "
+            f"INSERT IGNORE INTO {PLAYER_CHARACTER_INFO} (character_uuid, type, uuid) "
             "VALUES (%(character_uuid)s, %(type)s, %(uuid)s)"
         )
         await WynncraftDataDatabase.write_many(query, params)  # type: ignore

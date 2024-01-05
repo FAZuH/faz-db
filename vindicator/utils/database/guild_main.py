@@ -4,11 +4,11 @@ from time import time
 from typing import TYPE_CHECKING, List
 
 from vindicator import (
-    DatabaseTables,
     WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
+from vindicator.constants import *
 
 if TYPE_CHECKING:
     from vindicator.types import *
@@ -37,7 +37,7 @@ class GuildMain:
                 try:
                     error_message = {
                         "error": str(e),
-                        "data recipient": DatabaseTables.PLAYER_CHARACTER,
+                        "data recipient": PLAYER_CHARACTER,
                         "username": guild_stats["name"],
                         "timestamp": f"<t:{int(time())}>",
                     }
@@ -51,7 +51,7 @@ class GuildMain:
     async def to_db(cls, fetched_guilds: lFetchedGuilds) -> None:
         params: List[GuildMainT] = cls.from_raw(fetched_guilds)
         query: str = (
-            f"INSERT IGNORE INTO {DatabaseTables.GUILD_MAIN} (level, member_total, name, online_members, territories, unique_hash, wars) "
+            f"INSERT IGNORE INTO {GUILD_MAIN} (level, member_total, name, online_members, territories, unique_hash, wars) "
             "VALUES (%(level)s, %(member_total)s, %(name)s, %(online_members)s, %(territories)s, %(unique_hash)s, %(wars)s)"
         )
         await WynncraftDataDatabase.write_many(query, params)  # type: ignore

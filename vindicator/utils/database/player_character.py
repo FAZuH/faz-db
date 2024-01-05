@@ -4,12 +4,12 @@ from time import time
 from typing import TYPE_CHECKING, List
 
 from vindicator import (
-    DatabaseTables,
     ProfessionsData,
     WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftResponseUtils
 )
+from vindicator.constants import *
 
 if TYPE_CHECKING:
     from vindicator.types import *
@@ -59,7 +59,7 @@ class PlayerCharacter:
                 try:
                     error_message = {
                         "error": str(e),
-                        "data recipient": DatabaseTables.PLAYER_CHARACTER,
+                        "data recipient": PLAYER_CHARACTER,
                         "username": player_stats["username"],
                         "timestamp": f"<t:{int(time())}>",
                     }
@@ -73,7 +73,7 @@ class PlayerCharacter:
     async def to_db(cls, fetched_players: lFetchedPlayers) -> None:
         params: List[PlayerCharacterT] = PlayerCharacter.from_raw(fetched_players)
         query = (
-            f"REPLACE INTO {DatabaseTables.PLAYER_CHARACTER} ("
+            f"REPLACE INTO {PLAYER_CHARACTER} ("
             "character_uuid, alchemism, armouring, cooking, farming, fishing, jeweling, mining, "
             "scribing, tailoring, weaponsmithing, woodcutting, woodworking, chests_found, deaths, "
             "discoveries, level, logins, mobs_killed, playtime, wars, xp, dungeon_completions, "

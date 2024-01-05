@@ -7,8 +7,6 @@ from uuid import UUID
 from discord.ext.tasks import loop
 
 from vindicator import (
-    FETCH_PLAYER_INTERVAL,
-    DatabaseTables,
     FetchOnline,
     PlayerCharacter,
     PlayerCharacterInfo,
@@ -18,6 +16,7 @@ from vindicator import (
     WynncraftRequest,
     WynncraftResponseUtils
 )
+from vindicator.constants import *
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
@@ -61,11 +60,7 @@ class FetchPlayer:
 
     @classmethod
     async def _request_api(cls) -> None:
-        """Requests player stats from Wynncraft API. Saves into cls.fetched_guilds.
-
-        Guilds-to-fetch are grabbed from:
-        - latest_fetch class variable of FetchPlayer class
-        - guilds that's not saved in database
+        """ Requests player stats from Wynncraft API. Saves into cls.fetched_guilds.
 
         Needs
         -----------
@@ -73,7 +68,7 @@ class FetchPlayer:
 
         Assigns
         -----------
-            - `cls.latest_fetch`
+            - `cls._latest_fetch`
 
         Clears
         -----------
@@ -137,12 +132,12 @@ class FetchPlayer:
 
         create_task(VindicatorWebhook.log("database", "write", {
             "records": len(cls._fetched_players),
-            "table1": DatabaseTables.PLAYER_MAIN_INFO,
+            "table1": PLAYER_MAIN_INFO,
             "time1": f"{t1-t0:.2f}s",
-            "table2": DatabaseTables.PLAYER_CHARACTER_INFO,
+            "table2": PLAYER_CHARACTER_INFO,
             "time2": f"{t2-t1:.2f}s",
-            "table3": DatabaseTables.PLAYER_MAIN,
+            "table3": PLAYER_MAIN,
             "time3": f"{t3-t2:.2f}s",
-            "table4": DatabaseTables.PLAYER_CHARACTER,
+            "table4": PLAYER_CHARACTER,
             "time4": f"{t4-t3:.2f}s",
         }, title="Save fetched players to database"))

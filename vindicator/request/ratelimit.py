@@ -22,16 +22,4 @@ class Ratelimit:
     def update(self, headers: dict) -> None:
         self._total = int(headers.get("RateLimit-Limit", 180))
         self._remaining = int(headers.get("RateLimit-Remaining", 180))
-        self._reset = time() + int(headers.get("RateLimit-Reset", 0))
-
-    @property
-    def total(self) -> int:
-        return self._total
-
-    @property
-    def remaining(self) -> int:
-        return self.total if self.reset < 0 else self._remaining
-
-    @property
-    def reset(self) -> float:
-        return 0 if self._reset == 0 else self._reset - time()
+        self._reset = int(headers.get("RateLimit-Reset", 60))

@@ -7,13 +7,12 @@ from uuid import UUID
 from discord.ext.tasks import loop
 
 from vindicator import (
-    FETCH_ONLINE_INTERVAL,
-    DatabaseTables,
     ErrorHandler,
     WynncraftDataDatabase,
     VindicatorWebhook,
     WynncraftRequest,
 )
+from vindicator.constants import *
 
 if TYPE_CHECKING:
     from vindicator.types import *
@@ -87,9 +86,9 @@ class FetchOnline:
         -----------
             - `cls.raw_online_player_list`
         """; t0: float = perf_counter()
-        await WynncraftDataDatabase.write(f"UPDATE {DatabaseTables.PLAYER_MAIN_INFO} SET server = NULL")
+        await WynncraftDataDatabase.write(f"UPDATE {PLAYER_MAIN_INFO} SET server = NULL")
         await WynncraftDataDatabase.write_many(
-            f"UPDATE {DatabaseTables.PLAYER_MAIN_INFO} SET server = %(server)s WHERE uuid = %(uuid)s",
+            f"UPDATE {PLAYER_MAIN_INFO} SET server = %(server)s WHERE uuid = %(uuid)s",
             [{"server": server, "uuid": uuid}
             for uuid, server in cls._raw_online_uuids["players"].items()]
         ); t1: float = perf_counter()
@@ -144,7 +143,7 @@ class FetchOnline:
             for uuid, logon_timestamp in cls._logon_timestamps.copy().items()
         ]
         query: str = (
-            f"INSERT INTO {DatabaseTables.PLAYER_ACTIVITY} (uuid, logon_timestamp, logoff_timestamp) "
+            f"INSERT INTO {PLAYER_ACTIVITY} (uuid, logon_timestamp, logoff_timestamp) "
             "VALUES (%(uuid)s, %(logon_timestamp)s, %(logoff_timestamp)s) "
             "ON DUPLICATE KEY UPDATE "
             "    logoff_timestamp = VALUES(logoff_timestamp)"

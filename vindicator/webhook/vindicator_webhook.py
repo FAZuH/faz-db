@@ -4,18 +4,18 @@ from typing import Any, Dict, Literal
 from aiohttp import ClientSession
 from discord import Colour, Embed, Webhook
 
-from vindicator import DEVELOPER_DISCORD_ID, Webhooks
+from vindicator.constants import *
 
 
 class VindicatorWebhook:
 
     MATCH_WEBHOOK_TYPE: Dict[str, str] = {
-        "database": Webhooks.DATABASE_WEBHOOK,
-        "error": Webhooks.ERROR_WEBHOOK,
-        "fetch_guild": Webhooks.FETCH_GUILD_WEBHOOK,
-        "fetch_online": Webhooks.FETCH_ONLINE_WEBHOOK,
-        "fetch_player": Webhooks.FETCH_PLAYER_WEBHOOK,
-        "wynncraft_request": Webhooks.WYNNCRAFT_REQUEST_WEBHOOK
+        "database": DATABASE_WEBHOOK,
+        "error": ERROR_WEBHOOK,
+        "fetch_guild": FETCH_GUILD_WEBHOOK,
+        "fetch_online": FETCH_ONLINE_WEBHOOK,
+        "fetch_player": FETCH_PLAYER_WEBHOOK,
+        "wynncraft_request": WYNNCRAFT_REQUEST_WEBHOOK
     }
     MATCH_MESSAGE_TYPE: Dict[str, Colour] = {
         "success": Colour.green(),

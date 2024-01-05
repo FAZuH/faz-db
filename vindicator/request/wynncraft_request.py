@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Any, Coroutine, Iterable, List, Tuple, Union
 from aiohttp import ClientResponse, ClientSession
 
 from vindicator import (
+    __version__,
     Ratelimit,
     RequestManager,
 )
-from vindicator.constants import __version__
 
 if TYPE_CHECKING:
     from vindicator.types import *

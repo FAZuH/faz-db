@@ -3,7 +3,7 @@ import asyncio
 from traceback import format_exception
 from typing import TYPE_CHECKING
 
-from vindicator import FetchGuild, FetchOnline, FetchPlayer, VindicatorWebhook
+from vindicator import FetchOnline, FetchPlayer, FetchGuild, VindicatorWebhook
 
 if TYPE_CHECKING:
     from asyncio import Task
@@ -43,22 +43,19 @@ class Main:
                 raise
 
 
-# class Test:
+class Test:
+    from vindicator.utils.error_handler import ErrorHandler
 
-#     @staticmethod
-#     async def main() -> None:
-#         from time import perf_counter
-#         print('start')
-#         t0=perf_counter(); await Test.test(); t1=perf_counter()
-#         print('stop, elapsed', f"{t1-t0:.2f}")
+    @staticmethod
+    async def main() -> None:
+        from time import perf_counter
+        print('start')
+        t0=perf_counter(); await Test.test(); t1=perf_counter()
+        print('stop, elapsed', f"{t1-t0:.2f}")
 
-#     from vindicator.utils.error_handler import ErrorHandler
-#     @staticmethod
-#     @ErrorHandler.aretry(times=3, exceptions=Exception)
-#     async def test() -> None:
-#         from vindicator import WynncraftRequest
-#         async with WynncraftRequest._rm.session as s:
-#             resp = await WynncraftRequest.get_player_stats_coro(s, "ee24ee2c-7f01-4f65-b598-5c67cd3f97e5")
+    @staticmethod
+    async def test() -> None:
+        pass
 
 
 if __name__ == "__main__":

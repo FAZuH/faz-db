@@ -6,9 +6,7 @@ from typing import TYPE_CHECKING, Dict, List
 from discord.ext.tasks import loop
 
 from vindicator import (
-    FETCH_GUILD_INTERVAL,
     GuildStats,
-    DatabaseTables,
     FetchPlayer,
     GuildMainInfo,
     GuildMain,
@@ -17,6 +15,7 @@ from vindicator import (
     WynncraftRequest,
     WynncraftResponseUtils,
 )
+from vindicator.constants import *
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
@@ -109,10 +108,10 @@ class FetchGuild:
 
         create_task(VindicatorWebhook.log("database", "write", {
             "records": len(fethed_guilds),
-            "table1": DatabaseTables.GUILD_MAIN_INFO,
+            "table1": GUILD_MAIN_INFO,
             "time1": f"{t1-t0:.2f}s",
-            "table2": DatabaseTables.GUILD_MAIN,
+            "table2": GUILD_MAIN,
             "time2": f"{t2-t1:.2f}s",
-            "table3": DatabaseTables.GUILD_MEMBER,
+            "table3": GUILD_MEMBER,
             "time3": f"{t3-t2:.2f}s",
         }, title="Save fetched guilds to database"))
