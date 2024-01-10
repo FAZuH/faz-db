@@ -17,6 +17,9 @@ from vindicator import (
 )
 from vindicator.typehints import *
 
+T = TypeVar("T", bound=TypedDict)
+V = TypeVar("V", bound=TypedDict)
+
 
 class RequestManager:
 
@@ -105,7 +108,7 @@ class RequestManager:
                 raise TooManyRequests(url_param)
 
 
-class ResponseSet[T: TypedDict, V: TypedDict]:
+class ResponseSet(Generic[T, V]):
     def __init__(self, json: Any, headers: Any) -> None:
         self._json: T = json
         self._headers: V = headers

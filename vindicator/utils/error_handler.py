@@ -6,6 +6,9 @@ from loguru import logger
 
 from vindicator.typehints import *
 
+T = TypeVar("T")
+P = ParamSpec("P")
+
 
 class ErrorHandler:
 
@@ -14,7 +17,7 @@ class ErrorHandler:
     @classmethod
     def lock_decorator(cls, lock_name: str):
         """Locks the wrapped async function/method until the lock is released"""
-        def decorator[T, **P](f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
+        def decorator(f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
             @wraps(f)
             async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
                 lock = cls._locks.get(lock_name)
@@ -30,7 +33,7 @@ class ErrorHandler:
     @staticmethod
     def retry_decorator(times: int, exceptions: Union[Type[BaseException], Iterable[Type[BaseException]]]):
         """ Retries the wrapped function/method `times` times if the exceptions listed in `exceptions` are thrown """
-        def decorator[T, **P](f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
+        def decorator(f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
             @wraps(f)
             async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
                 attempt: int = 0

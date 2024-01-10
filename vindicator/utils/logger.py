@@ -9,6 +9,9 @@ from loguru import logger
 
 from vindicator.typehints import *
 
+T = TypeVar("T")
+P = ParamSpec("P")
+
 
 def _getclsatr(cls, attr) -> Any:
     return getattr(cls, attr, "error in accessing class property")
@@ -25,7 +28,7 @@ class Logger:
         cls._is_disabled = False
 
     @classmethod
-    def logging_decorator[T, **P](cls, f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
+    def logging_decorator(cls, f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
         @wraps(f)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             t0: float = perf_counter()

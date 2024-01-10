@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from vindicator.request.ratelimit import Ratelimit
     from vindicator.request.request_manager import ResponseSet
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 
 Rank: TypeAlias = str
 Server: TypeAlias = str
@@ -54,7 +54,7 @@ ExcTypeT: TypeAlias =  Optional[Type[BaseException]]
 ExcT: TypeAlias = Optional[BaseException]
 TbT: TypeAlias = Optional[TracebackType]
 
-Coro: TypeAlias = Coroutine[Any, Any, T]
+Coro: TypeAlias = Coroutine[Any, Any, _T]
 
 CacheDB_I = TypedDict("Cache", {
     # TODO: verify the proper types
