@@ -1,6 +1,5 @@
 from __future__ import annotations
 import asyncio
-from typing import TYPE_CHECKING, Dict, Optional
 
 from aiohttp import ClientSession, ClientTimeout
 
@@ -16,9 +15,8 @@ from vindicator import (
     VindicatorError,
     VindicatorWebhook
 )
+from vindicator.typehints import *
 
-if TYPE_CHECKING:
-    from vindicator.types import *
 
 class RequestManager:
 
@@ -35,9 +33,11 @@ class RequestManager:
         if self._api_key is not None:
             self._headers["apikey"] = self._api_key
 
-    @property
-    def session(self) -> ClientSession:
+    def create_session(self) -> ClientSession:
         return ClientSession(self._base_url, headers=self._headers, timeout=ClientTimeout(self._timeout))
+
+    async def get_as_resultset(self, *args, **kwargs) -> ResponseSet:
+        return await ResponseSet.from_response(await self.get(*args, **kwargs))
 
     async def get(
             self,
@@ -103,3 +103,21 @@ class RequestManager:
                 return await self.get(url_param, session, retries - 1, retry_on_exc)
             else:
                 raise TooManyRequests(url_param)
+
+
+class ResponseSet[T: TypedDict, V: TypedDict]:
+    def __init__(self, json: Any, headers: Any) -> None:
+        self._json: T = json
+        self._headers: V = headers
+
+    @classmethod
+    async def from_response(cls, response: ClientResponse) -> Self:
+        return cls(await response.json(), dict(response.headers))
+
+    @property
+    def json(self) -> T:
+        return self._json
+
+    @property
+    def headers(self) -> V:
+        return self._headers

@@ -1,5 +1,26 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, TypedDict, TypeAlias, Union
+from types import TracebackType
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Coroutine,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    Self,
+    Set,
+    ParamSpec,
+    Tuple,
+    Type,
+    TypeAlias,
+    TypedDict,
+    TypeVar,
+    Union
+)
 
 from aiohttp import ClientResponse
 from uuid import UUID
@@ -8,7 +29,9 @@ if TYPE_CHECKING:
     from asyncio import Task
     from aiomysql import Connection, Cursor
     from vindicator.request.ratelimit import Ratelimit
+    from vindicator.request.request_manager import ResponseSet
 
+T = TypeVar("T")
 
 Rank: TypeAlias = str
 Server: TypeAlias = str
@@ -27,12 +50,23 @@ sUsername: TypeAlias = Set[Username]
 sUuid: TypeAlias = Set[Uuid]
 tReturnGather: TypeAlias = Tuple[ReturnGather]
 
-GuildMainInfoT = TypedDict("GuildMainInfo", {
-    "created": int,  # int unsigned
+ExcTypeT: TypeAlias =  Optional[Type[BaseException]]
+ExcT: TypeAlias = Optional[BaseException]
+TbT: TypeAlias = Optional[TracebackType]
+
+Coro: TypeAlias = Coroutine[Any, Any, T]
+
+CacheDB_I = TypedDict("Cache", {
+    # TODO: verify the proper types
+    "address": str,  # varchar(255)
+    "data": bytes,  # json
+})
+GuildMainInfoDB_I = TypedDict("GuildMainInfo", {
+    "created": str,  # datetime
     "name": str,  # varchar(30)
     "prefix": str  # varchar(4)
 })
-GuildMainT = TypedDict("GuildMain", {
+GuildMainDB_I = TypedDict("GuildMain", {
     "level": float,  # decimal(5, 2)
     "member_total": int,  # tinyint unsigned
     "name": str,  # varchar(30)
@@ -41,27 +75,27 @@ GuildMainT = TypedDict("GuildMain", {
     "wars": int,  # int unsigned
 
     "unique_hash": bytes,  # binary(32)
-    "timestamp": int,  # int unsigned
+    "datetime": str,  # datetime
 })
-GuildMemberT = TypedDict("GuildMember", {
-    "joined": int,  # int unsigned
+GuildMemberDB_I = TypedDict("GuildMember", {
+    "joined": str,  # int unsigned
     "uuid": bytes,  # binary(16)
     "contributed": int,  # bigint unsigned
 
     "unique_hash": bytes,  # binary(32)
-    "timestamp": int,  # int unsigned
+    "datetime": str,  # datetime
 })
-PlayerActivityT = TypedDict("PlayerActivity", {
-    "logoff_timestamp": int,  # NOTE: int unsigned
-    "logon_timestamp": int,  # NOTE: int unsigned
+PlayerActivityDB_I = TypedDict("PlayerActivity", {
+    "logoff_datetime": str,  # NOTE: datetime
+    "logon_datetime": str,  # NOTE: datetime
     "uuid": bytes  # NOTE: binary(16)
 })
-PlayerCharacterInfoT = TypedDict("PlayerCharacterInfo", {
+PlayerCharacterInfoDB_I = TypedDict("PlayerCharacterInfo", {
     "character_uuid": bytes,  # binary(16)
     "type": str,  # enum('ARCHER', 'ASSASSIN', 'MAGE', 'SHAMAN', 'WARRIOR')
     "uuid": bytes  # binary(16)
 })
-PlayerCharacterT = TypedDict(("PlayerCharacter"), {
+PlayerCharacterDB_I = TypedDict(("PlayerCharacter"), {
     "character_uuid": bytes,  # binary(16)
 
     # Professions
@@ -96,15 +130,14 @@ PlayerCharacterT = TypedDict(("PlayerCharacter"), {
     "gamemode": bytes,  # bit(5)
 
     "unique_hash": bytes,  # binary(32)
-    "timestamp": int,  # int unsigned
+    "datetime": str,  # datetime
 })
-PlayerMainInfoT = TypedDict(("PlayerMainInfo"), {
-    "first_join": Optional[int],  # int unsigned
+PlayerMainInfoDB_I = TypedDict(("PlayerMainInfo"), {
+    "first_join": Optional[str],  # datetime unsigned
     "latest_username": str,  # varchar(16)
-    "server": Optional[str],  # varchar(10)
     "uuid": bytes,  # binary(16)
 })
-PlayerMainT = TypedDict("PlayerMain", {
+PlayerMainDB_I = TypedDict("PlayerMain", {
     "guild_name": Optional[str],  # varchar(30)
     "guild_rank": Optional[str],  # enum('OWNER', 'CHIEF', 'STRATEGIST', 'CAPTAIN', 'RECRUITER', 'RECRUIT)
     "playtime": float,  # decimal(7, 2) unsigned
@@ -114,11 +147,12 @@ PlayerMainT = TypedDict("PlayerMain", {
     "uuid": bytes,  # binary(16)
 
     "unique_hash": bytes,  # binary(32)
-    "timestamp": int,  # int unsigned
+    "datetime": str,  # datetime
 }, total=False)
-class RawResponsesT(TypedDict):
-    endpoint: str  # NOTE: enum('guild_list', 'territory_list', 'online_player_list')
-    response: dict  # NOTE: json
+PlayerServerDB_I = TypedDict("PlayerServer", {
+    "uuid": bytes,  # binary(16)
+    "server": str,  # varchar(10)
+})
 
 
 GuildRecord = TypedDict("GuildRecord", {
@@ -312,8 +346,5 @@ PlayerStats = TypedDict("PlayerStats", {
     "publicProfile": bool
 })
 
-FetchedPlayer = TypedDict("FetchedPlayer", {"response_timestamp": float, "player_stats": "PlayerStats"})
-FetchedGuild = TypedDict("FetchedGuild", {"response_timestamp": float, "guild_stats": "GuildStats"})
-
-lFetchedPlayers: TypeAlias = List[FetchedPlayer]
-lFetchedGuilds: TypeAlias = List[FetchedGuild]
+FetchedPlayer = TypedDict("FetchedPlayer", {"resp_datetime": str, "player_stats": "PlayerStats"})
+FetchedGuild = TypedDict("FetchedGuild", {"resp_datetime": str, "guild_stats": "GuildStats"})

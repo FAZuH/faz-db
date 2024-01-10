@@ -1,14 +1,11 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from abc import ABC
 from warnings import filterwarnings
 
 from aiomysql import connect, DictCursor, Warning
 
-from vindicator.utils.error_handler import ErrorHandler
-
-if TYPE_CHECKING:
-    from vindicator.types import *
+from vindicator import ErrorHandler
+from vindicator.typehints import *
 
 
 filterwarnings("ignore", category=Warning)
@@ -16,74 +13,49 @@ filterwarnings("ignore", category=Warning)
 
 class DatabaseBase(ABC):
 
-    @classmethod
-    async def read(cls, query: str, params: Optional[dict] = None) -> lRecords:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
-            conn: Connection
-            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
-            async def _read_all() -> lRecords:
-                async with conn.cursor(DictCursor) as curs:
-                    curs: DictCursor
-                    await curs.execute(query, params)
-                    return await curs.fetchall()
-            return await _read_all()
+    _DATABASE: str
+    _PASSWORD: str
+    _RETRIES: int
+    _USER: str
 
     @classmethod
-    async def read_many(cls, query: str, args: List[dict]) -> lRecords:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
-            conn: Connection
-            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
-            async def _read_many() -> lRecords:
-                async with conn.cursor(DictCursor) as curs:
-                    curs: DictCursor
-                    ret: lRecords = []
-                    for arg in args:
-                        await curs.execute(query, arg)
-                        res: lRecords = await curs.fetchall()
-                        if res:
-                            ret.append(res[0])
-                return ret
-            return await _read_many()
+    async def execute(cls, query: str, params: Optional[Iterable[Union[dict, TypedDict]]] = []) -> Optional[List[Record]]:
+        conn: Connection; curs: DictCursor
+        async with cls.create_connection() as conn:
+            async with conn.cursor(DictCursor) as curs:
+                if params:
+                    await ErrorHandler.retry_decorator(cls._RETRIES, Exception)(curs.executemany)(query, params)
+                else:
+                    await ErrorHandler.retry_decorator(cls._RETRIES, Exception)(curs.execute)(query)
+                await conn.commit()
+                return await curs.fetchall()
 
     @classmethod
-    async def write(cls, query: str, params: Optional[dict] = None) -> None:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
-            conn: Connection
-            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
-            async def _write() -> None:
-                async with conn.cursor(DictCursor) as curs:
-                    curs: Cursor
-                    await curs.execute(query, params)
-                    await conn.commit()
-            await _write()
-    @classmethod
-    async def write_many(cls, query: str, seq_of_params: List[dict]) -> None:
-        async with connect(user=cls.user(), password=cls.password(), db=cls.database()) as conn:
-            conn: Connection
-            @ErrorHandler.aretry(times=cls.retries(), exceptions=Exception)
-            async def _write_many() -> None:
-                async with conn.cursor(DictCursor) as curs:
-                    curs: Cursor
-                    await curs.executemany(query, seq_of_params)
-                    await conn.commit()
-            await _write_many()
+    def transaction_group(cls):
+        class _TransactionGroupContextManager:
+
+            def __init__(self):
+                self._query: List[Tuple[str, Iterable[Union[dict, TypedDict]]]] = []
+
+            async def __aenter__(self) -> Self:
+                return self
+
+            async def __aexit__(self, exc_type: ExcTypeT, exc: ExcT, tb: TbT) -> None:
+                conn: Connection; curs: DictCursor
+                async with cls.create_connection() as conn:
+                    async with conn.cursor(DictCursor) as curs:
+                        for q, p in self._query:
+                            if p:
+                                await ErrorHandler.retry_decorator(cls._RETRIES, Exception)(curs.executemany)(q, p)
+                            else:
+                                await ErrorHandler.retry_decorator(cls._RETRIES, Exception)(curs.execute)(q)
+                        await conn.commit()
+
+            def add(self, query: str, params: Iterable[dict] = []) -> None:
+                self._query.append((query, params))
+
+        return _TransactionGroupContextManager()
 
     @classmethod
-    @abstractmethod
-    def database(cls) -> str:
-        ...
-
-    @classmethod
-    @abstractmethod
-    def password(cls) -> str:
-        ...
-
-    @classmethod
-    @abstractmethod
-    def retries(cls) -> int:
-        ...
-
-    @classmethod
-    @abstractmethod
-    def user(cls) -> str:
-        ...
+    def create_connection(cls):
+        return connect(user=cls._USER, password=cls._PASSWORD, db=cls._DATABASE)

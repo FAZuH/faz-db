@@ -1,74 +1,59 @@
-from typing import Any, Awaitable, Callable, Iterable, Set, Type, Union
+import asyncio
+from functools import wraps
+from inspect import iscoroutinefunction
 
 from loguru import logger
+
+from vindicator.typehints import *
 
 
 class ErrorHandler:
 
-    _locks: Set[str] = set()
+    _locks: Dict[str, asyncio.Lock] = {}
 
     @classmethod
-    def retry(cls, times: int, exceptions: Union[Type[BaseException], Iterable[Type[BaseException]]]) -> Any:
+    def lock_decorator(cls, lock_name: str):
+        """Locks the wrapped async function/method until the lock is released"""
+        def decorator[T, **P](f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
+            @wraps(f)
+            async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+                lock = cls._locks.get(lock_name)
+                if not lock:
+                    lock = asyncio.Lock()
+                    cls._locks[lock_name] = lock
+                async with lock:
+                    res = (await f(*args, **kwargs)) if iscoroutinefunction(f) else f(*args, **kwargs)
+                return res
+            return wrapper
+        return decorator
+
+    @staticmethod
+    def retry_decorator(times: int, exceptions: Union[Type[BaseException], Iterable[Type[BaseException]]]):
         """ Retries the wrapped function/method `times` times if the exceptions listed in `exceptions` are thrown """
-        def decorator(f: Callable):
-            def wrapper(*args, **kwargs):
-                attempt: int = 1
+        def decorator[T, **P](f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
+            @wraps(f)
+            async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+                attempt: int = 0
                 while True:
                     try:
-                        return f(*args, **kwargs)
+                        return (await f(*args, **kwargs)) if iscoroutinefunction(f) else f(*args, **kwargs)  # type: ignore
                     except exceptions:
                         attempt += 1
-                        logger.warning(f"\n{f.__name__} failed. Retrying ({attempt}/{times})...\nargs:{args}\nkwargs:{kwargs}\n")
-                        if attempt >= times:
-                            logger.error(f"\n{f.__name__} failed. Raising exception to main thread...\nargs:{args}\nkwargs:{kwargs}\n")
+                        if attempt > times:
+                            logger.error(
+                                f"""
+                                {f.__qualname__} failed. Raising exception to main thread...\n
+                                args:{str(args)[:30]}\n
+                                kwargs:{str(kwargs)[:30]}
+                                """
+                            )
                             raise
-            return wrapper
-        return decorator
-
-    @classmethod
-    def aretry(cls, times: int, exceptions: Union[Type[BaseException], Iterable[Type[BaseException]]]) -> Any:
-        """ Retries the wrapped function/method `times` times if the exceptions listed in `exceptions` are thrown """
-        def decorator(f: Callable):
-            async def wrapper(*args, **kwargs):
-                attempt: int = 1
-                while True:
-                    try:
-                        return await f(*args, **kwargs)
-                    except exceptions:
-                        attempt += 1
-                        logger.warning(f"\n{f.__name__} failed. Retrying ({attempt}/{times})...\nargs:{args}\nkwargs:{kwargs}\n")
-                        if attempt >= times:
-                            logger.error(f"\n{f.__name__} failed. Raising exception to main thread...\nargs:{args}\nkwargs:{kwargs}\n")
-                            raise
-            return wrapper
-        return decorator
-
-    @classmethod
-    def lock(cls, lock_name: str) -> Any:
-        """ Locks the wrapped function/method until the lock is released """
-        def decorator(f: Callable):
-            def wrapper(*args, **kwargs):
-                while getattr(f, lock_name, False):
-                    pass
-                setattr(f, lock_name, True)
-                try:
-                    return f(*args, **kwargs)
-                finally:
-                    setattr(f, lock_name, False)
-            return wrapper
-        return decorator
-
-    @classmethod
-    def alock(cls, lock_name: str):
-        """ Locks the wrapped async function/method until the lock is released """
-        def decorator(f: Callable[..., Awaitable[Any]]):
-            async def wrapper(*args, **kwargs):
-                while lock_name in cls._locks:
-                    pass
-                cls._locks.add(lock_name)
-                try:
-                    return await f(*args, **kwargs)
-                finally:
-                    cls._locks.remove(lock_name)
+                        logger.warning(
+                            f"""
+                            {f.__qualname__} failed. Retrying ({attempt}/{times})...\n
+                            args:{str(args)[:30]}\n
+                            kwargs:{str(kwargs)[:30]}\n
+                            """
+                        )
             return wrapper
         return decorator
