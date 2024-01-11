@@ -23,21 +23,25 @@ class FetchPlayer:
     _fetch_queue: Dict[UUID, Timestamp] = {}
     _latest_fetch: List[FetchedPlayer] = []
     _requeue_schedule: Dict[UUID, Timestamp] = {}
-
-
-    @classmethod
-    def get_latest_fetch(cls) -> List[FetchedPlayer]:
-        return cls._latest_fetch.copy()
+    _is_running: bool = False
 
 
     @classmethod
     @loop(seconds=FETCH_PLAYER_INTERVAL)
     @Logger.logging_decorator
     async def run(cls) -> None:
+        if not cls._is_running:
+            cls._is_running = True
+            await cls._run()
+            cls._is_running = False
+
+    @classmethod
+    async def _run(cls) -> None:
         cls._update_fetch_queue()
         if cls._fetch_queue:
             await cls._fetch_players()
             await cls._to_db()
+
 
     @classmethod
     def _update_fetch_queue(cls) -> None:
@@ -111,3 +115,8 @@ class FetchPlayer:
         await PlayerCharacterInfoUtil(fetched_players).to_db()
         await PlayerMainUtil(fetched_players).to_db()
         await PlayerCharacterUtil(fetched_players).to_db()
+
+
+    @classmethod
+    def get_latest_fetch(cls) -> List[FetchedPlayer]:
+        return cls._latest_fetch.copy()

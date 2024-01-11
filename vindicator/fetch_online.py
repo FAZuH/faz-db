@@ -25,29 +25,26 @@ class FetchOnline:
     _prev_online_uuids: sUuid = set()
     _raw_online_uuids: OnlinePlayerList
 
-
-    @classmethod
-    def get_logged_on(cls) -> sUuid:
-        return cls._logged_on.copy()
-
-    @classmethod
-    def get_request_timestamp(cls) -> Timestamp:
-        return cls._request_timestamp
-
-    @classmethod
-    def get_online_uuids(cls) -> sUuid:
-        return cls._online_uuids.copy()
+    _is_running: bool = False
 
 
     @classmethod
     @loop(seconds=FETCH_ONLINE_INTERVAL)
     @Logger.logging_decorator
     async def run(cls) -> None:
+        if not cls._is_running:
+            cls._is_running = True
+            await cls._run()
+            cls._is_running = False
+
+    @classmethod
+    async def _run(cls) -> None:
         await cls._request_api()
         task1: Task = create_task(PlayerServerUtil(cls._raw_online_uuids).to_db())
         cls._update_online_info()
         task2: Task = create_task(PlayerActivityUtil(cls._request_sqldt, cls._logon_dt).to_db())
         await gather(task1, task2)
+
 
     @classmethod
     @Logger.logging_decorator
@@ -94,3 +91,16 @@ class FetchOnline:
 
         for uuid in cls._logged_on:
             cls._logon_dt[uuid] = cls._request_sqldt
+
+
+    @classmethod
+    def get_logged_on(cls) -> sUuid:
+        return cls._logged_on.copy()
+
+    @classmethod
+    def get_request_timestamp(cls) -> Timestamp:
+        return cls._request_timestamp
+
+    @classmethod
+    def get_online_uuids(cls) -> sUuid:
+        return cls._online_uuids.copy()
