@@ -22,7 +22,7 @@ class Main:
                     await fetch_player_task
                 if fetch_guild_task.done() and fetch_guild_task.exception():
                     await fetch_guild_task
-                await asyncio.sleep(10.0)
+                await asyncio.sleep(1.0)
             except Exception as e:
                 await VindicatorWebhook.send(
                     "error", "error", "Fatal error occured on Main.main(). Program has stopped\n"

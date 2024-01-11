@@ -24,24 +24,29 @@ class FetchPlayer:
     _fetch_queue: Dict[UUID, Timestamp] = {}
     _latest_fetch: List[FetchedPlayer] = []
     _requeue_schedule: Dict[UUID, Timestamp] = {}
-    _is_running: bool = False
+
+    _task: Optional[Task] = None
 
 
     @classmethod
     @loop(seconds=FETCH_PLAYER_INTERVAL)
     async def run(cls) -> None:
-        if not cls._is_running:
-            create_task(cls._run())
+        if not cls._task:
+            cls._task = create_task(cls._run())
+
+        if cls._task.done():
+            if cls._task.exception():
+                await cls._task
+            else:
+                cls._task = create_task(cls._run())
 
     @classmethod
     @Logger.logging_decorator
     async def _run(cls) -> None:
-        cls._is_running = True
         cls._update_fetch_queue()
         if cls._fetch_queue:
             await cls._fetch_players()
             await cls._to_db()
-        cls._is_running = False
 
 
     @classmethod

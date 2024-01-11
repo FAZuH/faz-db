@@ -23,24 +23,29 @@ class FetchGuild:
     _fetch_queue: Dict[str, float] = {}
     _latest_fetch: List[FetchedGuild] = []
     _requeue_schedule: Dict[str, float] = {}
-    _is_running: bool = False
+
+    _task: Optional[Task] = None
 
 
     @classmethod
     @loop(seconds=FETCH_GUILD_INTERVAL)
     async def run(cls) -> None:
-        if not cls._is_running:
-            create_task(cls._run())
+        if not cls._task:
+            cls._task = create_task(cls._run())
+
+        if cls._task.done():
+            if cls._task.exception():
+                await cls._task
+            else:
+                cls._task = create_task(cls._run())
 
     @classmethod
     @Logger.logging_decorator
     async def _run(cls):
-        cls._is_running = True
         await cls._update_fetch_queue()
         if cls._fetch_queue:
             await cls._fetch_guilds()
             await cls._to_db()
-        cls._is_running = False
 
 
     @classmethod

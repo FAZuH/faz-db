@@ -25,25 +25,29 @@ class FetchOnline:
     _prev_online_uuids: sUuid = set()
     _raw_online_uuids: OnlinePlayerList
 
-    _is_running: bool = False
+    _task: Optional[Task] = None
 
 
     @classmethod
     @loop(seconds=FETCH_ONLINE_INTERVAL)
     async def run(cls) -> None:
-        if not cls._is_running:
-            create_task(cls._run())
+        if not cls._task:
+            cls._task = create_task(cls._run())
+
+        if cls._task.done():
+            if cls._task.exception():
+                await cls._task
+            else:
+                cls._task = create_task(cls._run())
 
     @classmethod
     @Logger.logging_decorator
     async def _run(cls) -> None:
-        cls._is_running = True
         await cls._request_api()
         task1: Task = create_task(PlayerServerUtil(cls._raw_online_uuids).to_db())
         cls._update_online_info()
         task2: Task = create_task(PlayerActivityUtil(cls._request_sqldt, cls._logon_dt).to_db())
         await gather(task1, task2)
-        cls._is_running = False
 
 
     @classmethod
