@@ -16,7 +16,6 @@ class Ratelimit:
             await self.ratelimited()
 
     async def ratelimited(self) -> None:
-        logger.warning(f"You are being ratelimited, waiting for {self._reset}s")
         await asyncio.sleep(self._reset)
 
     def update(self, headers: dict) -> None:
