@@ -30,7 +30,6 @@ class FetchOnline:
 
     @classmethod
     @loop(seconds=FETCH_ONLINE_INTERVAL)
-    @Logger.logging_decorator
     async def run(cls) -> None:
         if not cls._is_running:
             cls._is_running = True
@@ -38,6 +37,7 @@ class FetchOnline:
             cls._is_running = False
 
     @classmethod
+    @Logger.logging_decorator
     async def _run(cls) -> None:
         await cls._request_api()
         task1: Task = create_task(PlayerServerUtil(cls._raw_online_uuids).to_db())

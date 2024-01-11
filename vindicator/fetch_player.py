@@ -36,6 +36,7 @@ class FetchPlayer:
             cls._is_running = False
 
     @classmethod
+    @Logger.logging_decorator
     async def _run(cls) -> None:
         cls._update_fetch_queue()
         if cls._fetch_queue:

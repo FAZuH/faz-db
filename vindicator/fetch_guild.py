@@ -27,7 +27,6 @@ class FetchGuild:
 
     @classmethod
     @loop(seconds=FETCH_GUILD_INTERVAL)
-    @Logger.logging_decorator
     async def run(cls) -> None:
         if not cls._is_running:
             cls._is_running = True
@@ -35,6 +34,7 @@ class FetchGuild:
             cls._is_running = False
 
     @classmethod
+    @Logger.logging_decorator
     async def _run(cls):
         await cls._update_fetch_queue()
         if cls._fetch_queue:
