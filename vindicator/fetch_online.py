@@ -32,18 +32,18 @@ class FetchOnline:
     @loop(seconds=FETCH_ONLINE_INTERVAL)
     async def run(cls) -> None:
         if not cls._is_running:
-            cls._is_running = True
-            await cls._run()
-            cls._is_running = False
+            create_task(cls._run())
 
     @classmethod
     @Logger.logging_decorator
     async def _run(cls) -> None:
+        cls._is_running = True
         await cls._request_api()
         task1: Task = create_task(PlayerServerUtil(cls._raw_online_uuids).to_db())
         cls._update_online_info()
         task2: Task = create_task(PlayerActivityUtil(cls._request_sqldt, cls._logon_dt).to_db())
         await gather(task1, task2)
+        cls._is_running = False
 
 
     @classmethod

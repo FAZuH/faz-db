@@ -1,4 +1,5 @@
 from __future__ import annotations
+from asyncio import create_task, TaskGroup
 from time import time
 from uuid import UUID
 
@@ -28,20 +29,19 @@ class FetchPlayer:
 
     @classmethod
     @loop(seconds=FETCH_PLAYER_INTERVAL)
-    @Logger.logging_decorator
     async def run(cls) -> None:
         if not cls._is_running:
-            cls._is_running = True
-            await cls._run()
-            cls._is_running = False
+            create_task(cls._run())
 
     @classmethod
     @Logger.logging_decorator
     async def _run(cls) -> None:
+        cls._is_running = True
         cls._update_fetch_queue()
         if cls._fetch_queue:
             await cls._fetch_players()
             await cls._to_db()
+        cls._is_running = False
 
 
     @classmethod
@@ -112,10 +112,11 @@ class FetchPlayer:
             - `_fetched_players`
         """
         fetched_players: List[FetchedPlayer] = cls.get_latest_fetch()
-        await PlayerMainInfoUtil(fetched_players).to_db()
-        await PlayerCharacterInfoUtil(fetched_players).to_db()
-        await PlayerMainUtil(fetched_players).to_db()
-        await PlayerCharacterUtil(fetched_players).to_db()
+        async with TaskGroup() as tg:
+            tg.create_task(PlayerMainInfoUtil(fetched_players).to_db())
+            tg.create_task(PlayerCharacterInfoUtil(fetched_players).to_db())
+            tg.create_task(PlayerMainUtil(fetched_players).to_db())
+            tg.create_task(PlayerCharacterUtil(fetched_players).to_db())
 
 
     @classmethod

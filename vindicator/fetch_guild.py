@@ -1,4 +1,5 @@
 from __future__ import annotations
+from asyncio import create_task, TaskGroup
 from time import time
 
 from discord.ext.tasks import loop
@@ -29,17 +30,17 @@ class FetchGuild:
     @loop(seconds=FETCH_GUILD_INTERVAL)
     async def run(cls) -> None:
         if not cls._is_running:
-            cls._is_running = True
-            await cls._run()
-            cls._is_running = False
+            create_task(cls._run())
 
     @classmethod
     @Logger.logging_decorator
     async def _run(cls):
+        cls._is_running = True
         await cls._update_fetch_queue()
         if cls._fetch_queue:
             await cls._fetch_guilds()
             await cls._to_db()
+        cls._is_running = False
 
 
     @classmethod
@@ -87,6 +88,7 @@ class FetchGuild:
     @classmethod
     async def _to_db(cls):
         fethed_guilds: List[FetchedGuild] = cls._latest_fetch.copy()
-        await GuildMainInfoUtil(fethed_guilds).to_db()
-        await GuildMainUtil(fethed_guilds).to_db()
-        await GuildMemberUtil(fethed_guilds).to_db()
+        async with TaskGroup() as tg:
+            tg.create_task(GuildMainInfoUtil(fethed_guilds).to_db())
+            tg.create_task(GuildMainUtil(fethed_guilds).to_db())
+            tg.create_task(GuildMemberUtil(fethed_guilds).to_db())
