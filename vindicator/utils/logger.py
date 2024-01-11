@@ -46,19 +46,19 @@ class Logger:
     def _send_log(fname: str, td: str) -> None:
         from vindicator import VindicatorWebhook, FetchOnline, FetchPlayer, FetchGuild
         match fname:
-            case "FetchOnline.run":
+            case "FetchOnline._run":
                 create_task(VindicatorWebhook.log("fetch_online", "success", {
                     "logged off": len(_getclsatr(FetchOnline, "_logged_off")),
                     "logged on": len(_getclsatr(FetchOnline, "_logged_on")),
                     "online": _getclsatr(FetchOnline, "_raw_online_uuids")["total"],
                     "time spent": td
                 }, title="FetchOnline loop finished"))
-            case "FetchPlayer.run":
+            case "FetchPlayer._run":
                 create_task(VindicatorWebhook.log("fetch_player", "success", {
                     "fetched players": len(_getclsatr(FetchPlayer, "_latest_fetch")),
                     "time spent": td
                 }, title="FetchPlayer loop finished"))
-            case "FetchGuild.run":
+            case "FetchGuild._run":
                 create_task(VindicatorWebhook.log("fetch_guild", "success", {
                     "fetched guilds": len(_getclsatr(FetchGuild, "_latest_fetch")),
                     "time spent": td
