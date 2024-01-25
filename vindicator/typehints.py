@@ -6,6 +6,7 @@ from typing import (
     Awaitable,
     Callable,
     Coroutine,
+    Deque,
     Dict,
     Generic,
     Iterable,

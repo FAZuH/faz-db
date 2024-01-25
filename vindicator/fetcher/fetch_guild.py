@@ -5,7 +5,7 @@ from time import time
 from discord.ext.tasks import loop
 
 from vindicator import (
-    GuildStats,
+    Fetch,
     FetchPlayer,
     GuildMainInfoUtil,
     GuildMainUtil,
@@ -18,21 +18,27 @@ from vindicator.constants import *
 from vindicator.typehints import *
 
 
-class FetchGuild:
+class FetchGuild(Fetch):
 
     _fetch_queue: Dict[str, float] = {}
     _latest_fetch: List[FetchedGuild] = []
     _requeue_schedule: Dict[str, float] = {}
 
-    _task: Optional[Task] = None
+    _task: Optional[Task[Coro[None]]] = None
 
+    @classmethod
+    def queue_request(cls, request: Coro[None]) -> None:
+        return
+
+    @classmethod
+    def queue_dbquery(cls, dbquery: Coro[None]) -> None:
+        return
 
     @classmethod
     @loop(seconds=FETCH_GUILD_INTERVAL)
     async def run(cls) -> None:
         if not cls._task:
             cls._task = create_task(cls._run())
-
         if cls._task.done():
             if cls._task.exception():
                 await cls._task

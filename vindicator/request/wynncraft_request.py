@@ -12,10 +12,11 @@ class WynncraftRequest:
 
 
     def __init__(self) -> None:
-        self._session = WynncraftRequest._rm.create_session()
+        self._session
+        return
 
-    async def __aenter__(self) -> Self:
-        return self
+    async def __aenter__(self) -> None:
+        self._session = WynncraftRequest._rm.create_session()
 
     async def __aexit__(self, exc_type: ExcTypeT, exc: ExcT, tb: TbT) -> None:
         await self._session.close()
@@ -48,7 +49,7 @@ class WynncraftRequest:
         for res in (await gather(*coros, return_exceptions=True)):
             if isinstance(res, BaseException):
                 excs.append(res)
-            elif isinstance(res, ResponseSet):
+            else:
                 ress.append(res)
         return excs, ress
 
@@ -72,6 +73,6 @@ class WynncraftRequest:
         for res in (await gather(*coros, return_exceptions=True)):
             if isinstance(res, BaseException):
                 excs.append(res)
-            elif isinstance(res, ResponseSet):
+            else:
                 ress.append(res)
         return excs, ress

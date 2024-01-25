@@ -33,7 +33,7 @@ class PlayerCharacterInfoUtil:
                         "timestamp": f"<t:{int(time())}>",
                     }
                 except Exception as e:
-                    error_message: dict = {"error": str(e), "message": "Failed building error message."}
+                    error_message: Dict[str, str] = {"error": str(e), "message": "Failed building error message."}
                 create_task(VindicatorWebhook.log("error", "error", error_message, title="Wynn response parsing"))
                 continue
 

@@ -19,7 +19,7 @@ class DatabaseBase(ABC):
     _USER: str
 
     @classmethod
-    async def execute(cls, query: str, params: Optional[Iterable[Union[dict, TypedDict]]] = []) -> Optional[List[Record]]:
+    async def execute(cls, query: str, params: Optional[Iterable[Union[Dict[Any, Any], TypedDict]]] = []) -> Optional[List[Record]]:
         conn: Connection; curs: DictCursor
         async with cls.create_connection() as conn:
             async with conn.cursor(DictCursor) as curs:
@@ -35,7 +35,7 @@ class DatabaseBase(ABC):
         class _TransactionGroupContextManager:
 
             def __init__(self):
-                self._query: List[Tuple[str, Iterable[Union[dict, TypedDict]]]] = []
+                self._query: List[Tuple[str, Iterable[Union[Dict[Any, Any], TypedDict]]]] = []
 
             async def __aenter__(self) -> Self:
                 return self
@@ -51,7 +51,7 @@ class DatabaseBase(ABC):
                                 await ErrorHandler.retry_decorator(cls._RETRIES, Exception)(curs.execute)(q)
                         await conn.commit()
 
-            def add(self, query: str, params: Iterable[dict] = []) -> None:
+            def add(self, query: str, params: Iterable[Dict[Any, Any]] = []) -> None:
                 self._query.append((query, params))
 
         return _TransactionGroupContextManager()

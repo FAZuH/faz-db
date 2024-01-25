@@ -25,6 +25,8 @@ from .database.wynncraft_data.player_main_util import PlayerMainUtil
 from .database.wynncraft_data.player_main_info_util import PlayerMainInfoUtil
 from .database.wynncraft_data.player_server_util import PlayerServerUtil
 
-from .fetch_online import FetchOnline
-from .fetch_player import FetchPlayer  # needs FetchOnline
-from .fetch_guild import FetchGuild  # needs FetchPlayer
+from .fetcher.fetch import Fetch
+from .fetcher.fetcher import Fetcher
+from .fetcher.fetch_online import FetchOnline # needs Fetch, FetchBase
+from .fetcher.fetch_player import FetchPlayer  # needs Fetch, FetchBase, FetchOnline
+from .fetcher.fetch_guild import FetchGuild  # needs Fetch, FetchBase, FetchPlayer

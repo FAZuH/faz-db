@@ -6,6 +6,7 @@ from uuid import UUID
 from discord.ext.tasks import loop
 
 from vindicator import (
+    Fetch,
     FetchOnline,
     Logger,
     PlayerCharacterUtil,
@@ -19,21 +20,27 @@ from vindicator.constants import *
 from vindicator.typehints import *
 
 
-class FetchPlayer:
+class FetchPlayer(Fetch):
 
     _fetch_queue: Dict[UUID, Timestamp] = {}
     _latest_fetch: List[FetchedPlayer] = []
     _requeue_schedule: Dict[UUID, Timestamp] = {}
 
-    _task: Optional[Task] = None
+    _task: Optional[Task[Coro[None]]] = None
 
+    @classmethod
+    def queue_request(cls, request: Coro[None]) -> None:
+        return
+
+    @classmethod
+    def queue_dbquery(cls, dbquery: Coro[None]) -> None:
+        return
 
     @classmethod
     @loop(seconds=FETCH_PLAYER_INTERVAL)
     async def run(cls) -> None:
         if not cls._task:
             cls._task = create_task(cls._run())
-
         if cls._task.done():
             if cls._task.exception():
                 await cls._task
