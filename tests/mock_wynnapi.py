@@ -17,20 +17,20 @@ class MockWynnApi:
 
     def __init__(self) -> None:
         self.wynnapi = WynnApi()
-        self.onlineUuids = None
+        self.onlineuuids = None
         if os.path.exists(ONLINEUUIDS_MOCK_FP):
             with open(ONLINEUUIDS_MOCK_FP, 'r') as f:
-                self.onlineUuids = PlayersResponse(*(json.load(f)["0"]))
+                self.onlineuuids = PlayersResponse(*(json.load(f)["0"]))
 
-        self.onlinePlayerStats = None
+        self.onlineplayerstats = None
         if os.path.exists(ONLINEPLAYERSTATS_MOCK_FP):
             with open(ONLINEPLAYERSTATS_MOCK_FP, 'r') as f:
-                self.onlinePlayerStats = [PlayerResponse(*resp) for resp in json.load(f).values()]
+                self.onlineplayerstats = [PlayerResponse(*resp) for resp in json.load(f).values()]
 
-        self.onlineGuildStats = None
+        self.onlineguildstats = None
         if os.path.exists(ONLINEGUILDSTATS_MOCK_FP):
             with open(ONLINEGUILDSTATS_MOCK_FP, 'r') as f:
-                self.onlineGuildStats = [GuildResponse(*resp) for resp in json.load(f).values()]
+                self.onlineguildstats = [GuildResponse(*resp) for resp in json.load(f).values()]
 
     # async def response_to_mock(self) -> None:
     #     online_uuids: PlayersResponse = await self.get_online_uuids()

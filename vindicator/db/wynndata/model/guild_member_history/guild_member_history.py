@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Iterable, Self
 from typing_extensions import override
 
 from vindicator import DateColumn, GuildMemberHistoryId, UuidColumn
@@ -24,15 +24,15 @@ class GuildMemberHistory(GuildMemberHistoryId):
         self._datetime = datetime
 
     @classmethod
-    def from_response(cls, response: GuildResponse) -> list[Self]:
-        return [
+    def from_response(cls, resps: Iterable[GuildResponse]) -> list[Self]:
+        return tuple(
             cls(
                 uuid=UuidColumn(uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes()),  # type: ignore
                 contributed=memberinfo.contributed,
                 joined=DateColumn(memberinfo.joined.to_datetime()),
-                datetime=DateColumn(response.get_datetime())
-            ) for rank, uuid, memberinfo in response.body.members.iter_online_members()  # type: ignore
-        ]
+                datetime=DateColumn(resp.get_datetime())
+            )  for resp in resps for rank, uuid, memberinfo in resp.body.members.iter_online_members()  # type: ignore
+        )
 
     @property
     @override

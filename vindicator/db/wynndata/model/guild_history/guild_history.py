@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 from typing_extensions import override
 
 from vindicator import DateColumn, GuildHistoryId
@@ -31,16 +31,16 @@ class GuildHistory(GuildHistoryId):
         self._datetime = datetime
 
     @classmethod
-    def from_response(cls, response: GuildResponse) -> GuildHistory:
-        return cls(
-            name=response.body.name,
-            level=Decimal(response.body.level),
-            territories=response.body.territories,
-            wars=response.body.wars,
-            member_total=response.body.members.total,
-            online_members=response.body.members.get_online_members(),
-            datetime=DateColumn(response.get_datetime())
-        )
+    def from_responses(cls, resps: Iterable[GuildResponse]) -> tuple[GuildHistory, ...]:
+        return tuple(cls(
+            name=resp.body.name,
+            level=Decimal(resp.body.level),
+            territories=resp.body.territories,
+            wars=resp.body.wars,
+            member_total=resp.body.members.total,
+            online_members=resp.body.members.get_online_members(),
+            datetime=DateColumn(resp.get_datetime())
+        ) for resp in resps)
 
     @property
     @override

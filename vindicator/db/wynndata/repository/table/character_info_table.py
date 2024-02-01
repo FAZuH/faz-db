@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
+from typing_extensions import override
+
 from vindicator import CharacterInfoRepo
 
 if TYPE_CHECKING:
@@ -19,32 +21,38 @@ class CharacterInfoTable(CharacterInfoRepo):
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, connection: None | Connection, entity: Iterable[CharacterInfo]) -> bool:
+    @override
+    async def insert(self, entities: Iterable[CharacterInfo], conn: None | Connection = None) -> int:
         # NOTE: This doesn't change. Ignore duplicates.
         sql = f"""
         INSERT IGNORE INTO {self.table_name} (character_uuid, type, uuid)
         VALUES (%s, %s, %s)
         """
-        await self._db.fetch(sql, (
-            entity.character_uuid,
-            entity.type,
-            entity.uuid
-        ))
+        await self._db.execute_many(
+            sql,
+            tuple((
+                entity.character_uuid.uuid,
+                entity.type,
+                entity.uuid)
+                for entity in entities
+            ),
+            conn
+        )
         return True
 
-    async def exists(self, id_: CharacterInfoId) -> bool: ...
+    async def exists(self, id_: CharacterInfoId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float: ...
 
-    async def find_one(self, id_: CharacterInfoId) -> None | CharacterInfo: ...
+    async def find_one(self, id_: CharacterInfoId, conn: None | Connection = None) -> None | CharacterInfo: ...
 
-    async def find_all(self) -> None | list[CharacterInfo]: ...
+    async def find_all(self, conn: None | Connection = None) -> None | list[CharacterInfo]: ...
 
-    async def update(self, entity: CharacterInfo) -> bool: ...
+    async def update(self, entities: Iterable[CharacterInfo], conn: None | Connection = None) -> int: ...
 
-    async def delete(self, id_: CharacterInfoId) -> bool: ...
+    async def delete(self, id_: CharacterInfoId, conn: None | Connection = None) -> int: ...
 
-    async def create_table(self) -> None:
+    async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.table_name}` (
             `character_uuid` binary(16) NOT NULL,

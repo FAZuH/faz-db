@@ -19,36 +19,40 @@ class GuildHistoryTable(GuildHistoryRepo):
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, connection: None | Connection, entity: Iterable[GuildHistory]) -> bool:
+    async def insert(self, entities: Iterable[GuildHistory], conn: None | Connection = None) -> int:
         sql = f"""
-        INSERT IGNORE INTO `{self.table_name}` 
+        INSERT IGNORE INTO `{self.table_name}`
             (`level`, `member_total`, `name`, `online_members`, `territories`, `wars`, `datetime`)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        await self._db.fetch(sql, (
-            float(entity.level),
-            entity.member_total,
-            entity.name,
-            entity.online_members,
-            entity.territories,
-            entity.wars,
-            entity.datetime
-        ))
+        await self._db.execute_many(
+            sql,
+            tuple((
+                entity.level,
+                entity.member_total,
+                entity.name,
+                entity.online_members,
+                entity.territories,
+                entity.wars,
+                entity.datetime
+            ) for entity in entities),
+            conn
+        )
         return True
 
-    async def exists(self, id_: GuildHistoryId) -> bool: ...
+    async def exists(self,id_: GuildHistoryId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float: ...
 
-    async def find_one(self, id_: GuildHistoryId) -> None | GuildHistory: ...
+    async def find_one(self, id_: GuildHistoryId, conn: None | Connection = None) -> None | GuildHistory: ...
 
-    async def find_all(self) -> None | list[GuildHistory]: ...
+    async def find_all(self, conn: None | Connection = None) -> None | list[GuildHistory]: ...
 
-    async def update(self, entity: GuildHistory) -> bool: ...
+    async def update(self, entities: Iterable[GuildHistory], conn: None | Connection = None) -> int: ...
 
-    async def delete(self, id_: GuildHistoryId) -> bool: ...
+    async def delete(self, id_: GuildHistoryId, conn: None | Connection = None) -> int: ...
 
-    async def create_table(self) -> None:
+    async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.table_name}` (
             `name` varchar(30) NOT NULL,

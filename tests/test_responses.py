@@ -29,11 +29,11 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
         self.wynnapi = self.mockwynnapi.wynnapi
         # await self.wynnapi.start()
 
-        self.toTest_guildStats: list[GuildResponse] = self.mockwynnapi.onlineGuildStats  # type: ignore
-        self.toTest_onlineUuids: PlayersResponse = self.mockwynnapi.onlineUuids  # type: ignore
-        self.toTest_playerStats: list[PlayerResponse] = self.mockwynnapi.onlinePlayerStats  # type: ignore
+        self.toTest_guildStats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
+        self.toTest_onlineUuids: PlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
+        self.toTest_playerStats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
 
-    async def test_guild_response(self):
+    async def test_guild_response(self) -> None:
         for guildStat in self.toTest_guildStats:
             body = guildStat.body
             self.assertIsInstance(body, Guild)
@@ -94,7 +94,7 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
                 self.assertGreaterEqual(season_rank_info.final_territories, 0)
                 self.assertGreaterEqual(season_rank_info.rating, 0)
 
-    async def test_player_response(self):
+    async def test_player_response(self) -> None:
         for playerStat in self.toTest_playerStats:
             self.assertIsInstance(playerStat.get_datetime(), dt)
             self.assertIsInstance(playerStat.get_expiry_datetime(), dt)
@@ -264,7 +264,7 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
 
                 self.assertIsInstance(ch.quests, list)
 
-    async def test_players_response(self):
+    async def test_players_response(self) -> None:
         players = self.toTest_onlineUuids
         self.assertGreaterEqual(players.body.total, 0)
         self.assertIsInstance(players.body.players, dict)

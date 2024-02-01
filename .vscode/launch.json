@@ -9,7 +9,8 @@
       "type": "python",
       "request": "launch",
       "module": "vindicator",
-      "justMyCode": false
+      "justMyCode": false,
+      "python": "${workspaceFolder}//.venv//Scripts//python.exe",
     },
     {
       "name": "Python: Current File",
@@ -17,22 +18,16 @@
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",
-      "justMyCode": false
+      "justMyCode": false,
+      "python": "${workspaceFolder}//.venv//Scripts//python.exe",
     },
     {
       "name": "Python: Test Module",
       "type": "python",
       "request": "launch",
       "module": "tests",
-      "justMyCode": false
-    },
-    {
-      "name": "Python: Current File",
-      "type": "python",
-      "request": "launch",
-      "program": "${file}",
-      "console": "integratedTerminal",
-      "justMyCode": false
+      "justMyCode": false,
+      "python": "${workspaceFolder}//.venv//Scripts//python.exe",
     },
     {
       "name": "Python: Remote Attach",

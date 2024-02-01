@@ -3,9 +3,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Awaitable
 
 from vindicator import (
-    config,
     logger,
-    DatabaseQuery,
     FetchGuild,
     FetchOnline,
     FetchPlayer,
@@ -31,10 +29,7 @@ class FetchCore:
         # Other Processes
         self._queue: FetchQueue = FetchQueue()
         self._wynnapi: WynnApi = WynnApi()
-        self._wynndb: DatabaseQuery = DatabaseQuery(
-            config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
-        )
-        self._wynnrepo: WynnDataRepository = WynnDataRepository(self._wynndb)
+        self._wynnrepo: WynnDataRepository = WynnDataRepository()
         # Fetchers
         self._fetch_guild: Fetch[Any] = FetchGuild(self)
         self._fetch_online: Fetch[Any] = FetchOnline(self)

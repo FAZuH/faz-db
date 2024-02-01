@@ -7,6 +7,15 @@
     "reportUnknownVariableType": "none"
   },
   "editor.bracketPairColorization.enabled": false,
+  "pylint.args": ["--disable=R0901,R0913,R0916,R0912,R0902,R0914,R01702,R0917,R0904,R0911,R0915,R0903,C0301,C0114,C0115,C0116,W"],
+  "python.analysis.autoFormatStrings": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.inlayHints.variableTypes": true,
+  "python.analysis.inlayHints.callArgumentNames": "off",
+  "python.analysis.inlayHints.functionReturnTypes": true,
+  "python.analysis.inlayHints.pytestParameters": true,
+  "debug.inlineValues": "on",
+  "editor.inlayHints.enabled": "on",
   "python.testing.unittestArgs": [
     "-v",
     "-s",
@@ -16,6 +25,7 @@
   ],
   "python.testing.pytestEnabled": false,
   "python.testing.unittestEnabled": true,
+  "notebook.experimental.variablesView": true,
   "highlight.decorations": {
     "rangeBehavior": 3,
   },

@@ -19,35 +19,35 @@ class PlayerActivityHistoryTable(PlayerActivityHistoryRepo):
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, connection: None | Connection, entity: Iterable[PlayerActivityHistory]) -> bool:
+    async def insert(self, entities: Iterable[PlayerActivityHistory], conn: None | Connection = None) -> int:
         sql = f"""
         REPLACE INTO {self.table_name} (uuid, logon_datetime, logoff_datetime)
         VALUES (%s, %s, %s)
         """
         await self._db.fetch(
             sql,
-            (
+            tuple((
                 entity.uuid,
                 entity.logon_datetime,
                 entity.logoff_datetime
-            ),
-            connection
+            ) for entity in entities),
+            conn
         )
         return True
 
-    async def exists(self, id_: PlayerActivityHistoryId) -> bool: ...
+    async def exists(self,id_: PlayerActivityHistoryId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float: ...
 
-    async def find_one(self, id_: PlayerActivityHistoryId) -> None | PlayerActivityHistory: ...
+    async def find_one(self, id_: PlayerActivityHistoryId, conn: None | Connection = None) -> None | PlayerActivityHistory: ...
 
-    async def find_all(self) -> None | list[PlayerActivityHistory]: ...
+    async def find_all(self, conn: None | Connection = None) -> None | list[PlayerActivityHistory]: ...
 
-    async def update(self, entity: PlayerActivityHistory) -> bool: ...
+    async def update(self, entities: Iterable[PlayerActivityHistory], conn: None | Connection = None) -> int: ...
 
-    async def delete(self, id_: PlayerActivityHistoryId) -> bool: ...
+    async def delete(self, id_: PlayerActivityHistoryId, conn: None | Connection = None) -> int: ...
 
-    async def create_table(self) -> None:
+    async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.table_name}` (
             `uuid` binary(16) NOT NULL,

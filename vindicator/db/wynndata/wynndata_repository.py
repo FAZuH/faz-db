@@ -1,7 +1,7 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
 from vindicator import (
+    config,
     DatabaseQuery,
     GuildInfoTable,
     GuildHistoryTable,
@@ -14,23 +14,21 @@ from vindicator import (
     OnlinePlayersTable
 )
 
-if TYPE_CHECKING:
-    from vindicator import DatabaseQuery
-
-
 class WynnDataRepository:
 
-    def __init__(self, wynndata_db: DatabaseQuery) -> None:
-        self._wynndata_db = wynndata_db
-        self._guild_history_repository = GuildHistoryTable(self.wynndata_db)
-        self._guild_info_repository = GuildInfoTable(self.wynndata_db)
-        self._guild_member_history_repository = GuildMemberHistoryTable(self.wynndata_db)
-        self._player_activity_history_repository = PlayerActivityHistoryTable(self.wynndata_db)
-        self._character_history_repository = CharacterHistoryTable(self.wynndata_db)
-        self._character_info_repository = CharacterInfoTable(self.wynndata_db)
-        self._player_history_repository = PlayerHistoryTable(self.wynndata_db)
-        self._player_info_repository = PlayerInfoTable(self.wynndata_db)
-        self._online_players_repository = OnlinePlayersTable(self.wynndata_db)
+    def __init__(self) -> None:
+        self._wynndb: DatabaseQuery = DatabaseQuery(
+            config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
+        )
+        self._guild_history_repository = GuildHistoryTable(self.wynndb)
+        self._guild_info_repository = GuildInfoTable(self.wynndb)
+        self._guild_member_history_repository = GuildMemberHistoryTable(self.wynndb)
+        self._player_activity_history_repository = PlayerActivityHistoryTable(self.wynndb)
+        self._character_history_repository = CharacterHistoryTable(self.wynndb)
+        self._character_info_repository = CharacterInfoTable(self.wynndb)
+        self._player_history_repository = PlayerHistoryTable(self.wynndb)
+        self._player_info_repository = PlayerInfoTable(self.wynndb)
+        self._online_players_repository = OnlinePlayersTable(self.wynndb)
 
     @property
     def guild_history_repository(self) -> GuildHistoryTable:
@@ -69,5 +67,5 @@ class WynnDataRepository:
         return self._online_players_repository
 
     @property
-    def wynndata_db(self) -> DatabaseQuery:
-        return self._wynndata_db
+    def wynndb(self) -> DatabaseQuery:
+        return self._wynndb

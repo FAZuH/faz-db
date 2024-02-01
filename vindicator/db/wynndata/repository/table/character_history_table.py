@@ -19,7 +19,7 @@ class CharacterHistoryTable(CharacterHistoryRepo):
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, connection: None | Connection, entity: Iterable[CharacterHistory]) -> bool:
+    async def insert(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int:
         sql = f"""
         INSERT IGNORE INTO {self.table_name} (
             character_uuid, alchemism, armouring, cooking, farming, fishing, jeweling, mining,
@@ -29,9 +29,9 @@ class CharacterHistoryTable(CharacterHistoryRepo):
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        await self._db.execute(
+        return await self._db.execute_many(
             sql,
-            (
+            tuple((
                 entity.character_uuid.uuid,
                 entity.alchemism,
                 entity.armouring,
@@ -59,24 +59,23 @@ class CharacterHistoryTable(CharacterHistoryRepo):
                 entity.raid_completions,
                 entity.gamemode.gamemode,
                 entity.datetime.datetime,
-            ),
-            connection
+            ) for entity in entities),
+            conn
         )
-        return True
 
-    async def exists(self, id_: CharacterHistoryId) -> bool: ...
+    async def exists(self, id_: CharacterHistoryId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float: ...
 
-    async def find_one(self, id_: CharacterHistoryId) -> None | CharacterHistory: ...
+    async def find_one(self, id_: CharacterHistoryId, conn: None | Connection = None) -> None | CharacterHistory: ...
 
-    async def find_all(self) -> None | list[CharacterHistory]: ...
+    async def find_all(self, conn: None | Connection = None) -> None | list[CharacterHistory]: ...
 
-    async def update(self, entity: CharacterHistory) -> bool: ...
+    async def update(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int: ...
 
-    async def delete(self, id_: CharacterHistoryId) -> bool: ...
+    async def delete(self, id_: CharacterHistoryId, conn: None | Connection = None) -> int: ...
 
-    async def create_table(self) -> None:
+    async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.table_name}` (
             `character_uuid` binary(16) NOT NULL,

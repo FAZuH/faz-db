@@ -29,58 +29,53 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
         self.wynnapi = self.mockwynnapi.wynnapi
         # await self.wynnapi.start()
 
-        self.toTest_guildStats: list[GuildResponse] = self.mockwynnapi.onlineGuildStats  # type: ignore
-        self.toTest_onlineUuids: PlayersResponse = self.mockwynnapi.onlineUuids  # type: ignore
-        self.toTest_playerStats: list[PlayerResponse] = self.mockwynnapi.onlinePlayerStats  # type: ignore
+        self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
+        self.mock_onlineuuids: PlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
+        self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
 
     # @vcr.use_cassette
     async def test_character_history(self) -> None:
-        for playerStat in self.toTest_playerStats:
-            char_hist = CharacterHistory.from_response(playerStat)
-            for row in char_hist:
-                self.assertIsInstance(row, CharacterHistory)
-                self.assertIsInstance(row.character_uuid, UuidColumn)
-                self.assertIsInstance(row.level, int)
-                self.assertIsInstance(row.xp, int)
-                self.assertIsInstance(row.wars, int)
-                self.assertIsInstance(row.playtime, Decimal)
-                self.assertIsInstance(row.mobs_killed, int)
-                self.assertIsInstance(row.chests_found, int)
-                self.assertIsInstance(row.logins, int)
-                self.assertIsInstance(row.deaths, int)
-                self.assertIsInstance(row.discoveries, int)
-                self.assertIsInstance(row.gamemode, GamemodeColumn)
-                self.assertIsInstance(row.alchemism, Decimal)
-                self.assertIsInstance(row.armouring, Decimal)
-                self.assertIsInstance(row.cooking, Decimal)
-                self.assertIsInstance(row.jeweling, Decimal)
-                self.assertIsInstance(row.scribing, Decimal)
-                self.assertIsInstance(row.tailoring, Decimal)
-                self.assertIsInstance(row.weaponsmithing, Decimal)
-                self.assertIsInstance(row.woodworking, Decimal)
-                self.assertIsInstance(row.mining, Decimal)
-                self.assertIsInstance(row.woodcutting, Decimal)
-                self.assertIsInstance(row.farming, Decimal)
-                self.assertIsInstance(row.fishing, Decimal)
-                self.assertIsInstance(row.dungeon_completions, int)
-                self.assertIsInstance(row.quest_completions, int)
-                self.assertIsInstance(row.raid_completions, int)
-                self.assertIsInstance(row.datetime, DateColumn)
+        for char_hist in CharacterHistory.from_responses(self.mock_playerstats):
+            self.assertIsInstance(char_hist, CharacterHistory)
+            self.assertIsInstance(char_hist.character_uuid, UuidColumn)
+            self.assertIsInstance(char_hist.level, int)
+            self.assertIsInstance(char_hist.xp, int)
+            self.assertIsInstance(char_hist.wars, int)
+            self.assertIsInstance(char_hist.playtime, Decimal)
+            self.assertIsInstance(char_hist.mobs_killed, int)
+            self.assertIsInstance(char_hist.chests_found, int)
+            self.assertIsInstance(char_hist.logins, int)
+            self.assertIsInstance(char_hist.deaths, int)
+            self.assertIsInstance(char_hist.discoveries, int)
+            self.assertIsInstance(char_hist.gamemode, GamemodeColumn)
+            self.assertIsInstance(char_hist.alchemism, Decimal)
+            self.assertIsInstance(char_hist.armouring, Decimal)
+            self.assertIsInstance(char_hist.cooking, Decimal)
+            self.assertIsInstance(char_hist.jeweling, Decimal)
+            self.assertIsInstance(char_hist.scribing, Decimal)
+            self.assertIsInstance(char_hist.tailoring, Decimal)
+            self.assertIsInstance(char_hist.weaponsmithing, Decimal)
+            self.assertIsInstance(char_hist.woodworking, Decimal)
+            self.assertIsInstance(char_hist.mining, Decimal)
+            self.assertIsInstance(char_hist.woodcutting, Decimal)
+            self.assertIsInstance(char_hist.farming, Decimal)
+            self.assertIsInstance(char_hist.fishing, Decimal)
+            self.assertIsInstance(char_hist.dungeon_completions, int)
+            self.assertIsInstance(char_hist.quest_completions, int)
+            self.assertIsInstance(char_hist.raid_completions, int)
+            self.assertIsInstance(char_hist.datetime, DateColumn)
 
     # @vcr.use_cassette
     async def test_character_info(self) -> None:
-        for playerStat in self.toTest_playerStats:
-            char_inf = CharacterInfo.from_response(playerStat)
-            for row in char_inf:
-                # assert instance of row members
-                self.assertIsInstance(row.character_uuid, UuidColumn)
-                self.assertIsInstance(row.uuid, UuidColumn)
-                self.assertIsInstance(row.type, str)
+        for char_inf in CharacterInfo.from_responses(self.mock_playerstats):
+            # assert instance of row members
+            self.assertIsInstance(char_inf.character_uuid, UuidColumn)
+            self.assertIsInstance(char_inf.uuid, UuidColumn)
+            self.assertIsInstance(char_inf.type, str)
 
     # @vcr.use_cassette
     async def test_guild_history(self) -> None:
-        for guildStats in self.toTest_guildStats:
-            guild_hist = GuildHistory.from_response(guildStats)
+        for guild_hist in GuildHistory.from_responses(self.mock_guildstats):
             self.assertIsInstance(guild_hist.name, str)
             self.assertIsInstance(guild_hist.level, Decimal)
             self.assertIsInstance(guild_hist.territories, int)
@@ -91,25 +86,22 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
 
     # @vcr.use_cassette
     async def test_guild_info(self) -> None:
-        for guildStats in self.toTest_guildStats:
-            guild_info = GuildInfo.from_response(guildStats)
+        for guild_info in GuildInfo.from_responses(self.mock_guildstats):
             self.assertIsInstance(guild_info.name, str)
             self.assertIsInstance(guild_info.prefix, str)
             self.assertIsInstance(guild_info.created, DateColumn)
 
     # @vcr.use_cassette
     async def test_guild_member_history(self) -> None:
-        for guildStats in self.toTest_guildStats:
-            guild_member_history = GuildMemberHistory.from_response(guildStats)
-            for row in guild_member_history:
-                self.assertIsInstance(row.uuid, UuidColumn)
-                self.assertIsInstance(row.contributed, int)
-                self.assertIsInstance(row.joined, DateColumn)
-                self.assertIsInstance(row.datetime, DateColumn)
+        for guild_member_history in GuildMemberHistory.from_response(self.mock_guildstats):
+            self.assertIsInstance(guild_member_history.uuid, UuidColumn)
+            self.assertIsInstance(guild_member_history.contributed, int)
+            self.assertIsInstance(guild_member_history.joined, DateColumn)
+            self.assertIsInstance(guild_member_history.datetime, DateColumn)
 
     # @vcr.use_cassette
     async def test_online_players(self) -> None:
-        online_players = OnlinePlayers.from_response(self.toTest_onlineUuids)
+        online_players = OnlinePlayers.from_response(self.mock_onlineuuids)
         for row in online_players:
             self.assertIsInstance(row.uuid, UuidColumn)
             self.assertIsInstance(row.server, str)
@@ -120,8 +112,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
 
     # @vcr.use_cassette
     async def test_player_history(self) -> None:
-        for playerStat in self.toTest_playerStats:
-            player_history = PlayerHistory.from_response(playerStat)
+        for player_history in PlayerHistory.from_responses(self.mock_playerstats):
             self.assertIsInstance(player_history.uuid, UuidColumn)
             self.assertIsInstance(player_history.username, str)
             self.assertIsInstance(player_history.support_rank, (NoneType, str))
@@ -133,8 +124,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
 
     # @vcr.use_cassette
     async def test_player_info(self) -> None:
-        for playerStat in self.toTest_playerStats:
-            player_info = PlayerInfo.from_model(playerStat)
+        for player_info in PlayerInfo.from_responses(self.mock_playerstats):
             self.assertIsInstance(player_info.uuid, UuidColumn)
             self.assertIsInstance(player_info.latest_username, str)
             self.assertIsInstance(player_info.first_join, DateColumn)

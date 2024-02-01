@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-import aiomysql
-
 from .connection_pool import ConnectionPool
 
 if TYPE_CHECKING:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 from typing_extensions import override
 
 from vindicator import DateColumn, PlayerHistoryId, UuidColumn
@@ -33,17 +33,17 @@ class PlayerHistory(PlayerHistoryId):
         self._datetime = datetime
 
     @classmethod
-    def from_response(cls, response: PlayerResponse) -> PlayerHistory:
-        return cls(
-            uuid=UuidColumn(response.body.uuid.to_bytes()),
-            username=response.body.username,
-            support_rank=response.body.support_rank,
-            playtime=Decimal(response.body.playtime),
-            guild_name=response.body.guild.name if response.body.guild else None,
-            guild_rank=response.body.guild.name if response.body.guild else None,
-            rank=response.body.rank,
-            datetime=DateColumn(response.get_datetime())
-        )
+    def from_responses(cls, resps: Iterable[PlayerResponse]) -> tuple[PlayerHistory, ...]:
+        return tuple(cls(
+            uuid=UuidColumn(resp.body.uuid.to_bytes()),
+            username=resp.body.username,
+            support_rank=resp.body.support_rank,
+            playtime=Decimal(resp.body.playtime),
+            guild_name=resp.body.guild.name if resp.body.guild else None,
+            guild_rank=resp.body.guild.rank if resp.body.guild else None,
+            rank=resp.body.rank,
+            datetime=DateColumn(resp.get_datetime())
+        ) for resp in resps)
 
     @property
     @override

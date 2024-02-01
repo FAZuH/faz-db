@@ -22,7 +22,7 @@ class PlayerActivityHistory(PlayerActivityHistoryId):
         self._logoff_datetime = logoff_datetime
 
     @classmethod
-    def from_response(cls, response: PlayerResponse) -> PlayerActivityHistory:
+    def from_responses(cls, response: PlayerResponse) -> PlayerActivityHistory:
         raise NotImplementedError
 
     @property

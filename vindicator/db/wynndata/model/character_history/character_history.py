@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Iterable
 from typing_extensions import override
 
 from vindicator import CharacterHistoryId, DateColumn, GamemodeColumn, UuidColumn
@@ -71,38 +71,38 @@ class CharacterHistory(CharacterHistoryId):
         self._datetime = datetime
 
     @classmethod
-    def from_response(cls, response: PlayerResponse) -> list[CharacterHistory]:
-        return [
+    def from_responses(cls, resps: Iterable[PlayerResponse]) -> tuple[CharacterHistory, ...]:
+        return tuple(
             cls(
-                character_uuid=UuidColumn(character_uuid.to_bytes()),
-                level=character.level,
-                xp=character.xp,
-                wars=character.wars,
-                playtime=Decimal(character.playtime),
-                mobs_killed=character.mobs_killed,
-                chests_found=character.chests_found,
-                logins=character.logins,
-                deaths=character.deaths,
-                discoveries=character.discoveries,
-                gamemode=GamemodeColumn(character.gamemode.to_bytes()),
-                alchemism=Decimal(character.professions.alchemism.to_float()),
-                armouring=Decimal(character.professions.armouring.to_float()),
-                cooking=Decimal(character.professions.cooking.to_float()),
-                jeweling=Decimal(character.professions.jeweling.to_float()),
-                scribing=Decimal(character.professions.scribing.to_float()),
-                tailoring=Decimal(character.professions.tailoring.to_float()),
-                weaponsmithing=Decimal(character.professions.weaponsmithing.to_float()),
-                woodworking=Decimal(character.professions.woodworking.to_float()),
-                mining=Decimal(character.professions.mining.to_float()),
-                woodcutting=Decimal(character.professions.woodcutting.to_float()),
-                farming=Decimal(character.professions.farming.to_float()),
-                fishing=Decimal(character.professions.fishing.to_float()),
-                dungeon_completions=character.dungeons.total,
-                quest_completions=len(character.quests),
-                raid_completions=character.raids.total,
-                datetime=DateColumn(response.get_datetime())
-            ) for character_uuid, character in response.body.iter_characters()
-        ]
+                character_uuid=UuidColumn(ch_uuid.to_bytes()),
+                level=ch.level,
+                xp=ch.xp,
+                wars=ch.wars,
+                playtime=Decimal(ch.playtime),
+                mobs_killed=ch.mobs_killed,
+                chests_found=ch.chests_found,
+                logins=ch.logins,
+                deaths=ch.deaths,
+                discoveries=ch.discoveries,
+                gamemode=GamemodeColumn(ch.gamemode.to_bytes()),
+                alchemism=Decimal(ch.professions.alchemism.to_float()),
+                armouring=Decimal(ch.professions.armouring.to_float()),
+                cooking=Decimal(ch.professions.cooking.to_float()),
+                jeweling=Decimal(ch.professions.jeweling.to_float()),
+                scribing=Decimal(ch.professions.scribing.to_float()),
+                tailoring=Decimal(ch.professions.tailoring.to_float()),
+                weaponsmithing=Decimal(ch.professions.weaponsmithing.to_float()),
+                woodworking=Decimal(ch.professions.woodworking.to_float()),
+                mining=Decimal(ch.professions.mining.to_float()),
+                woodcutting=Decimal(ch.professions.woodcutting.to_float()),
+                farming=Decimal(ch.professions.farming.to_float()),
+                fishing=Decimal(ch.professions.fishing.to_float()),
+                dungeon_completions=ch.dungeons.total,
+                quest_completions=len(ch.quests),
+                raid_completions=ch.raids.total,
+                datetime=DateColumn(resp.get_datetime())
+            ) for resp in resps for ch_uuid, ch in resp.body.iter_characters()
+        )
 
     @property
     @override

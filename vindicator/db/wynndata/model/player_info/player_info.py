@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 from typing_extensions import override
 
 from vindicator import DateColumn, PlayerInfoId, UuidColumn
@@ -17,12 +17,12 @@ class PlayerInfo(PlayerInfoId):
         self._first_join = first_join
 
     @classmethod
-    def from_model(cls, response: PlayerResponse) -> PlayerInfo:
-        return cls(
-            uuid=UuidColumn(response.body.uuid.to_bytes()),
-            latest_username=response.body.username,
-            first_join=DateColumn(response.body.first_join.to_datetime())
-        )
+    def from_responses(cls, resps: Iterable[PlayerResponse]) -> tuple[PlayerInfo, ...]:
+        return tuple(cls(
+            uuid=UuidColumn(resp.body.uuid.to_bytes()),
+            latest_username=resp.body.username,
+            first_join=DateColumn(resp.body.first_join.to_datetime())
+        ) for resp in resps)
 
     @property
     @override

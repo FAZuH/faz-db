@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 from typing_extensions import override
 
 from vindicator import DateColumn, GuildInfoId
@@ -22,12 +22,12 @@ class GuildInfo(GuildInfoId):
         self._created = created
 
     @classmethod
-    def from_response(cls, response: GuildResponse) -> GuildInfo:
-        return cls(
-            name=response.body.name,
-            prefix=response.body.prefix,
-            created=DateColumn(response.body.created.to_datetime())
-        )
+    def from_responses(cls, resps: Iterable[GuildResponse]) -> tuple[GuildInfo, ...]:
+        return tuple(cls(
+            name=resp.body.name,
+            prefix=resp.body.prefix,
+            created=DateColumn(resp.body.created.to_datetime())
+        ) for resp in resps)
 
     @property
     @override

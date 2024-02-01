@@ -8,7 +8,7 @@ async def asyncrun() -> None:
     from tests.test_wynndb_repository import TestWynnDbRepository
     t = TestWynnDbRepository()
     await t.asyncSetUp()
-    await t.test_character_history_repo()
+    await t.test_player_history_repo()
 
 
 if __name__ == "__main__":

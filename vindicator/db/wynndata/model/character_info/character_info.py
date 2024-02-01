@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Iterable, Self
 from typing_extensions import override
 
 from vindicator import CharacterInfoId, UuidColumn
@@ -17,14 +17,13 @@ class CharacterInfo(CharacterInfoId):
         self._type = type
 
     @classmethod
-    def from_response(cls, response: PlayerResponse) -> list[Self]:
-        return [
-            cls(
+    def from_responses(cls, resps: Iterable[PlayerResponse]) -> tuple[Self, ...]:
+        return tuple(cls(
                 character_uuid=UuidColumn(character_uuid.to_bytes()),
-                uuid=UuidColumn(response.body.uuid.to_bytes()),
+                uuid=UuidColumn(resp.body.uuid.to_bytes()),
                 type=character.type.get_kind()
-            ) for character_uuid, character in response.body.iter_characters()
-        ]
+            ) for resp in resps for character_uuid, character in resp.body.iter_characters()
+        )
 
     @property
     @override

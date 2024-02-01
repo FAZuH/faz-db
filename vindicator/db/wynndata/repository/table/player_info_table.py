@@ -19,7 +19,7 @@ class PlayerInfoTable(PlayerInfoRepo):
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, connection: None | Connection, entity: Iterable[PlayerInfo]) -> bool:
+    async def insert(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int:
         sql = f"""
         REPLACE INTO {self.table_name} (first_join, latest_username, uuid)
         VALUES (%s, %s, %s)
@@ -29,30 +29,30 @@ class PlayerInfoTable(PlayerInfoRepo):
         #     WHEN VALUES(latest_username) <> latest_username THEN VALUES(latest_username)
         #     ELSE latest_username
         # END
-        await self._db.execute(
+        await self._db.execute_many(
             sql,
-            (
-                entity.first_join,
+            tuple((
+                entity.first_join.datetime,
                 entity.latest_username,
-                entity.uuid
-            ),
-            connection
+                entity.uuid.uuid
+            ) for entity in entities),
+            conn
         )
         return True
 
-    async def exists(self, id_: PlayerInfoId) -> bool: ...
+    async def exists(self, id_: PlayerInfoId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float: ...
 
-    async def find_one(self, id_: PlayerInfoId) -> None | PlayerInfo: ...
+    async def find_one(self, id_: PlayerInfoId, conn: None | Connection = None) -> None | PlayerInfo: ...
 
-    async def find_all(self) -> None | list[PlayerInfo]: ...
+    async def find_all(self, conn: None | Connection = None) -> None | list[PlayerInfo]: ...
 
-    async def update(self, entity: PlayerInfo) -> bool: ...
+    async def update(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int: ...
 
-    async def delete(self, id_: PlayerInfoId) -> bool: ...
+    async def delete(self, id_: PlayerInfoId, conn: None | Connection = None) -> int: ...
 
-    async def create_table(self) -> None:
+    async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.table_name}` (
             `uuid` binary(16) NOT NULL,
