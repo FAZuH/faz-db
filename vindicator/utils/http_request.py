@@ -5,9 +5,11 @@ from typing import TYPE_CHECKING, Any
 from aiohttp import ClientSession, ClientTimeout
 
 from vindicator import (
+    BadRequest,
     Forbidden,
     HTTPError,
     NotFound,
+    Ratelimited,
     ResponseSet,
     ServerError,
     TooManyRetries,
@@ -17,7 +19,7 @@ from vindicator import (
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
-    from vindicator import BadRequest, Ratelimit, Ratelimited
+    from vindicator import Ratelimit
 
 
 class HttpRequest:
@@ -96,14 +98,13 @@ class HttpRequest:
             return await self.get(url_param, retries, retry_on_exc)
 
         except HTTPError:
-            if retry_on_exc:
+            if retry_on_exc is True:
                 if retries <= 0:
                     # await VindicatorWebhook.log("error", "error", {"url": url_param},
                     #     title=f"HTTPError: {response.status} - {response.reason}")
                     raise TooManyRetries(url_param)
                 return await self.get(url_param, retries - 1, retry_on_exc)
-            else:
-                raise
+            raise
 
     def is_sessionopen(self) -> bool:
         return self._session is not None and not self._session.closed

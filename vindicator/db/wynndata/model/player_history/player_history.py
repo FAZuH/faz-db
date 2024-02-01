@@ -3,17 +3,17 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from vindicator import PlayerHistoryId, UuidColumn
+from vindicator import DateColumn, PlayerHistoryId, UuidColumn
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from vindicator import PlayerResponse
 
 
 class PlayerHistory(PlayerHistoryId):
     """id: uuid, datetime"""
 
-    def __init__(self,
+    def __init__(
+        self,
         uuid: UuidColumn,
         username: str,
         support_rank: None | str,
@@ -21,7 +21,7 @@ class PlayerHistory(PlayerHistoryId):
         guild_name: None | str,
         guild_rank: None | str,
         rank: None | str,
-        datetime: dt
+        datetime: DateColumn
     ) -> None:
         self._uuid = uuid
         self._username = username
@@ -42,7 +42,7 @@ class PlayerHistory(PlayerHistoryId):
             guild_name=response.body.guild.name if response.body.guild else None,
             guild_rank=response.body.guild.name if response.body.guild else None,
             rank=response.body.rank,
-            datetime=response.get_datetime()
+            datetime=DateColumn(response.get_datetime())
         )
 
     @property
@@ -76,5 +76,5 @@ class PlayerHistory(PlayerHistoryId):
 
     @property
     @override
-    def datetime(self) -> dt:
+    def datetime(self) -> DateColumn:
         return self._datetime

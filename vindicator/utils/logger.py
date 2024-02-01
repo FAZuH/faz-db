@@ -100,4 +100,3 @@
     #             }, title="Save fetched guilds"))
     #         case _:
     #             print(f"Logger: Function/method {fname} doesn't match any cases")
-

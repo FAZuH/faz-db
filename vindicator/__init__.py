@@ -10,6 +10,7 @@ from .api.wynn.model.field.date_field import DateField
 from .api.wynn.model.field.gamemode_field import GamemodeField
 from .api.wynn.model.field.username_or_uuid_field import UsernameOrUuidField
 from .api.wynn.model.field.uuid_field import UuidField
+from .db.wynndata.model.date_column import DateColumn
 from .db.wynndata.model.gamemode_column import GamemodeColumn
 from .db.wynndata.model.uuid_column import UuidColumn
 from .db.wynndata.repository.repository import Table
@@ -59,15 +60,15 @@ from .db.wynndata.model.player_history.player_history import PlayerHistory
 from .db.wynndata.model.player_info.player_info import PlayerInfo
 
 # db base. needs db models
-from .db.wynndata.repository.base.character_history_base import CharacterHistoryBase
-from .db.wynndata.repository.base.character_info_base import CharacterInfoBase
-from .db.wynndata.repository.base.guild_history_base import GuildHistoryBase
-from .db.wynndata.repository.base.guild_info_base import GuildInfoBase
-from .db.wynndata.repository.base.guild_member_history_base import GuildMemberHistoryBase
-from .db.wynndata.repository.base.online_players_base import OnlinePlayersBase
-from .db.wynndata.repository.base.player_activity_history_base import PlayerActivityHistoryBase
-from .db.wynndata.repository.base.player_history_base import PlayerHistoryBase
-from .db.wynndata.repository.base.player_info_base import PlayerInfoBase
+from .db.wynndata.repository.base.character_history_repo import CharacterHistoryRepo
+from .db.wynndata.repository.base.character_info_repo import CharacterInfoRepo
+from .db.wynndata.repository.base.guild_history_repo import GuildHistoryRepo
+from .db.wynndata.repository.base.guild_info_repo import GuildInfoRepo
+from .db.wynndata.repository.base.guild_member_history_repo import GuildMemberHistoryRepo
+from .db.wynndata.repository.base.online_players_repo import OnlinePlayersRepo
+from .db.wynndata.repository.base.player_activity_history_repo import PlayerActivityHistoryRepo
+from .db.wynndata.repository.base.player_history_repo import PlayerHistoryRepo
+from .db.wynndata.repository.base.player_info_repo import PlayerInfoRepo
 
 # db tables. needs db base
 from .db.wynndata.repository.table.guild_history_table import GuildHistoryTable
@@ -89,7 +90,7 @@ from .tasks.request import Request  # ResponseSet
 from .tasks.guild_request import GuildRequest  # Request, RequestLevel, WynnRequest, GuildStats
 from .tasks.online_request import OnlineRequest  # Request, RequestLevel, WynnRequest, Players
 from .tasks.player_request import PlayerRequest  # Request, RequestLevel, WynnRequest, PlayerStats
-from .tasks.fetch_online import FetchOnline # Fetch, Players, OnlineRequest, PlayerRequest
+from .tasks.fetch_online import FetchOnline  # Fetch, Players, OnlineRequest, PlayerRequest
 from .tasks.fetch_player import FetchPlayer  # Fetch, FetchBase, FetchOnline, PlayerStats
 from .tasks.fetch_guild import FetchGuild  # Fetch, FetchBase, FetchPlayer, GuildStats
 from .tasks.fetch_core import FetchCore  # Fetch, FetchGuild, FetchOnline, FetchPlayer, RequestLevel, WynnApi

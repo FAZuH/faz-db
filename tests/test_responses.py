@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     )
 
 
-
 class TestResponses(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         self.mockwynnapi = MockWynnApi()
@@ -48,7 +47,6 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
             # created
             self.assertIsInstance(body.created, BodyDateField)
             self.assertIsInstance(body.created.to_datetime(), dt)
-            self.assertIsInstance(body.created.to_sqldt(), str)
 
             # members
             self.assertIsInstance(body.members, Guild.Members)
@@ -74,7 +72,6 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
                 self.assertGreaterEqual(member_info.contribution_rank, 0)
                 self.assertIsInstance(member_info.joined, BodyDateField)
                 self.assertIsInstance(member_info.joined.to_datetime(), dt)
-                self.assertIsInstance(member_info.joined.to_sqldt(), str)
 
             self.assertGreaterEqual(body.online, 0)
             # banner
@@ -125,12 +122,10 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
             # first_join
             self.assertIsInstance(body.first_join, BodyDateField)
             self.assertIsInstance(body.first_join.to_datetime(), dt)
-            self.assertIsInstance(body.first_join.to_sqldt(), str)
 
             # last_join
             self.assertIsInstance(body.last_join, BodyDateField)
             self.assertIsInstance(body.last_join.to_datetime(), dt)
-            self.assertIsInstance(body.last_join.to_sqldt(), str)
 
             self.assertGreater(body.playtime, 0)
             # guild

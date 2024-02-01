@@ -5,10 +5,10 @@ from tests.mock_wynnapi import MockWynnApi
 
 async def asyncrun() -> None:
     mockwynnapi = MockWynnApi()  # type: ignore
-    from tests.test_wynndb_models import TestWynnDbModels
-    t = TestWynnDbModels()
+    from tests.test_wynndb_repository import TestWynnDbRepository
+    t = TestWynnDbRepository()
     await t.asyncSetUp()
-    await t.test_guild_member_history()
+    await t.test_character_history_repo()
 
 
 if __name__ == "__main__":

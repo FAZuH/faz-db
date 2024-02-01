@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
-from vindicator import CharacterInfoBase
+from vindicator import CharacterInfoRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         CharacterInfo,
         CharacterInfoId,
@@ -11,20 +12,20 @@ if TYPE_CHECKING:
     )
 
 
-class CharacterInfoTable(CharacterInfoBase):
+class CharacterInfoTable(CharacterInfoRepo):
 
     _TABLE_NAME: str = "character_info"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: CharacterInfo) -> bool:
+    async def insert(self, connection: None | Connection, entity: Iterable[CharacterInfo]) -> bool:
         # NOTE: This doesn't change. Ignore duplicates.
         sql = f"""
         INSERT IGNORE INTO {self.table_name} (character_uuid, type, uuid)
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s)
         """
-        await self._db.execute_fetch(sql, (
+        await self._db.fetch(sql, (
             entity.character_uuid,
             entity.type,
             entity.uuid

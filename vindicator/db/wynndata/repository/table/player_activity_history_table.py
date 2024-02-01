@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
-from vindicator import PlayerActivityHistoryBase
+from vindicator import PlayerActivityHistoryRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         DatabaseQuery,
         PlayerActivityHistory,
@@ -11,23 +12,27 @@ if TYPE_CHECKING:
     )
 
 
-class PlayerActivityHistoryTable(PlayerActivityHistoryBase):
+class PlayerActivityHistoryTable(PlayerActivityHistoryRepo):
 
     _TABLE_NAME: str = "player_activity_history"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: PlayerActivityHistory) -> bool:
+    async def insert(self, connection: None | Connection, entity: Iterable[PlayerActivityHistory]) -> bool:
         sql = f"""
         REPLACE INTO {self.table_name} (uuid, logon_datetime, logoff_datetime)
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s)
         """
-        await self._db.execute_fetch(sql, (
-            entity.uuid,
-            entity.logon_datetime,
-            entity.logoff_datetime
-        ))
+        await self._db.fetch(
+            sql,
+            (
+                entity.uuid,
+                entity.logon_datetime,
+                entity.logoff_datetime
+            ),
+            connection
+        )
         return True
 
     async def exists(self, id_: PlayerActivityHistoryId) -> bool: ...

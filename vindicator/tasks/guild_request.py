@@ -1,7 +1,7 @@
 from __future__ import annotations
 import asyncio
-from typing_extensions import override
 from typing import TYPE_CHECKING
+from typing_extensions import override
 
 from vindicator import GuildResponse, Request, RequestLevel
 

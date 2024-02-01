@@ -1,4 +1,3 @@
-from datetime import datetime as dt
 from decimal import Decimal
 from types import NoneType
 import unittest
@@ -8,6 +7,7 @@ from tests.mock_wynnapi import MockWynnApi
 from vindicator import (
     CharacterHistory,
     CharacterInfo,
+    DateColumn,
     GamemodeColumn,
     GuildHistory,
     GuildResponse,
@@ -65,7 +65,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
                 self.assertIsInstance(row.dungeon_completions, int)
                 self.assertIsInstance(row.quest_completions, int)
                 self.assertIsInstance(row.raid_completions, int)
-                self.assertIsInstance(row.datetime, dt)
+                self.assertIsInstance(row.datetime, DateColumn)
 
     # @vcr.use_cassette
     async def test_character_info(self) -> None:
@@ -87,7 +87,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
             self.assertIsInstance(guild_hist.wars, int)
             self.assertIsInstance(guild_hist.member_total, int)
             self.assertIsInstance(guild_hist.online_members, int)
-            self.assertIsInstance(guild_hist.datetime, dt)
+            self.assertIsInstance(guild_hist.datetime, DateColumn)
 
     # @vcr.use_cassette
     async def test_guild_info(self) -> None:
@@ -95,7 +95,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
             guild_info = GuildInfo.from_response(guildStats)
             self.assertIsInstance(guild_info.name, str)
             self.assertIsInstance(guild_info.prefix, str)
-            self.assertIsInstance(guild_info.created, dt)
+            self.assertIsInstance(guild_info.created, DateColumn)
 
     # @vcr.use_cassette
     async def test_guild_member_history(self) -> None:
@@ -104,8 +104,8 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
             for row in guild_member_history:
                 self.assertIsInstance(row.uuid, UuidColumn)
                 self.assertIsInstance(row.contributed, int)
-                self.assertIsInstance(row.joined, dt)
-                self.assertIsInstance(row.datetime, dt)
+                self.assertIsInstance(row.joined, DateColumn)
+                self.assertIsInstance(row.datetime, DateColumn)
 
     # @vcr.use_cassette
     async def test_online_players(self) -> None:
@@ -129,7 +129,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
             self.assertIsInstance(player_history.guild_name, (NoneType, str))
             self.assertIsInstance(player_history.guild_rank, (NoneType, str))
             self.assertIsInstance(player_history.rank, str)
-            self.assertIsInstance(player_history.datetime, dt)
+            self.assertIsInstance(player_history.datetime, DateColumn)
 
     # @vcr.use_cassette
     async def test_player_info(self) -> None:
@@ -137,7 +137,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
             player_info = PlayerInfo.from_model(playerStat)
             self.assertIsInstance(player_info.uuid, UuidColumn)
             self.assertIsInstance(player_info.latest_username, str)
-            self.assertIsInstance(player_info.first_join, dt)
+            self.assertIsInstance(player_info.first_join, DateColumn)
 
     async def asyncTearDown(self) -> None:
         # await self.wynnapi.close()

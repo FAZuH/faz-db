@@ -54,4 +54,3 @@ class FetchOnline(Fetch[OnlineRequest]):
             tg.create_task(self.wynnrepo.player_activity_history_repository.to_db(finished_request.response.body, self._logon_timestamps))
 
         asyncio.create_task(finished_request.requeue())
-

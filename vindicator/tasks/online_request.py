@@ -1,7 +1,7 @@
 from __future__ import annotations
 import asyncio
-from typing_extensions import override
 from typing import TYPE_CHECKING
+from typing_extensions import override
 
 from vindicator import PlayersResponse, Request, RequestLevel
 
@@ -28,4 +28,3 @@ class OnlineRequest(Request[PlayersResponse]):
                 self.__class__(self._fetch_core, self._request_arg)
             )
         )
-

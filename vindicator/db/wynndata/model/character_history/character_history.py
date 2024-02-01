@@ -3,10 +3,9 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Self
 from typing_extensions import override
 
-from vindicator import CharacterHistoryId, GamemodeColumn, UuidColumn
+from vindicator import CharacterHistoryId, DateColumn, GamemodeColumn, UuidColumn
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from vindicator import PlayerResponse
 
 
@@ -41,7 +40,7 @@ class CharacterHistory(CharacterHistoryId):
         dungeon_completions: int,
         quest_completions: int,
         raid_completions: int,
-        datetime: dt
+        datetime: DateColumn
     ) -> None:
         self._character_uuid = character_uuid
         self._level = level
@@ -72,7 +71,7 @@ class CharacterHistory(CharacterHistoryId):
         self._datetime = datetime
 
     @classmethod
-    def from_response(cls, response: PlayerResponse) -> list[Self]:
+    def from_response(cls, response: PlayerResponse) -> list[CharacterHistory]:
         return [
             cls(
                 character_uuid=UuidColumn(character_uuid.to_bytes()),
@@ -101,7 +100,7 @@ class CharacterHistory(CharacterHistoryId):
                 dungeon_completions=character.dungeons.total,
                 quest_completions=len(character.quests),
                 raid_completions=character.raids.total,
-                datetime=response.get_datetime()
+                datetime=DateColumn(response.get_datetime())
             ) for character_uuid, character in response.body.iter_characters()
         ]
 
@@ -212,5 +211,5 @@ class CharacterHistory(CharacterHistoryId):
 
     @property
     @override
-    def datetime(self) -> dt:
+    def datetime(self) -> DateColumn:
         return self._datetime

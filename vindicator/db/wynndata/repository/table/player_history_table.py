@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
-from vindicator import PlayerHistoryBase
+from vindicator import PlayerHistoryRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         DatabaseQuery,
         PlayerHistory,
@@ -11,32 +12,36 @@ if TYPE_CHECKING:
     )
 
 
-class PlayerHistoryTable(PlayerHistoryBase):
+class PlayerHistoryTable(PlayerHistoryRepo):
 
     _TABLE_NAME: str = "player_history"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: PlayerHistory) -> bool:
+    async def insert(self, connection: None | Connection, entity: Iterable[PlayerHistory]) -> bool:
         sql = f"""
         INSERT INTO {self.table_name}
         (guild_name, guild_rank, playtime, support_rank, `rank`, datetime, username, uuid)
         VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?)
+        (%s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
         datetime = VALUES(datetime)
         """
-        await self._db.execute_fetch(sql, (
-            entity.guild_name,
-            entity.guild_rank,
-            entity.playtime,
-            entity.support_rank,
-            entity.rank,
-            entity.datetime,
-            entity.username,
-            entity.uuid
-        ))
+        await self._db.fetch(
+            sql,
+            (
+                entity.guild_name,
+                entity.guild_rank,
+                entity.playtime,
+                entity.support_rank,
+                entity.rank,
+                entity.datetime,
+                entity.username,
+                entity.uuid
+            ),
+            connection
+        )
         return True
 
     async def exists(self, id_: PlayerHistoryId) -> bool: ...

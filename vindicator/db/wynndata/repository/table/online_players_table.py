@@ -1,9 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from typing_extensions import override, Iterable
 
-from vindicator import OnlinePlayersBase
+from vindicator import OnlinePlayersRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         DatabaseQuery,
         OnlinePlayers,
@@ -11,18 +13,19 @@ if TYPE_CHECKING:
     )
 
 
-class OnlinePlayersTable(OnlinePlayersBase):
+class OnlinePlayersTable(OnlinePlayersRepo):
 
     _TABLE_NAME: str = "online_players"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: OnlinePlayers) -> bool:
+    @override
+    async def insert(self, connection: None | Connection, entity: Iterable[OnlinePlayers]) -> bool:
         async with self._db.transaction_group() as tg:
             tg.add(f"DELETE FROM {self.table_name} WHERE uuid IS NOT NULL")
             tg.add(
-                f"INSERT INTO {self.table_name} (uuid, server) VALUES (?, ?)",
+                f"INSERT INTO {self.table_name} (uuid, server) VALUES (%s, %s)",
                 (entity.uuid, entity.server)
             )
         return True

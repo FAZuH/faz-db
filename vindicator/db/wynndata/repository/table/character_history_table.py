@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
-from vindicator import CharacterHistoryBase
+from vindicator import CharacterHistoryRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         CharacterHistory,
         CharacterHistoryId,
@@ -11,14 +12,14 @@ if TYPE_CHECKING:
     )
 
 
-class CharacterHistoryTable(CharacterHistoryBase):
+class CharacterHistoryTable(CharacterHistoryRepo):
 
     _TABLE_NAME: str = "character_history"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: CharacterHistory) -> bool:
+    async def insert(self, connection: None | Connection, entity: Iterable[CharacterHistory]) -> bool:
         sql = f"""
         INSERT IGNORE INTO {self.table_name} (
             character_uuid, alchemism, armouring, cooking, farming, fishing, jeweling, mining,
@@ -26,37 +27,41 @@ class CharacterHistoryTable(CharacterHistoryBase):
             discoveries, level, logins, mobs_killed, playtime, wars, xp, dungeon_completions,
             quest_completions, raid_completions, gamemode, datetime
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        await self._db.execute_fetch(sql, (
-            entity.character_uuid,
-            entity.alchemism,
-            entity.armouring,
-            entity.cooking,
-            entity.farming,
-            entity.fishing,
-            entity.jeweling,
-            entity.mining,
-            entity.scribing,
-            entity.tailoring,
-            entity.weaponsmithing,
-            entity.woodcutting,
-            entity.woodworking,
-            entity.chests_found,
-            entity.deaths,
-            entity.discoveries,
-            entity.level,
-            entity.logins,
-            entity.mobs_killed,
-            entity.playtime,
-            entity.wars,
-            entity.xp,
-            entity.dungeon_completions,
-            entity.quest_completions,
-            entity.raid_completions,
-            entity.gamemode,
-            entity.datetime,
-        ))
+        await self._db.execute(
+            sql,
+            (
+                entity.character_uuid.uuid,
+                entity.alchemism,
+                entity.armouring,
+                entity.cooking,
+                entity.farming,
+                entity.fishing,
+                entity.jeweling,
+                entity.mining,
+                entity.scribing,
+                entity.tailoring,
+                entity.weaponsmithing,
+                entity.woodcutting,
+                entity.woodworking,
+                entity.chests_found,
+                entity.deaths,
+                entity.discoveries,
+                entity.level,
+                entity.logins,
+                entity.mobs_killed,
+                entity.playtime,
+                entity.wars,
+                entity.xp,
+                entity.dungeon_completions,
+                entity.quest_completions,
+                entity.raid_completions,
+                entity.gamemode.gamemode,
+                entity.datetime.datetime,
+            ),
+            connection
+        )
         return True
 
     async def exists(self, id_: CharacterHistoryId) -> bool: ...

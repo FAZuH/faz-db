@@ -68,4 +68,3 @@ class FetchPlayer(Fetch[PlayerRequest]):
         for guild_name in logged_on_guilds:
             # Timestamp doesn't matter here
             self.fetch_core.queue.put((dt.now().timestamp(), GuildRequest(self.fetch_core, guild_name)))
-

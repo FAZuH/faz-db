@@ -2,10 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Self
 from typing_extensions import override
 
-from vindicator import GuildMemberHistoryId, UuidColumn
+from vindicator import DateColumn, GuildMemberHistoryId, UuidColumn
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from vindicator import GuildResponse
 
 
@@ -16,8 +15,8 @@ class GuildMemberHistory(GuildMemberHistoryId):
         self,
         uuid: UuidColumn,
         contributed: int,
-        joined: dt,
-        datetime: dt
+        joined: DateColumn,
+        datetime: DateColumn
     ) -> None:
         self._uuid = uuid
         self._contributed = contributed
@@ -30,8 +29,8 @@ class GuildMemberHistory(GuildMemberHistoryId):
             cls(
                 uuid=UuidColumn(uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes()),  # type: ignore
                 contributed=memberinfo.contributed,
-                joined=memberinfo.joined.to_datetime(),
-                datetime=response.get_datetime()
+                joined=DateColumn(memberinfo.joined.to_datetime()),
+                datetime=DateColumn(response.get_datetime())
             ) for rank, uuid, memberinfo in response.body.members.iter_online_members()  # type: ignore
         ]
 
@@ -45,10 +44,10 @@ class GuildMemberHistory(GuildMemberHistoryId):
         return self._contributed
 
     @property
-    def joined(self) -> dt:
+    def joined(self) -> DateColumn:
         return self._joined
 
     @property
     @override
-    def datetime(self) -> dt:
+    def datetime(self) -> DateColumn:
         return self._datetime

@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
-from vindicator import PlayerInfoBase
+from vindicator import PlayerInfoRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         DatabaseQuery,
         PlayerInfo,
@@ -11,28 +12,32 @@ if TYPE_CHECKING:
     )
 
 
-class PlayerInfoTable(PlayerInfoBase):
+class PlayerInfoTable(PlayerInfoRepo):
 
     _TABLE_NAME: str = "player_info"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: PlayerInfo) -> bool:
+    async def insert(self, connection: None | Connection, entity: Iterable[PlayerInfo]) -> bool:
         sql = f"""
         REPLACE INTO {self.table_name} (first_join, latest_username, uuid)
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s)
         """
         # ON DUPLICATE KEY UPDATE
         # latest_username = CASE
         #     WHEN VALUES(latest_username) <> latest_username THEN VALUES(latest_username)
         #     ELSE latest_username
         # END
-        await self._db.execute_fetch(sql, (
-            entity.first_join,
-            entity.latest_username,
-            entity.uuid
-        ))
+        await self._db.execute(
+            sql,
+            (
+                entity.first_join,
+                entity.latest_username,
+                entity.uuid
+            ),
+            connection
+        )
         return True
 
     async def exists(self, id_: PlayerInfoId) -> bool: ...

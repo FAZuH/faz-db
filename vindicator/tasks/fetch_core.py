@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Awaitable
 
 from vindicator import (
     config,
+    logger,
     DatabaseQuery,
     FetchGuild,
     FetchOnline,
@@ -15,7 +16,7 @@ from vindicator import (
 )
 
 if TYPE_CHECKING:
-    from vindicator import logger, Fetch, Request
+    from vindicator import Fetch, Request
 
 
 class FetchCore:
@@ -30,7 +31,9 @@ class FetchCore:
         # Other Processes
         self._queue: FetchQueue = FetchQueue()
         self._wynnapi: WynnApi = WynnApi()
-        self._wynndb: DatabaseQuery = DatabaseQuery(config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DATABASE'], 2)
+        self._wynndb: DatabaseQuery = DatabaseQuery(
+            config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
+        )
         self._wynnrepo: WynnDataRepository = WynnDataRepository(self._wynndb)
         # Fetchers
         self._fetch_guild: Fetch[Any] = FetchGuild(self)

@@ -39,7 +39,7 @@ class Guild:
             self._recruit = self._members_constructor(node["recruit"])
 
         def get_online_members(self) -> int:
-            return len([_ for _ in self.iter_online_members()])
+            return len(list(self.iter_online_members()))
 
         def iter_online_members(self) -> Generator[tuple[str, UsernameOrUuidField, Guild.Members.MemberInfo], Any, None]:
             for rank, uuid, memberinfo in self.iter_members():

@@ -15,10 +15,9 @@ class FetchQueue:
     def put(self, entry: tuple[float, Request[Any]]) -> bool:
         if entry[1].request_arg in self._queued_req_args:
             return False
-        else:
-            self._queued_req_args.add(entry[1].request_arg)
-            self._queue.put(entry)
-            return True
+        self._queued_req_args.add(entry[1].request_arg)
+        self._queue.put(entry)
+        return True
 
     def get(self, amount: int) -> list[Request[Any]]:
         ret: list[Request[Any]] = []

@@ -3,5 +3,5 @@ from typing import Protocol
 from vindicator import PlayerHistory, PlayerHistoryId, Table
 
 
-class PlayerHistoryBase(Table[PlayerHistory, PlayerHistoryId], Protocol):
+class PlayerHistoryRepo(Table[PlayerHistory, PlayerHistoryId], Protocol):
     ...

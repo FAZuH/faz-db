@@ -2,10 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from vindicator import PlayerActivityHistoryId, UuidColumn
+from vindicator import DateColumn, PlayerActivityHistoryId, UuidColumn
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from vindicator import PlayerResponse
 
 
@@ -15,8 +14,8 @@ class PlayerActivityHistory(PlayerActivityHistoryId):
     def __init__(
         self,
         uuid: UuidColumn,
-        logon_datetime: dt,
-        logoff_datetime: dt
+        logon_datetime: DateColumn,
+        logoff_datetime: DateColumn
     ) -> None:
         self._uuid = uuid
         self._logon_datetime = logon_datetime
@@ -33,9 +32,9 @@ class PlayerActivityHistory(PlayerActivityHistoryId):
 
     @property
     @override
-    def logon_datetime(self) -> dt:
+    def logon_datetime(self) -> DateColumn:
         return self._logon_datetime
 
     @property
-    def logoff_datetime(self) -> dt:
+    def logoff_datetime(self) -> DateColumn:
         return self._logoff_datetime

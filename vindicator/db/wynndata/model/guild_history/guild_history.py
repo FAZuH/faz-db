@@ -3,10 +3,9 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from vindicator import GuildHistoryId
+from vindicator import DateColumn, GuildHistoryId
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from vindicator import GuildResponse
 
 
@@ -21,7 +20,7 @@ class GuildHistory(GuildHistoryId):
         wars: int,
         member_total: int,
         online_members: int,
-        datetime: dt
+        datetime: DateColumn
     ) -> None:
         self._name = name
         self._level = level
@@ -40,7 +39,7 @@ class GuildHistory(GuildHistoryId):
             wars=response.body.wars,
             member_total=response.body.members.total,
             online_members=response.body.members.get_online_members(),
-            datetime=response.get_datetime()
+            datetime=DateColumn(response.get_datetime())
         )
 
     @property
@@ -70,5 +69,5 @@ class GuildHistory(GuildHistoryId):
 
     @property
     @override
-    def datetime(self) -> dt:
+    def datetime(self) -> DateColumn:
         return self._datetime

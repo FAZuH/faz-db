@@ -2,10 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from vindicator import GuildInfoId
+from vindicator import DateColumn, GuildInfoId
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from vindicator import GuildResponse
 
 
@@ -16,7 +15,7 @@ class GuildInfo(GuildInfoId):
         self,
         name: str,
         prefix: str,
-        created: dt
+        created: DateColumn
     ) -> None:
         self._name = name
         self._prefix = prefix
@@ -27,7 +26,7 @@ class GuildInfo(GuildInfoId):
         return cls(
             name=response.body.name,
             prefix=response.body.prefix,
-            created=response.body.created.to_datetime()
+            created=DateColumn(response.body.created.to_datetime())
         )
 
     @property
@@ -40,5 +39,5 @@ class GuildInfo(GuildInfoId):
         return self._prefix
 
     @property
-    def created(self) -> dt:
+    def created(self) -> DateColumn:
         return self._created

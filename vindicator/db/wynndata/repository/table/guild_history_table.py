@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
-from vindicator import GuildHistoryBase
+from vindicator import GuildHistoryRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         DatabaseQuery,
         GuildHistory,
@@ -11,22 +12,27 @@ if TYPE_CHECKING:
     )
 
 
-class GuildHistoryTable(GuildHistoryBase):
+class GuildHistoryTable(GuildHistoryRepo):
 
     _TABLE_NAME: str = "guild_history"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: GuildHistory) -> bool:
+    async def insert(self, connection: None | Connection, entity: Iterable[GuildHistory]) -> bool:
         sql = f"""
-        INSERT IGNORE INTO {self.table_name} (level, member_total, name, online_members, territories, wars, datetime)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT IGNORE INTO `{self.table_name}` 
+            (`level`, `member_total`, `name`, `online_members`, `territories`, `wars`, `datetime`)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        await self._db.execute_fetch(sql, (
-            entity.level,
+        await self._db.fetch(sql, (
+            float(entity.level),
             entity.member_total,
-            entity.name
+            entity.name,
+            entity.online_members,
+            entity.territories,
+            entity.wars,
+            entity.datetime
         ))
         return True
 

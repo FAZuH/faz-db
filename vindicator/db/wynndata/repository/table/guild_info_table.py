@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
-from vindicator import GuildInfoBase
+from vindicator import GuildInfoRepo
 
 if TYPE_CHECKING:
+    from aiomysql import Connection
     from vindicator import (
         DatabaseQuery,
         GuildInfo,
@@ -11,20 +12,20 @@ if TYPE_CHECKING:
     )
 
 
-class GuildInfoTable(GuildInfoBase):
+class GuildInfoTable(GuildInfoRepo):
 
     _TABLE_NAME: str = "guild_info"
 
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    async def insert(self, entity: GuildInfo) -> bool:
+    async def insert(self, connection: None | Connection, entity: Iterable[GuildInfo]) -> bool:
         # NOTE: This doesn't change. Ignore duplicates.
         sql = f"""
         INSERT IGNORE INTO {self.table_name} (created, name, prefix)
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s)
         """
-        await self._db.execute_fetch(sql, (
+        await self._db.fetch(sql, (
             entity.created,
             entity.name,
             entity.prefix

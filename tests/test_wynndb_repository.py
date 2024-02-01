@@ -22,20 +22,30 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         self.toTest_onlineUuids = self.mockwynnapi.onlineUuids
         self.toTest_playerStats = self.mockwynnapi.onlinePlayerStats
 
-        self.wynndb: DatabaseQuery = DatabaseQuery(config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DATABASE'], 2)
+        self.wynndb: DatabaseQuery = DatabaseQuery(
+            config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
+        )
         self.wynnrepo: WynnDataRepository = WynnDataRepository(self.wynndb)
 
-    # # @vcr(use_cassette)
-    # async def test_guild_history(self) -> None:
-    #     if self.toTest_guildStats is None:
-    #         self.assertTrue(False)
-    #         return
+    # @vcr(use_cassette)
+    async def test_character_history_repo(self) -> None:
+        if self.toTest_guildStats is None:
+            self.assertTrue(False)
+            return
+        self.wynnrepo.character_history_repository._TABLE_NAME = "temp_character_history"
+        try:
+            await self.wynnrepo.character_history_repository.create_table()
+            for playerStat in self.toTest_playerStats:
+                player_hists = CharacterHistory.from_response(playerStat)
+                for player_hist in player_hists:
+                    b = await self.wynnrepo.character_history_repository.insert(player_hist)
+                    self.assertTrue(b)
+        except Exception:
+            raise
+        finally:
+            await self.wynndb.execute("DROP TABLE temp_character_history")
+        return
 
-    #     for guildStat in self.toTest_guildStats:
-    #         guild_hist = GuildHistory.from_response(guildStat)
-    #         guild_hist.
-    #         await self.wynnrepo.guild_history_repository.insert(guild_hist)
-    #     pass
 
     async def asyncTearDown(self) -> None:
         # await self.wynnapi.close()
