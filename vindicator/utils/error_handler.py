@@ -1,10 +1,9 @@
 import asyncio
 from functools import wraps
 from inspect import iscoroutinefunction
+from typing import Any, Callable, Coroutine, ParamSpec, TypeVar, Iterable
 
 from loguru import logger
-
-from vindicator.typehints import *
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -12,7 +11,7 @@ P = ParamSpec("P")
 
 class ErrorHandler:
 
-    _locks: Dict[str, asyncio.Lock] = {}
+    _locks: dict[str, asyncio.Lock] = {}
 
     @classmethod
     def lock_decorator(cls, lock_name: str):
@@ -31,7 +30,7 @@ class ErrorHandler:
         return decorator
 
     @staticmethod
-    def retry_decorator(times: int, exceptions: Union[Type[BaseException], Iterable[Type[BaseException]]]):
+    def retry_decorator(times: int, exceptions: type[BaseException] | Iterable[type[BaseException]]):
         """ Retries the wrapped function/method `times` times if the exceptions listed in `exceptions` are thrown """
         def decorator(f: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
             @wraps(f)

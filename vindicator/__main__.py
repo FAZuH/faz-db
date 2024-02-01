@@ -1,27 +1,25 @@
 from __future__ import annotations
 import asyncio
 from traceback import format_exception
+from typing import TYPE_CHECKING
 
-from vindicator import FetchOnline, FetchPlayer, FetchGuild, VindicatorWebhook
-from vindicator.typehints import *
+from vindicator import FetchCore, VindicatorWebhook
+
+if TYPE_CHECKING:
+    from asyncio import Task
 
 
 class Main:
 
     @staticmethod
     async def main() -> None:
-        fetch_online_task: Task = FetchOnline.run.start(); await asyncio.sleep(10.0)
-        fetch_player_task: Task = FetchPlayer.run.start(); await asyncio.sleep(10.0)
-        fetch_guild_task: Task = FetchGuild.run.start(); await asyncio.sleep(10.0)
+        fetch_core: Task[None] = asyncio.create_task(FetchCore().start())
+        await asyncio.sleep(1.0)
 
         while True:
             try:
-                if fetch_online_task.done() and fetch_online_task.exception():
-                    await fetch_online_task
-                if fetch_player_task.done() and fetch_player_task.exception():
-                    await fetch_player_task
-                if fetch_guild_task.done() and fetch_guild_task.exception():
-                    await fetch_guild_task
+                if fetch_core.done() and fetch_core.exception():
+                    await fetch_core
                 await asyncio.sleep(1.0)
             except Exception as e:
                 await VindicatorWebhook.send(
@@ -29,6 +27,17 @@ class Main:
                     f"```{''.join(format_exception(e))}```"
                 )
                 raise
+
+
+# from vindicator import WynnApi
+# class Test:
+#     @staticmethod
+#     async def main():
+#         api = WynnApi()
+#         async with api:
+#             avo = await api.get_guild_stats('Avicia')
+#             assert avo.body.name == 'Avicia'
+#         return
 
 
 if __name__ == "__main__":

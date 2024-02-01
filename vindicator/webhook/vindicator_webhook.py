@@ -1,23 +1,23 @@
 from time import time
-from typing import Any, Dict, Literal
+from typing import Any, Literal
 
 from aiohttp import ClientSession
 from discord import Colour, Embed, Webhook
 
-from vindicator.constants import *
+from vindicator import config
 
 
 class VindicatorWebhook:
 
-    MATCH_WEBHOOK_TYPE: Dict[str, str] = {
-        "database": DATABASE_WEBHOOK,
-        "error": ERROR_WEBHOOK,
-        "fetch_guild": FETCH_GUILD_WEBHOOK,
-        "fetch_online": FETCH_ONLINE_WEBHOOK,
-        "fetch_player": FETCH_PLAYER_WEBHOOK,
-        "wynncraft_request": WYNNCRAFT_REQUEST_WEBHOOK
+    MATCH_WEBHOOK_TYPE: dict[str, str] = {
+        "database": config["DATABASE_WEBHOOK"],
+        "error": config["ERROR_WEBHOOK"],
+        "fetch_guild": config["FETCH_GUILD_WEBHOOK"],
+        "fetch_online": config["FETCH_ONLINE_WEBHOOK"],
+        "fetch_player": config["FETCH_PLAYER_WEBHOOK"],
+        "wynncraft_request": config["WYNNCRAFT_REQUEST_WEBHOOK"],
     }
-    MATCH_MESSAGE_TYPE: Dict[str, Colour] = {
+    MATCH_MESSAGE_TYPE: dict[str, Colour] = {
         "success": Colour.green(),
         "error": Colour.red(),
         "info": Colour.dark_grey(),
@@ -49,7 +49,7 @@ class VindicatorWebhook:
     async def log(
         webhook_type: Literal["database", "error", "fetch_guild", "fetch_online", "fetch_player", "wynncraft_request"],
         message_type: Literal["success", "error", "info", "request", "read", "write", "update"],
-        stats: Dict[str, Any],
+        stats: dict[str, Any],
         title: str = ''
     ) -> None:
         url: str = VindicatorWebhook.MATCH_WEBHOOK_TYPE[webhook_type]
@@ -58,7 +58,7 @@ class VindicatorWebhook:
             colour=VindicatorWebhook.MATCH_MESSAGE_TYPE[message_type],
         )
         embed_content.description = f"**{title}**\n" if title else ''
-        embed_content.description += f"<@{DEVELOPER_DISCORD_ID}>\n" if message_type == "error" else ''
+        embed_content.description += f"<@{config['DEVELOPER_DISCORD_ID']}>\n" if message_type == "error" else ''
         embed_content.description += '\n'.join([f"`{k:15}:`**{v}**" for k, v in stats.items()])
 
         embed_content.add_field(name="", value=f"<t:{int(time())}:R>")

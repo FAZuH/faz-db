@@ -37,9 +37,13 @@ class NotFound(HTTPError):
     """HTTP 404. This resource does not exist."""
 
 
-class TooManyRequests(HTTPError):
-    """HTTP 429. The server is ratelimiting us. Please wait for a bit before trying again."""
-
-
 class ServerError(HTTPError):
     """HTTP 5xx. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+
+
+class TooManyRetries(HTTPError):
+    """Exceeded maximum number of retries."""
+
+
+class Ratelimited(HTTPError):
+    """HTTP 429. The server is ratelimiting us. Please wait for a bit before trying again."""
