@@ -23,16 +23,18 @@ class OnlinePlayersTable(OnlinePlayersRepo):
     @override
     async def insert(self, entities: Iterable[OnlinePlayers], conn: None | Connection = None) -> int:
         async with self._db.transaction_group() as tg:
-            tg.add(f"DELETE FROM {self.table_name} WHERE uuid IS NOT NULL")
+            tg.add(f"DELETE FROM `{self.table_name}` WHERE `uuid` IS NOT NULL")
             tg.add(
-                f"INSERT INTO {self.table_name} (uuid, server) VALUES (%s, %s)",
+                f"INSERT INTO `{self.table_name}` (`uuid`, `server`) VALUES (%s, %s)",
                 tuple((entity.uuid.uuid, entity.server) for entity in entities)
             )
-        return True
+        return 0
 
     async def exists(self,id_: OnlinePlayersId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self, conn: None | Connection = None) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float:
+        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: OnlinePlayersId, conn: None | Connection = None) -> None | OnlinePlayers: ...
 

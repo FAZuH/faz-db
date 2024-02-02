@@ -20,15 +20,15 @@ class CharacterHistoryTable(CharacterHistoryRepo):
         self._db = db
 
     async def insert(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int:
-        sql = f"""
-        INSERT IGNORE INTO {self.table_name} (
-            character_uuid, alchemism, armouring, cooking, farming, fishing, jeweling, mining,
-            scribing, tailoring, weaponsmithing, woodcutting, woodworking, chests_found, deaths,
-            discoveries, level, logins, mobs_killed, playtime, wars, xp, dungeon_completions,
-            quest_completions, raid_completions, gamemode, datetime
+        sql = (
+        f"INSERT IGNORE INTO `{self.table_name}` ("
+        "    `character_uuid`, `alchemism`, `armouring`, `cooking`, `farming`, `fishing`, `jeweling`, `mining`,"
+        "    `scribing`, `tailoring`, `weaponsmithing`, `woodcutting`, `woodworking`, `chests_found`, `deaths`,"
+        "    `discoveries`, `level`, `logins`, `mobs_killed`, `playtime`, `wars`, `xp`, `dungeon_completions`,"
+        "    `quest_completions`, `raid_completions`, `gamemode`, `datetime`"
+        ") "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
         return await self._db.execute_many(
             sql,
             tuple((
@@ -65,7 +65,9 @@ class CharacterHistoryTable(CharacterHistoryRepo):
 
     async def exists(self, id_: CharacterHistoryId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self, conn: None | Connection = None) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float:
+        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: CharacterHistoryId, conn: None | Connection = None) -> None | CharacterHistory: ...
 

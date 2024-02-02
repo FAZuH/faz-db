@@ -22,7 +22,7 @@ class FetchCore:
 
     def __init__(self) -> None:
         # Internal Fetcher State
-        self._concurrent_request: int = 25
+        self._concurrent_request: int = 36
         self._running: bool = False
         self._running_request: list[AbstractRequest[Any]] = []
         self._task: None | asyncio.Task[None] = None
@@ -36,14 +36,16 @@ class FetchCore:
         self._fetch_player: AbstractFetch[Any] = FetchPlayer(self)
 
     async def start(self) -> None:
-        self._running = True
-        logger.debug("Running loop")
         while True:
-            async with asyncio.TaskGroup() as tg:
-                tg.create_task(self._do_requests())
-                tg.create_task(self._fetch_online.run())
-                tg.create_task(self._fetch_player.run())
-                tg.create_task(self._fetch_guild.run())
+            await self._do_requests()
+            if not self._running:
+                logger.debug("Running loop")
+                self._running = True
+                async with asyncio.TaskGroup() as tg:
+                    tg.create_task(self._fetch_online.run())
+                    tg.create_task(self._fetch_player.run())
+                    tg.create_task(self._fetch_guild.run())
+                self._running = False
             await asyncio.sleep(5)
 
     def stop(self) -> None:
@@ -66,8 +68,6 @@ class FetchCore:
             await asyncio.gather(*coros, return_exceptions=True)
 
         for req in self._running_request:
-            if not req.done:
-                continue
             match req.level:
                 case RequestLevel.GUILD:
                     self._fetch_guild.append_request(req)

@@ -26,10 +26,8 @@ class DatabaseQuery:
         sql: str,
         params: None | tuple[Any, ...] | dict[str, Any] = None,
         connection: None | Connection = None
-    ) -> tuple[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         async with self.get_cursor(connection) as curs:
-            curs: DictCursor
-            # await ErrorHandler.retry_decorator(self._retries, Exception)(curs.execute)(sql, params)
             await curs.execute(sql, params)
             return await curs.fetchall()
 
@@ -38,9 +36,8 @@ class DatabaseQuery:
         sql: str,
         params: None | Iterable[tuple[Any, ...]] | Iterable[dict[str, Any]] = None,
         connection: None | Connection = None
-    ) -> tuple[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         async with self.get_cursor(connection) as curs:
-            curs: DictCursor
             await curs.executemany(sql, params)
             return await curs.fetchall()
 
@@ -51,7 +48,6 @@ class DatabaseQuery:
             connection: None | Connection = None
     ) -> int:
         async with self.get_cursor(connection) as curs:
-            # await ErrorHandler.retry_decorator(self._retries, Exception)(curs.execute)(sql, params)
             await curs.execute(sql, params)
             return curs.rowcount or 0
 
@@ -69,9 +65,9 @@ class DatabaseQuery:
         return _TransactionGroupContextManager(self)
 
     @asynccontextmanager
-    async def get_cursor(self, connection: None | Connection) -> AsyncGenerator[DictCursor, Any]:
-        if connection:
-            async with connection.cursor(DictCursor) as curs:
+    async def get_cursor(self, conn: None | Connection) -> AsyncGenerator[DictCursor, Any]:
+        if conn:
+            async with conn.cursor(DictCursor) as curs:
                 yield curs
         else:
             async with self.get_connection() as conn:
@@ -80,8 +76,10 @@ class DatabaseQuery:
 
     @asynccontextmanager
     async def get_connection(self) -> AsyncGenerator[Connection, Any]:
-        async with connect(user=self._user, password=self._password, db=self._database) as conn:
+        conn: Connection
+        async with connect(user=self._user, password=self._password, db=self._database, autocommit=True) as conn:
             yield conn
+            await conn.commit()
 
     @property
     def user(self) -> str:
@@ -110,12 +108,16 @@ class _TransactionGroupContextManager:
         return self
 
     async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
-        async with self._parent.get_cursor(None) as curs:
-            for q, p in self._sql:
-                if p:
-                    await ErrorHandler.retry_decorator(self._parent.retries, Exception)(curs.executemany)(q, p)
-                else:
-                    await ErrorHandler.retry_decorator(self._parent.retries, Exception)(curs.execute)(q)
+        conn: Connection
+        curs: DictCursor
+        async with connect(user=self._parent.user, password=self._parent.password, db=self._parent.database) as conn:
+            async with conn.cursor(DictCursor) as curs:
+                for q, p in self._sql:
+                    if p:
+                        await ErrorHandler.retry_decorator(self._parent.retries, Exception)(curs.executemany)(q, p)
+                    else:
+                        await ErrorHandler.retry_decorator(self._parent.retries, Exception)(curs.execute)(q)
+            await conn.commit()
 
     def add(self, sql: str, params: None | tuple[Any, ...] | dict[Any, Any] = None) -> None:
         self._sql.append((sql, params))

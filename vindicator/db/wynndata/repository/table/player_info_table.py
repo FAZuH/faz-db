@@ -20,16 +20,16 @@ class PlayerInfoTable(PlayerInfoRepo):
         self._db = db
 
     async def insert(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int:
-        sql = f"""
-        REPLACE INTO {self.table_name} (first_join, latest_username, uuid)
-        VALUES (%s, %s, %s)
-        """
+        sql = (
+        f"REPLACE INTO `{self.table_name}` (`first_join`, `latest_username`, `uuid`) "
+        "VALUES (%s, %s, %s)"
+        )
         # ON DUPLICATE KEY UPDATE
         # latest_username = CASE
         #     WHEN VALUES(latest_username) <> latest_username THEN VALUES(latest_username)
         #     ELSE latest_username
         # END
-        await self._db.execute_many(
+        return await self._db.execute_many(
             sql,
             tuple((
                 entity.first_join.datetime,
@@ -38,11 +38,12 @@ class PlayerInfoTable(PlayerInfoRepo):
             ) for entity in entities),
             conn
         )
-        return True
 
     async def exists(self, id_: PlayerInfoId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self, conn: None | Connection = None) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float:
+        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: PlayerInfoId, conn: None | Connection = None) -> None | PlayerInfo: ...
 

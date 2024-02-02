@@ -3,7 +3,6 @@ from typing import Any, TYPE_CHECKING
 
 from vindicator import (
     __version__,
-    logger,
     GuildResponse,
     HttpRequest,
     PlayerResponse,
@@ -40,7 +39,6 @@ class WynnApi:
         await self._request.__aexit__(exc_type, exc, tb)
 
     async def get_guild_stats(self, name_or_prefix: str, is_prefix: bool = False) -> GuildResponse:
-        logger.debug(f"Getting guild stats {name_or_prefix}")
         response: ResponseSet[Any, Any] = await self._request.get(
                 f"/v3/guild/{'prefix/' if is_prefix else ''}{name_or_prefix}",
                 retries=3,
@@ -49,7 +47,6 @@ class WynnApi:
         return GuildResponse(response.body, response.headers)
 
     async def get_online_uuids(self) -> PlayersResponse:
-        logger.debug("Getting uuids")
         response: ResponseSet[Any, Any] = await self._request.get(
                 "/v3/player?identifier=uuid",
                 retries=3,
@@ -58,7 +55,6 @@ class WynnApi:
         return PlayersResponse(response.body, response.headers)
 
     async def get_player_stats(self, username_or_uuid: str | UUID) -> PlayerResponse:
-        logger.debug(f"Getting player stats {username_or_uuid}")
         response: ResponseSet[Any, Any] = await self._request.get(
                 f"/v3/player/{username_or_uuid}?fullResult=True",
                 retries=3,

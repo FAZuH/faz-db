@@ -20,12 +20,12 @@ class GuildHistoryTable(GuildHistoryRepo):
         self._db = db
 
     async def insert(self, entities: Iterable[GuildHistory], conn: None | Connection = None) -> int:
-        sql = f"""
-        INSERT IGNORE INTO `{self.table_name}`
-            (`level`, `member_total`, `name`, `online_members`, `territories`, `wars`, `datetime`)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """
-        await self._db.execute_many(
+        sql = (
+        f"INSERT IGNORE INTO `{self.table_name}`"
+        "    (`level`, `member_total`, `name`, `online_members`, `territories`, `wars`, `datetime`) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        )
+        return await self._db.execute_many(
             sql,
             tuple((
                 entity.level,
@@ -38,11 +38,12 @@ class GuildHistoryTable(GuildHistoryRepo):
             ) for entity in entities),
             conn
         )
-        return True
 
-    async def exists(self,id_: GuildHistoryId, conn: None | Connection = None) -> bool: ...
+    async def exists(self, id_: GuildHistoryId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self, conn: None | Connection = None) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float:
+        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: GuildHistoryId, conn: None | Connection = None) -> None | GuildHistory: ...
 

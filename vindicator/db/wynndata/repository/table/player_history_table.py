@@ -20,15 +20,15 @@ class PlayerHistoryTable(PlayerHistoryRepo):
         self._db = db
 
     async def insert(self, entities: Iterable[PlayerHistory], conn: None | Connection = None) -> int:
-        sql = f"""
-        INSERT INTO {self.table_name}
-        (guild_name, guild_rank, playtime, support_rank, `rank`, datetime, username, uuid)
-        VALUES
-        (%s, %s, %s, %s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-        datetime = VALUES(datetime)
-        """
-        await self._db.execute_many(
+        sql = (
+        f"INSERT INTO `{self.table_name}` "
+        "(`guild_name`, `guild_rank`, `playtime`, `support_rank`, `rank`, `datetime`, `username`, `uuid`) "
+        "VALUES "
+        "(%s, %s, %s, %s, %s, %s, %s, %s) "
+        "ON DUPLICATE KEY UPDATE "
+        "`datetime` = VALUES(`datetime`)"
+        )
+        return await self._db.execute_many(
             sql,
             tuple((
                 entity.guild_name,
@@ -42,11 +42,12 @@ class PlayerHistoryTable(PlayerHistoryRepo):
             ) for entity in entities),
             conn
         )
-        return True
 
     async def exists(self,id_: PlayerHistoryId, conn: None | Connection = None) -> bool: ...
 
-    async def count(self, conn: None | Connection = None) -> float: ...
+    async def count(self, conn: None | Connection = None) -> float:
+        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: PlayerHistoryId, conn: None | Connection = None) -> None | PlayerHistory: ...
 
