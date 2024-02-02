@@ -24,7 +24,7 @@ class PlayerActivityHistoryTable(PlayerActivityHistoryRepo):
         REPLACE INTO {self.table_name} (uuid, logon_datetime, logoff_datetime)
         VALUES (%s, %s, %s)
         """
-        await self._db.fetch(
+        await self._db.execute_many(
             sql,
             tuple((
                 entity.uuid,

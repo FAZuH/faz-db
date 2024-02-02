@@ -9,7 +9,9 @@ if TYPE_CHECKING:
 
 
 class GuildInfo(GuildInfoId):
-    """id: name"""
+    """implements `GuildInfoId`
+
+    id: `name`"""
 
     def __init__(
         self,

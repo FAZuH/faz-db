@@ -14,8 +14,8 @@ from .db.wynndata.model.date_column import DateColumn
 from .db.wynndata.model.gamemode_column import GamemodeColumn
 from .db.wynndata.model.uuid_column import UuidColumn
 from .db.wynndata.repository.repository import Table
-from .tasks.fetch import Fetch
-from .tasks.request_level import RequestLevel
+from .app.fetch import Fetch
+from .app.request_level import RequestLevel
 from .utils.error_handler import ErrorHandler
 # from .utils.logger import Logger
 from .utils.ratelimit import Ratelimit
@@ -85,12 +85,12 @@ from .db.wynndata.repository.table.player_info_table import PlayerInfoTable
 from .db.wynndata.wynndata_repository import WynnDataRepository
 
 # tasks. needs all above
-from .tasks.fetch_queue import FetchQueue  # Request
-from .tasks.request import Request  # ResponseSet
-from .tasks.guild_request import GuildRequest  # Request, RequestLevel, WynnRequest, GuildStats
-from .tasks.online_request import OnlineRequest  # Request, RequestLevel, WynnRequest, Players
-from .tasks.player_request import PlayerRequest  # Request, RequestLevel, WynnRequest, PlayerStats
-from .tasks.fetch_online import FetchOnline  # Fetch, Players, OnlineRequest, PlayerRequest
-from .tasks.fetch_player import FetchPlayer  # Fetch, FetchBase, FetchOnline, PlayerStats
-from .tasks.fetch_guild import FetchGuild  # Fetch, FetchBase, FetchPlayer, GuildStats
-from .tasks.fetch_core import FetchCore  # Fetch, FetchGuild, FetchOnline, FetchPlayer, RequestLevel, WynnApi
+from .app.fetch_queue import FetchQueue  # Request
+from .app.request import Request  # ResponseSet
+from .app.guild_request import GuildRequest  # Request, RequestLevel, WynnRequest, GuildStats
+from .app.online_request import OnlineRequest  # Request, RequestLevel, WynnRequest, Players
+from .app.player_request import PlayerRequest  # Request, RequestLevel, WynnRequest, PlayerStats
+from .app.fetch_online import FetchOnline  # Fetch, Players, OnlineRequest, PlayerRequest
+from .app.fetch_player import FetchPlayer  # Fetch, FetchBase, FetchOnline, PlayerStats
+from .app.fetch_guild import FetchGuild  # Fetch, FetchBase, FetchPlayer, GuildStats
+from .app.fetch_core import FetchCore  # Fetch, FetchGuild, FetchOnline, FetchPlayer, RequestLevel, WynnApi

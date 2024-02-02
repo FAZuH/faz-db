@@ -110,7 +110,7 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         try:
             await self.wynnrepo.guild_member_history_repository.create_table()
             t1 = perf_counter()
-            l = GuildMemberHistory.from_response(self.mock_guildstats)
+            l = GuildMemberHistory.from_responses(self.mock_guildstats)
             affectedrows = await self.wynnrepo.guild_member_history_repository.insert(l)
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")

@@ -9,7 +9,9 @@ if TYPE_CHECKING:
 
 
 class GuildMemberHistory(GuildMemberHistoryId):
-    """id: uuid, datetime"""
+    """implements `GuildMemberHistoryId`
+
+    id: `uuid`, `datetime`"""
 
     def __init__(
         self,
@@ -24,15 +26,13 @@ class GuildMemberHistory(GuildMemberHistoryId):
         self._datetime = datetime
 
     @classmethod
-    def from_response(cls, resps: Iterable[GuildResponse]) -> list[Self]:
-        return tuple(
-            cls(
-                uuid=UuidColumn(uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes()),  # type: ignore
-                contributed=memberinfo.contributed,
-                joined=DateColumn(memberinfo.joined.to_datetime()),
-                datetime=DateColumn(resp.get_datetime())
-            )  for resp in resps for rank, uuid, memberinfo in resp.body.members.iter_online_members()  # type: ignore
-        )
+    def from_responses(cls, resps: Iterable[GuildResponse]) -> tuple[Self]:
+        return tuple(cls(
+            uuid=UuidColumn(uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes()),  # type: ignore
+            contributed=memberinfo.contributed,
+            joined=DateColumn(memberinfo.joined.to_datetime()),
+            datetime=DateColumn(resp.get_datetime())
+        ) for resp in resps for rank, uuid, memberinfo in resp.body.members.iter_online_members())  # type: ignore
 
     @property
     @override

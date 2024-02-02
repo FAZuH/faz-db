@@ -10,7 +10,9 @@ if TYPE_CHECKING:
 
 
 class GuildHistory(GuildHistoryId):
-    """id: name, datetime"""
+    """implements `GuildHistoryId`
+
+    id: `name`, `datetime`"""
 
     def __init__(
         self,

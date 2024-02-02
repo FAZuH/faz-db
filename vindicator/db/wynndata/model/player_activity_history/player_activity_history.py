@@ -5,25 +5,24 @@ from typing_extensions import override
 from vindicator import DateColumn, PlayerActivityHistoryId, UuidColumn
 
 if TYPE_CHECKING:
-    from vindicator import PlayerResponse
+    from datetime import datetime as dt
 
 
 class PlayerActivityHistory(PlayerActivityHistoryId):
-    """id: uuid, logon_datetime"""
+    """implements `PlayerActivityHistoryId`
+
+    id: `uuid`, `logon_datetime`
+    """
 
     def __init__(
         self,
-        uuid: UuidColumn,
-        logon_datetime: DateColumn,
-        logoff_datetime: DateColumn
+        uuid: str | UuidColumn,
+        logon_datetime: dt | DateColumn,
+        logoff_datetime: dt | DateColumn
     ) -> None:
-        self._uuid = uuid
-        self._logon_datetime = logon_datetime
-        self._logoff_datetime = logoff_datetime
-
-    @classmethod
-    def from_responses(cls, response: PlayerResponse) -> PlayerActivityHistory:
-        raise NotImplementedError
+        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn.from_str(uuid)
+        self._logon_datetime = logon_datetime if isinstance(logon_datetime, DateColumn) else DateColumn(logon_datetime)
+        self._logoff_datetime = logoff_datetime if isinstance(logoff_datetime, DateColumn) else DateColumn(logoff_datetime)
 
     @property
     @override

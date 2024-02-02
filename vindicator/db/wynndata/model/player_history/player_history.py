@@ -10,7 +10,9 @@ if TYPE_CHECKING:
 
 
 class PlayerHistory(PlayerHistoryId):
-    """id: uuid, datetime"""
+    """implements `PlayerHistoryId`
+
+    id: `uuid`, `datetime`"""
 
     def __init__(
         self,

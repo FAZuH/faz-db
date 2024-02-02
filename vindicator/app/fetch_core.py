@@ -40,10 +40,10 @@ class FetchCore:
         logger.debug("Running loop")
         while True:
             async with asyncio.TaskGroup() as tg:
-                tg.create_task(self._do_requests()).set_name('do_requests')
-                tg.create_task(self._fetch_online.run()).set_name('fetch_online')
-                tg.create_task(self._fetch_player.run()).set_name('fetch_player')
-                tg.create_task(self._fetch_guild.run()).set_name('fetch_guild')
+                tg.create_task(self._do_requests())
+                tg.create_task(self._fetch_online.run())
+                tg.create_task(self._fetch_player.run())
+                tg.create_task(self._fetch_guild.run())
             await asyncio.sleep(5)
 
     def stop(self) -> None:

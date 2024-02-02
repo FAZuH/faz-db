@@ -9,20 +9,20 @@ if TYPE_CHECKING:
 
 
 class OnlinePlayers(OnlinePlayersId):
-    """id: uuid"""
+    """implements `OnlinePlayersId`
+
+    id: `uuid`"""
 
     def __init__(self, uuid: UuidColumn, server: str) -> None:
         self._uuid = uuid
         self._server = server
 
     @classmethod
-    def from_response(cls, response: PlayersResponse) -> list[OnlinePlayers]:
-        return [
-            cls(
-                uuid=UuidColumn(uuid.to_bytes()),
-                server=server
-            ) for uuid, server in response.body.iter_players()
-        ]
+    def from_response(cls, response: PlayersResponse) -> tuple[OnlinePlayers, ...]:
+        return tuple(cls(
+            uuid=UuidColumn(uuid.to_bytes()),
+            server=server
+        ) for uuid, server in response.body.iter_players())
 
     @property
     @override

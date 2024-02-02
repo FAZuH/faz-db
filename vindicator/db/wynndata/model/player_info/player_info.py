@@ -9,7 +9,9 @@ if TYPE_CHECKING:
 
 
 class PlayerInfo(PlayerInfoId):
-    """id: uuid"""
+    """implements `PlayerInfoId`
+
+    id: `uuid`"""
 
     def __init__(self, uuid: UuidColumn, latest_username: str, first_join: DateColumn) -> None:
         self._uuid = uuid

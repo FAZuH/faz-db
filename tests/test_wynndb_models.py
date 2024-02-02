@@ -93,7 +93,7 @@ class TestWynnDbModels(unittest.IsolatedAsyncioTestCase):
 
     # @vcr.use_cassette
     async def test_guild_member_history(self) -> None:
-        for guild_member_history in GuildMemberHistory.from_response(self.mock_guildstats):
+        for guild_member_history in GuildMemberHistory.from_responses(self.mock_guildstats):
             self.assertIsInstance(guild_member_history.uuid, UuidColumn)
             self.assertIsInstance(guild_member_history.contributed, int)
             self.assertIsInstance(guild_member_history.joined, DateColumn)

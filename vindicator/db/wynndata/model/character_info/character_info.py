@@ -9,7 +9,9 @@ if TYPE_CHECKING:
 
 
 class CharacterInfo(CharacterInfoId):
-    """id: character_uuid"""
+    """implements ``CharacterInfoId``
+
+    id: `character_uuid`"""
 
     def __init__(self, character_uuid: UuidColumn, uuid: UuidColumn, type: str) -> None:
         self._character_uuid = character_uuid

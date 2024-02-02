@@ -29,13 +29,13 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
         self.wynnapi = self.mockwynnapi.wynnapi
         # await self.wynnapi.start()
 
-        self.toTest_guildStats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
-        self.toTest_onlineUuids: PlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
-        self.toTest_playerStats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
+        self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
+        self.mock_onlineuuids: PlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
+        self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
 
     async def test_guild_response(self) -> None:
-        for guildStat in self.toTest_guildStats:
-            body = guildStat.body
+        for guildstat in self.mock_guildstats:
+            body = guildstat.body
             self.assertIsInstance(body, Guild)
             self.assertIsInstance(body.uuid, UuidField)
             self.assertIsInstance(body.name, str)
@@ -95,12 +95,12 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
                 self.assertGreaterEqual(season_rank_info.rating, 0)
 
     async def test_player_response(self) -> None:
-        for playerStat in self.toTest_playerStats:
-            self.assertIsInstance(playerStat.get_datetime(), dt)
-            self.assertIsInstance(playerStat.get_expiry_datetime(), dt)
-            self.assertIsInstance(playerStat.get_expiry_timediff(), td)
+        for playerstat in self.mock_playerstats:
+            self.assertIsInstance(playerstat.get_datetime(), dt)
+            self.assertIsInstance(playerstat.get_expiry_datetime(), dt)
+            self.assertIsInstance(playerstat.get_expiry_timediff(), td)
 
-            body = playerStat.body
+            body = playerstat.body
             self.assertIsInstance(body, Player)
             self.assertIsInstance(body.username, str)
             self.assertIsInstance(body.online, bool)
@@ -265,7 +265,7 @@ class TestResponses(unittest.IsolatedAsyncioTestCase):
                 self.assertIsInstance(ch.quests, list)
 
     async def test_players_response(self) -> None:
-        players = self.toTest_onlineUuids
+        players = self.mock_onlineuuids
         self.assertGreaterEqual(players.body.total, 0)
         self.assertIsInstance(players.body.players, dict)
         for usernameoruuid, server in players.body.iter_players():
