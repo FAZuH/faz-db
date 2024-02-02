@@ -5,22 +5,23 @@ from typing import TYPE_CHECKING
 
 from vindicator import (
     logger,
-    Fetch,
+    AbstractFetch,
+    CharacterHistory,
+    CharacterInfo,
     GuildRequest,
     Player,
+    PlayerHistory,
+    PlayerInfo,
     PlayerRequest,
     PlayerResponse,
 )
-from vindicator.db.wynndata.model.character_history.character_history import CharacterHistory
-from vindicator.db.wynndata.model.character_info.character_info import CharacterInfo
-from vindicator.db.wynndata.model.player_history.player_history import PlayerHistory
-from vindicator.db.wynndata.model.player_info.player_info import PlayerInfo
 
 if TYPE_CHECKING:
     from vindicator import FetchCore
 
 
-class FetchPlayer(Fetch[PlayerRequest]):
+class FetchPlayer(AbstractFetch[PlayerRequest]):
+    """extends `Fetch`"""
 
     def __init__(self, fetch_core: FetchCore) -> None:
         super().__init__(fetch_core)
@@ -75,4 +76,4 @@ class FetchPlayer(Fetch[PlayerRequest]):
         # queue newly logged on guilds
         for guild_name in logged_on_guilds:
             # Timestamp doesn't matter here
-            self.fetch_core.queue.put((dt.now().timestamp(), GuildRequest(self.fetch_core, guild_name)))
+            self.fetch_core.queue.put(GuildRequest(self.fetch_core, dt.now().timestamp(), guild_name))

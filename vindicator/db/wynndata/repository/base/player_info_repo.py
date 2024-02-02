@@ -1,9 +1,9 @@
 from typing import Protocol
 
-from vindicator import PlayerInfo, PlayerInfoId, Table
+from vindicator import PlayerInfo, PlayerInfoId, TableProtocol
 
 
-class PlayerInfoRepo(Table[PlayerInfo, PlayerInfoId], Protocol):
+class PlayerInfoRepo(TableProtocol[PlayerInfo, PlayerInfoId], Protocol):
     """<<interface>>
 
     implements Table[PlayerInfo, PlayerInfoId]"""

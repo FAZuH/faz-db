@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 
 class PlayerActivityHistoryTable(PlayerActivityHistoryRepo):
+    """implements `PlayerActivityHistoryRepo`"""
 
     _TABLE_NAME: str = "player_activity_history"
 
@@ -27,9 +28,9 @@ class PlayerActivityHistoryTable(PlayerActivityHistoryRepo):
         await self._db.execute_many(
             sql,
             tuple((
-                entity.uuid,
-                entity.logon_datetime,
-                entity.logoff_datetime
+                entity.uuid.uuid,
+                entity.logon_datetime.datetime,
+                entity.logoff_datetime.datetime
             ) for entity in entities),
             conn
         )

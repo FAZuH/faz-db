@@ -10,12 +10,13 @@ from .api.wynn.model.field.date_field import DateField
 from .api.wynn.model.field.gamemode_field import GamemodeField
 from .api.wynn.model.field.username_or_uuid_field import UsernameOrUuidField
 from .api.wynn.model.field.uuid_field import UuidField
+from .app.abstract_fetch import AbstractFetch
+from .app.abstract_request import AbstractRequest
+from .app.request_level import RequestLevel
 from .db.wynndata.model.date_column import DateColumn
 from .db.wynndata.model.gamemode_column import GamemodeColumn
 from .db.wynndata.model.uuid_column import UuidColumn
-from .db.wynndata.repository.repository import Table
-from .app.fetch import Fetch
-from .app.request_level import RequestLevel
+from .db.wynndata.repository.repository import TableProtocol
 from .utils.error_handler import ErrorHandler
 # from .utils.logger import Logger
 from .utils.ratelimit import Ratelimit
@@ -86,7 +87,6 @@ from .db.wynndata.wynndata_repository import WynnDataRepository
 
 # tasks. needs all above
 from .app.fetch_queue import FetchQueue  # Request
-from .app.request import Request  # ResponseSet
 from .app.guild_request import GuildRequest  # Request, RequestLevel, WynnRequest, GuildStats
 from .app.online_request import OnlineRequest  # Request, RequestLevel, WynnRequest, Players
 from .app.player_request import PlayerRequest  # Request, RequestLevel, WynnRequest, PlayerStats

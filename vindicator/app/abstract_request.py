@@ -8,11 +8,13 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 
 
-class Request(ABC, Generic[T]):
+class AbstractRequest(ABC, Generic[T]):
+    """extended by `GuildRequest`, `OnlineRequest`, `PlayerRequest`"""
 
-    def __init__(self, fetch_core: FetchCore, level: RequestLevel, request_arg: str = '') -> None:
+    def __init__(self, fetch_core: FetchCore, level: RequestLevel, weight: float, request_arg: str = '') -> None:
         self._fetch_core = fetch_core
         self._level = level
+        self._weight = weight
         self._request_arg = request_arg
         self._done = False
         self._response: T
@@ -25,10 +27,17 @@ class Request(ABC, Generic[T]):
     async def run(self) -> None:
         raise NotImplementedError
 
-    def __lt__(self, other: Request[T]) -> bool:
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, AbstractRequest):
+            return self._request_arg == value._request_arg
+        return self._request_arg == value
+
+    def __lt__(self, other: AbstractRequest[T]) -> bool:
         """PriorityQueue compares the item with `<` if priority_value already exists.
         This magic method is implemented as a fix for that.
         The goal is to have Player and Guild request to be equal."""
+        if self.weight != other.weight:
+            return self.weight < other.weight
         if self.level >= 2 and other.level >= 2:
             return False
         return self.level < other.level
@@ -40,6 +49,10 @@ class Request(ABC, Generic[T]):
     @property
     def level(self) -> RequestLevel:
         return self._level
+
+    @property
+    def weight(self) -> float:
+        return self._weight
 
     @property
     def request_arg(self) -> str:

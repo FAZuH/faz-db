@@ -2,16 +2,21 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from vindicator import logger, Fetch, GuildRequest
-from vindicator.db.wynndata.model.guild_history.guild_history import GuildHistory
-from vindicator.db.wynndata.model.guild_info.guild_info import GuildInfo
-from vindicator.db.wynndata.model.guild_member_history.guild_member_history import GuildMemberHistory
+from vindicator import (
+    logger,
+    AbstractFetch,
+    GuildHistory,
+    GuildInfo,
+    GuildMemberHistory,
+    GuildRequest
+)
 
 if TYPE_CHECKING:
     from vindicator import FetchCore, GuildResponse
 
 
-class FetchGuild(Fetch[GuildRequest]):
+class FetchGuild(AbstractFetch[GuildRequest]):
+    """extends `Fetch`"""
 
     def __init__(self, fetch_core: FetchCore) -> None:
         super().__init__(fetch_core)

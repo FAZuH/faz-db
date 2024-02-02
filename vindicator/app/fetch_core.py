@@ -14,7 +14,7 @@ from vindicator import (
 )
 
 if TYPE_CHECKING:
-    from vindicator import Fetch, Request
+    from vindicator import AbstractFetch, AbstractRequest
 
 
 class FetchCore:
@@ -24,16 +24,16 @@ class FetchCore:
         # Internal Fetcher State
         self._concurrent_request: int = 25
         self._running: bool = False
-        self._running_request: list[Request[Any]] = []
+        self._running_request: list[AbstractRequest[Any]] = []
         self._task: None | asyncio.Task[None] = None
         # Other Processes
         self._queue: FetchQueue = FetchQueue()
         self._wynnapi: WynnApi = WynnApi()
         self._wynnrepo: WynnDataRepository = WynnDataRepository()
         # Fetchers
-        self._fetch_guild: Fetch[Any] = FetchGuild(self)
-        self._fetch_online: Fetch[Any] = FetchOnline(self)
-        self._fetch_player: Fetch[Any] = FetchPlayer(self)
+        self._fetch_guild: AbstractFetch[Any] = FetchGuild(self)
+        self._fetch_online: AbstractFetch[Any] = FetchOnline(self)
+        self._fetch_player: AbstractFetch[Any] = FetchPlayer(self)
 
     async def start(self) -> None:
         self._running = True
@@ -64,17 +64,18 @@ class FetchCore:
         async with self._wynnapi:
             # TODO: catch and log exceptions
             await asyncio.gather(*coros, return_exceptions=True)
-            for req in self._running_request:
-                if not req.done:
-                    continue
-                match req.level:
-                    case RequestLevel.GUILD:
-                        self._fetch_guild.append_request(req)
-                    case RequestLevel.ONLINE:
-                        self._fetch_online.append_request(req)
-                    case RequestLevel.PLAYER:
-                        self._fetch_player.append_request(req)
-            self._running_request.clear()
+
+        for req in self._running_request:
+            if not req.done:
+                continue
+            match req.level:
+                case RequestLevel.GUILD:
+                    self._fetch_guild.append_request(req)
+                case RequestLevel.ONLINE:
+                    self._fetch_online.append_request(req)
+                case RequestLevel.PLAYER:
+                    self._fetch_player.append_request(req)
+        self._running_request.clear()
 
     @property
     def queue(self) -> FetchQueue:

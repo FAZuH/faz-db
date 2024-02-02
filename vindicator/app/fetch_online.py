@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from vindicator import (
     logger,
-    Fetch,
+    AbstractFetch,
     PlayerActivityHistory,
     PlayerRequest,
     OnlineRequest,
@@ -16,11 +16,12 @@ if TYPE_CHECKING:
     from vindicator import FetchCore
 
 
-class FetchOnline(Fetch[OnlineRequest]):
+class FetchOnline(AbstractFetch[OnlineRequest]):
+    """extends `Fetch`"""
 
     def __init__(self, fetch_core: FetchCore) -> None:
         super().__init__(fetch_core)
-        self.fetch_core.queue.put((0.0, OnlineRequest(fetch_core)))
+        self.fetch_core.queue.put(OnlineRequest(fetch_core, 0))
         self._logon_timestamps: dict[str, dt] = {}
         self._prev_online_uuids: set[str] = set()
 
@@ -48,9 +49,8 @@ class FetchOnline(Fetch[OnlineRequest]):
 
         # queue newly logged on players
         for uuid in logged_on:
-            self.fetch_core.queue.put((
-                req.response.get_datetime().timestamp(),
-                PlayerRequest(self.fetch_core, uuid)
+            self.fetch_core.queue.put(PlayerRequest(
+                self.fetch_core, req.response.get_datetime().timestamp(), uuid
             ))
 
         # to db

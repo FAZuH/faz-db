@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from vindicator import GuildHistory, GuildHistoryId, Table
+from vindicator import GuildHistory, GuildHistoryId, TableProtocol
 
 
-class GuildHistoryRepo(Table[GuildHistory, GuildHistoryId], Protocol):
+class GuildHistoryRepo(TableProtocol[GuildHistory, GuildHistoryId], Protocol):
     ...

@@ -8,7 +8,10 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 
 
-class Fetch(ABC, Generic[T]):
+class AbstractFetch(ABC, Generic[T]):
+    """<<abstract>>
+    extended by `FetchGuild`, `FetchOnline`, `FetchPlayer`
+    """
 
     def __init__(self, fetch_core: FetchCore) -> None:
         self._fetch_core = fetch_core

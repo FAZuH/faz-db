@@ -1,33 +1,33 @@
 from __future__ import annotations
-from queue import PriorityQueue
+import threading
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from vindicator import Request
+    from vindicator import AbstractRequest
 
 
 class FetchQueue:
 
     def __init__(self) -> None:
-        self._queue: PriorityQueue[tuple[float, Request[Any]]] = PriorityQueue()
-        self._queued_req_args: set[str] = set()
+        self._queue: list[AbstractRequest[Any]] = []
+        self._lock: threading.Lock = threading.Lock()
 
-    def put(self, entry: tuple[float, Request[Any]]) -> bool:
-        if entry[1].request_arg in self._queued_req_args:
+    def put(self, entry: AbstractRequest[Any]) -> bool:
+        if entry in self._queue:
             return False
-        self._queued_req_args.add(entry[1].request_arg)
-        self._queue.put(entry)
+        self._queue.append(entry)
         return True
 
-    def get(self, amount: int) -> list[Request[Any]]:
-        ret: list[Request[Any]] = []
+    def get(self, amount: int) -> list[AbstractRequest[Any]]:
+        ret: list[AbstractRequest[Any]] = []
         for _ in range(amount):
-            if self._queue.empty():
-                break
-            item: tuple[float, Request[Any]] = self._queue.get()
-            self._queued_req_args.remove(item[1].request_arg)
-            ret.append(item[1])
+            with self._lock:
+                if len(self._queue) == 0:
+                    break
+                lowest: AbstractRequest[Any] = min(self._queue)  # AbstractRequest implements __lt__()
+                self._queue.remove(lowest)
+                ret.append(lowest)
         return ret
 
     def __contains__(self, item: str) -> bool:
-        return item in self._queued_req_args
+        return item in self._queue  # type: ignore AbstractRequest implements __eq__()

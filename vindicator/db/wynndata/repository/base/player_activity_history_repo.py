@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from vindicator import PlayerActivityHistory, PlayerActivityHistoryId, Table
+from vindicator import PlayerActivityHistory, PlayerActivityHistoryId, TableProtocol
 
 
-class PlayerActivityHistoryRepo(Table[PlayerActivityHistory, PlayerActivityHistoryId], Protocol):
+class PlayerActivityHistoryRepo(TableProtocol[PlayerActivityHistory, PlayerActivityHistoryId], Protocol):
     ...

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     optConn = None | Connection
 
 
-class Table(Protocol[T, ID_contra]):
+class TableProtocol(Protocol[T, ID_contra]):
     """<<interface>>
 
     Generic[T, ID]

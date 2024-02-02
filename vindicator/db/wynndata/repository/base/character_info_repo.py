@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from vindicator import CharacterInfo, CharacterInfoId, Table
+from vindicator import CharacterInfo, CharacterInfoId, TableProtocol
 
 
-class CharacterInfoRepo(Table[CharacterInfo, CharacterInfoId], Protocol):
+class CharacterInfoRepo(TableProtocol[CharacterInfo, CharacterInfoId], Protocol):
     ...

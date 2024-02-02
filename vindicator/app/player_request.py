@@ -3,16 +3,17 @@ import asyncio
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from vindicator import PlayerResponse, Request, RequestLevel
+from vindicator import PlayerResponse, AbstractRequest, RequestLevel
 
 if TYPE_CHECKING:
     from vindicator import FetchCore
 
 
-class PlayerRequest(Request[PlayerResponse]):
+class PlayerRequest(AbstractRequest[PlayerResponse]):
+    """extends `AbstractRequest`"""
 
-    def __init__(self, fetch_core: FetchCore, request_arg: str) -> None:
-        super().__init__(fetch_core, RequestLevel.PLAYER, request_arg)
+    def __init__(self, fetch_core: FetchCore, weight: float, request_arg: str) -> None:
+        super().__init__(fetch_core, RequestLevel.PLAYER, weight, request_arg)
 
     @override
     async def run(self) -> None:
@@ -22,9 +23,8 @@ class PlayerRequest(Request[PlayerResponse]):
     @override
     async def requeue(self) -> None:
         await asyncio.sleep(self.response.get_expiry_timediff().total_seconds())
-        self._fetch_core.queue.put(
-            (
-                self.response.get_expiry_datetime().timestamp(),
-                self.__class__(self._fetch_core, self._request_arg)
-            )
-        )
+        self._fetch_core.queue.put(self.__class__(
+            self._fetch_core,
+            self.response.get_expiry_datetime().timestamp(),
+            self._request_arg
+        ))
