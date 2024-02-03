@@ -1,7 +1,7 @@
 import json
 import os
 
-from vindicator import (
+from src import (
     GuildResponse,
     PlayerResponse,
     PlayersResponse,

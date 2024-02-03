@@ -4,7 +4,7 @@ import unittest
 
 # from tests import vcr
 from tests.mock_wynnapi import MockWynnApi
-from vindicator import (
+from src import (
     CharacterHistory,
     CharacterInfo,
     DateColumn,

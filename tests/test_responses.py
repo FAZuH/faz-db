@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import unittest
 
 from tests.mock_wynnapi import MockWynnApi
-from vindicator import (
+from src import (
     BodyDateField,
     CharacterTypeField,
     GamemodeField,
@@ -16,7 +16,7 @@ from vindicator import (
 )
 
 if TYPE_CHECKING:
-    from vindicator import (
+    from src import (
         GuildResponse,
         PlayerResponse,
         PlayersResponse

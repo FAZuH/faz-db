@@ -2,7 +2,7 @@ from time import perf_counter
 import unittest
 
 from tests.mock_wynnapi import MockWynnApi
-from vindicator import (
+from src import (
     logger,
     CharacterInfo,
     GuildHistory,
@@ -14,7 +14,7 @@ from vindicator import (
     PlayerInfo,
     WynnDataRepository
 )
-from vindicator import *
+from src import *
 
 
 class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
