@@ -28,7 +28,7 @@ class DatabaseQuery:
         connection: None | Connection = None
     ) -> list[dict[str, Any]]:
         async with self.get_cursor(connection) as curs:
-            await curs.execute(sql, params)
+            await self._execute(curs, sql, params)
             return await curs.fetchall()
 
     async def fetch_many(
@@ -38,7 +38,7 @@ class DatabaseQuery:
         connection: None | Connection = None
     ) -> list[dict[str, Any]]:
         async with self.get_cursor(connection) as curs:
-            await curs.executemany(sql, params)
+            await self._executemany(curs, sql, params)
             return await curs.fetchall()
 
     async def execute(
@@ -48,7 +48,7 @@ class DatabaseQuery:
             connection: None | Connection = None
     ) -> int:
         async with self.get_cursor(connection) as curs:
-            await curs.execute(sql, params)
+            await self._execute(curs, sql, params)
             return curs.rowcount or 0
 
     async def execute_many(
@@ -58,11 +58,8 @@ class DatabaseQuery:
         connection: None | Connection = None
     ) -> int:
         async with self.get_cursor(connection) as curs:
-            await curs.executemany(sql, params)
+            await self._executemany(curs, sql, params)
             return curs.rowcount or 0
-
-    def transaction_group(self) -> _TransactionGroupContextManager:
-        return _TransactionGroupContextManager(self)
 
     @asynccontextmanager
     async def get_cursor(self, conn: None | Connection) -> AsyncGenerator[DictCursor, Any]:
@@ -80,6 +77,17 @@ class DatabaseQuery:
         async with connect(user=self._user, password=self._password, db=self._database, autocommit=True) as conn:
             yield conn
             await conn.commit()
+
+    def transaction_group(self) -> _TransactionGroupContextManager:
+        return _TransactionGroupContextManager(self)
+
+    @ErrorHandler.retry_decorator(3, Exception)
+    async def _execute(self, cursor: DictCursor, sql: str, params: Any = None) -> None:
+        await cursor.execute(sql, params)
+
+    @ErrorHandler.retry_decorator(3, Exception)
+    async def _executemany(self, cursor: DictCursor, sql: str, params: Any = None) -> None:
+        await cursor.executemany(sql, params)
 
     @property
     def user(self) -> str:
