@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
-from src import GuildMemberHistoryRepo
+from kans import GuildMemberHistoryRepo
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from src import (
+    from kans import (
         DatabaseQuery,
         GuildMemberHistory,
         GuildMemberHistoryId

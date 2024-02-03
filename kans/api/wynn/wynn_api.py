@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
-from src import (
+from kans import (
     __version__,
     GuildResponse,
     HttpRequest,
@@ -13,7 +13,7 @@ from src import (
 
 if TYPE_CHECKING:
     from uuid import UUID
-    from src import ResponseSet
+    from kans import ResponseSet
 
 
 

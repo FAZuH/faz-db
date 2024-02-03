@@ -3,7 +3,7 @@ import asyncio
 from traceback import format_exception
 from typing import TYPE_CHECKING
 
-from src import FetchCore, VindicatorWebhook
+from kans import FetchCore, VindicatorWebhook
 
 if TYPE_CHECKING:
     from asyncio import Task

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from aiohttp import ClientSession, ClientTimeout
 
-from src import (
+from kans import (
     BadRequest,
     Forbidden,
     HTTPError,
@@ -19,7 +19,7 @@ from src import (
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
-    from src import Ratelimit
+    from kans import Ratelimit
 
 
 class HttpRequest:

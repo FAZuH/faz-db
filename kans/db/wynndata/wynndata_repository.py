@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src import (
+from kans import (
     config,
     DatabaseQuery,
     GuildInfoTable,

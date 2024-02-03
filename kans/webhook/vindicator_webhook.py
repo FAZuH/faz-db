@@ -4,7 +4,7 @@ from typing import Any, Literal
 from aiohttp import ClientSession
 from discord import Colour, Embed, Webhook
 
-from src import config
+from kans import config
 
 
 class VindicatorWebhook:

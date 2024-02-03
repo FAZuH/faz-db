@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from src import (
+from kans import (
     logger,
     AbstractFetch,
     GuildHistory,
@@ -12,7 +12,7 @@ from src import (
 )
 
 if TYPE_CHECKING:
-    from src import FetchCore, GuildResponse
+    from kans import FetchCore, GuildResponse
 
 
 class FetchGuild(AbstractFetch[GuildRequest]):

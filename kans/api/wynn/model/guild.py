@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Generator
 
-from src import BodyDateField, Nullable, UsernameOrUuidField, UuidField
+from kans import BodyDateField, Nullable, UsernameOrUuidField, UuidField
 
 
 class Guild:

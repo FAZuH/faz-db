@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from src import PlayerInfo, PlayerInfoId, TableProtocol
+from kans import PlayerInfo, PlayerInfoId, TableProtocol
 
 
 class PlayerInfoRepo(TableProtocol[PlayerInfo, PlayerInfoId], Protocol):

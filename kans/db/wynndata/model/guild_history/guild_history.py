@@ -3,10 +3,10 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Iterable
 from typing_extensions import override
 
-from src import DateColumn, GuildHistoryId
+from kans import DateColumn, GuildHistoryId
 
 if TYPE_CHECKING:
-    from src import GuildResponse
+    from kans import GuildResponse
 
 
 class GuildHistory(GuildHistoryId):

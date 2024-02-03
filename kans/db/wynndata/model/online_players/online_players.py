@@ -2,10 +2,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from src import OnlinePlayersId, UuidColumn
+from kans import OnlinePlayersId, UuidColumn
 
 if TYPE_CHECKING:
-    from src import PlayersResponse
+    from kans import PlayersResponse
 
 
 class OnlinePlayers(OnlinePlayersId):

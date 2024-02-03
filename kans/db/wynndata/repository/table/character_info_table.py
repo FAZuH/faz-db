@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING, Iterable
 
 from typing_extensions import override
 
-from src import CharacterInfoRepo
+from kans import CharacterInfoRepo
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from src import (
+    from kans import (
         CharacterInfo,
         CharacterInfoId,
         DatabaseQuery

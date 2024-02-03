@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from src import DateColumn, UuidColumn
+    from kans import DateColumn, UuidColumn
 
 
 class GuildMemberHistoryId(Protocol):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Generator
 
-from src import (
+from kans import (
     BodyDateField,
     CharacterTypeField,
     GamemodeField,

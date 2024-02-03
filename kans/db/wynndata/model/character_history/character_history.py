@@ -3,10 +3,10 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Iterable
 from typing_extensions import override
 
-from src import CharacterHistoryId, DateColumn, GamemodeColumn, UuidColumn
+from kans import CharacterHistoryId, DateColumn, GamemodeColumn, UuidColumn
 
 if TYPE_CHECKING:
-    from src import PlayerResponse
+    from kans import PlayerResponse
 
 
 class CharacterHistory(CharacterHistoryId):

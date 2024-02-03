@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from src import (
+from kans import (
     logger,
     AbstractFetch,
     PlayerActivityHistory,
@@ -13,7 +13,7 @@ from src import (
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
-    from src import FetchCore
+    from kans import FetchCore
 
 
 class FetchOnline(AbstractFetch[OnlineRequest]):

@@ -1,6 +1,6 @@
 from typing import Any
 
-from src import Headers, Players, WynnResponse
+from kans import Headers, Players, WynnResponse
 
 
 class PlayersResponse(WynnResponse[Players]):

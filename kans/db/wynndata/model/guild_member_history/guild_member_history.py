@@ -2,10 +2,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Self
 from typing_extensions import override
 
-from src import DateColumn, GuildMemberHistoryId, UuidColumn
+from kans import DateColumn, GuildMemberHistoryId, UuidColumn
 
 if TYPE_CHECKING:
-    from src import GuildResponse
+    from kans import GuildResponse
 
 
 class GuildMemberHistory(GuildMemberHistoryId):

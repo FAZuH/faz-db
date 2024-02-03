@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Any, Awaitable
 
-from src import (
+from kans import (
     logger,
     FetchGuild,
     FetchOnline,
@@ -14,7 +14,7 @@ from src import (
 )
 
 if TYPE_CHECKING:
-    from src import AbstractFetch, AbstractRequest
+    from kans import AbstractFetch, AbstractRequest
 
 
 class FetchCore:

@@ -2,7 +2,7 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from typing import TypeVar
 
-from src import Headers, ResponseSet
+from kans import Headers, ResponseSet
 
 T = TypeVar("T")
 

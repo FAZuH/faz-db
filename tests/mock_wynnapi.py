@@ -1,7 +1,7 @@
 import json
 import os
 
-from src import (
+from kans import (
     GuildResponse,
     PlayerResponse,
     PlayersResponse,

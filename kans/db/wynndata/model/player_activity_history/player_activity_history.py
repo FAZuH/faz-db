@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from src import DateColumn, PlayerActivityHistoryId, UuidColumn
+from kans import DateColumn, PlayerActivityHistoryId, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime as dt

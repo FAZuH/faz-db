@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
-    from src import FetchCore, RequestLevel
+    from kans import FetchCore, RequestLevel
 
 T = TypeVar('T')
 

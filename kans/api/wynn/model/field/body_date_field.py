@@ -3,7 +3,7 @@ from dateutil.tz import tzutc
 
 from typing_extensions import override
 
-from src import DateField
+from kans import DateField
 
 
 class BodyDateField(DateField):

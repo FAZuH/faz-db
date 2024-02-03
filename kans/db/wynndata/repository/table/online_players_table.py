@@ -2,11 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing_extensions import override, Iterable
 
-from src import OnlinePlayersRepo
+from kans import OnlinePlayersRepo
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from src import (
+    from kans import (
         DatabaseQuery,
         OnlinePlayers,
         OnlinePlayersId

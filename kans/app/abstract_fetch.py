@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generator, Generic, TypeVar
 
 if TYPE_CHECKING:
-    from src import FetchCore, WynnDataRepository
+    from kans import FetchCore, WynnDataRepository
 
 T = TypeVar('T')
 

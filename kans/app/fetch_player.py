@@ -3,7 +3,7 @@ import asyncio
 from datetime import datetime as dt
 from typing import TYPE_CHECKING
 
-from src import (
+from kans import (
     logger,
     AbstractFetch,
     CharacterHistory,
@@ -17,7 +17,7 @@ from src import (
 )
 
 if TYPE_CHECKING:
-    from src import FetchCore
+    from kans import FetchCore
 
 
 class FetchPlayer(AbstractFetch[PlayerRequest]):

@@ -1,6 +1,6 @@
 from typing import Any
 
-from src import Guild, Headers, WynnResponse
+from kans import Guild, Headers, WynnResponse
 
 
 class GuildResponse(WynnResponse[Guild]):

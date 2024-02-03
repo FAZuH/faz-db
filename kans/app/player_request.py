@@ -3,10 +3,10 @@ import asyncio
 from typing import TYPE_CHECKING
 from typing_extensions import override
 
-from src import PlayerResponse, AbstractRequest, RequestLevel
+from kans import PlayerResponse, AbstractRequest, RequestLevel
 
 if TYPE_CHECKING:
-    from src import FetchCore
+    from kans import FetchCore
 
 
 class PlayerRequest(AbstractRequest[PlayerResponse]):

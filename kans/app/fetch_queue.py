@@ -3,7 +3,7 @@ import threading
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from src import AbstractRequest
+    from kans import AbstractRequest
 
 
 class FetchQueue:
