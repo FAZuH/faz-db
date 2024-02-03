@@ -12,7 +12,7 @@ from kans import (
     # PlayerActivityHistory,
     PlayerHistory,
     PlayerInfo,
-    WynnDataRepository
+    WynnDataDatabase
 )
 from kans import *
 
@@ -27,7 +27,7 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         self.mock_onlineuuids = self.mockwynnapi.onlineuuids
         self.mock_playerstats = self.mockwynnapi.onlineplayerstats
 
-        self.wynnrepo: WynnDataRepository = WynnDataRepository()
+        self.wynnrepo: WynnDataDatabase = WynnDataDatabase()
 
     # @vcr(use_cassette)
     async def test_character_history_repo(self) -> None:

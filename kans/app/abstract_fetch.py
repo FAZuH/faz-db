@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generator, Generic, TypeVar
 
 if TYPE_CHECKING:
-    from kans import FetchCore, WynnDataRepository
+    from kans import FetchCore, WynnDataDatabase
 
 T = TypeVar('T')
 
@@ -37,5 +37,5 @@ class AbstractFetch(ABC, Generic[T]):
         return self._fetch_core
 
     @property
-    def wynnrepo(self) -> WynnDataRepository:
+    def wynnrepo(self) -> WynnDataDatabase:
         return self.fetch_core.wynnrepo

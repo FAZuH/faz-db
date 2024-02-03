@@ -10,7 +10,7 @@ from kans import (
     RequestLevel,
     FetchQueue,
     WynnApi,
-    WynnDataRepository
+    WynnDataDatabase
 )
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class FetchCore:
         # Other Processes
         self._queue: FetchQueue = FetchQueue()
         self._wynnapi: WynnApi = WynnApi()
-        self._wynnrepo: WynnDataRepository = WynnDataRepository()
+        self._wynnrepo: WynnDataDatabase = WynnDataDatabase()
         # Fetchers
         self._fetch_guild: AbstractFetch[Any] = FetchGuild(self)
         self._fetch_online: AbstractFetch[Any] = FetchOnline(self)
@@ -90,5 +90,5 @@ class FetchCore:
         return self._wynnapi
 
     @property
-    def wynnrepo(self) -> WynnDataRepository:
+    def wynnrepo(self) -> WynnDataDatabase:
         return self._wynnrepo

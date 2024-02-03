@@ -13,6 +13,7 @@ from .api.wynn.model.field.uuid_field import UuidField
 from .app.abstract_fetch import AbstractFetch
 from .app.abstract_request import AbstractRequest
 from .app.request_level import RequestLevel
+from .db.wynndata.database import Database
 from .db.wynndata.model.date_column import DateColumn
 from .db.wynndata.model.gamemode_column import GamemodeColumn
 from .db.wynndata.model.uuid_column import UuidColumn
@@ -83,7 +84,7 @@ from .db.wynndata.repository.table.player_history_table import PlayerHistoryTabl
 from .db.wynndata.repository.table.player_info_table import PlayerInfoTable
 
 # needs all tables above
-from .db.wynndata.wynndata_repository import WynnDataRepository
+from .db.wynndata.wynndata_database import WynnDataDatabase
 
 # tasks. needs all above
 from .app.fetch_queue import FetchQueue  # Request

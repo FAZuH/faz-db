@@ -1,7 +1,8 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 
 from kans import (
-    config,
+    Database,
     DatabaseQuery,
     GuildInfoTable,
     GuildHistoryTable,
@@ -14,9 +15,13 @@ from kans import (
     OnlinePlayersTable
 )
 
-class WynnDataRepository:
+if TYPE_CHECKING:
+    from loguru import Logger
 
-    def __init__(self) -> None:
+
+class WynnDataDatabase(Database):
+
+    def __init__(self, config: dict[str, str], logger: Logger) -> None:
         self._wynndb: DatabaseQuery = DatabaseQuery(
             config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
         )
