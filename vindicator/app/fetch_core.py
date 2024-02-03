@@ -42,9 +42,13 @@ class FetchCore:
                 logger.debug("Running loop")
                 self._running = True
                 async with asyncio.TaskGroup() as tg:
-                    tg.create_task(self._fetch_online.run())
-                    tg.create_task(self._fetch_player.run())
-                    tg.create_task(self._fetch_guild.run())
+                    t1 = tg.create_task(self._fetch_online.run())
+                    t2 = tg.create_task(self._fetch_player.run())
+                    t3 = tg.create_task(self._fetch_guild.run())
+                res = [t1, t2, t3]
+                for t in res:
+                    if t.done() and t.exception():
+                        await t
                 self._running = False
             await asyncio.sleep(5)
 

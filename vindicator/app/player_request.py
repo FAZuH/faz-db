@@ -25,6 +25,6 @@ class PlayerRequest(AbstractRequest[PlayerResponse]):
         await asyncio.sleep(self.response.get_expiry_timediff().total_seconds())
         self._fetch_core.queue.put(self.__class__(
             self._fetch_core,
-            self.response.get_expiry_datetime().timestamp(),
+            self.response.get_expiry_datetime().timestamp() + 480.0,
             self._request_arg
         ))
