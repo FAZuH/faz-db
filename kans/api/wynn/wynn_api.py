@@ -46,7 +46,7 @@ class WynnApi:
         )
         return GuildResponse(response.body, response.headers)
 
-    async def get_online_uuids(self) -> PlayersResponse:
+    async def get_online_uuids(self, *args) -> PlayersResponse:  # TODO: change requestqueue design
         response: ResponseSet[Any, Any] = await self._request.get(
                 "/v3/player?identifier=uuid",
                 retries=3,

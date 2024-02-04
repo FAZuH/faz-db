@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from dateutil.tz import tzutc
+from dateutil import parser
 
 from typing_extensions import override
 
@@ -13,4 +13,4 @@ class BodyDateField(DateField):
 
     @override
     def to_datetime(self) -> dt:
-        return dt.strptime(self.datestr, "%a, %d %b %Y %H:%M:%S %Z").replace(tzinfo=tzutc())
+        return parser.parse(self.datestr)

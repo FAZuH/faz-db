@@ -4,6 +4,7 @@ import unittest
 from tests.mock_wynnapi import MockWynnApi
 from kans import (
     logger,
+    config,
     CharacterInfo,
     GuildHistory,
     GuildInfo,
@@ -27,7 +28,7 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         self.mock_onlineuuids = self.mockwynnapi.onlineuuids
         self.mock_playerstats = self.mockwynnapi.onlineplayerstats
 
-        self.wynnrepo: WynnDataDatabase = WynnDataDatabase()
+        self.wynnrepo: WynnDataDatabase = WynnDataDatabase(config, logger)
 
     # @vcr(use_cassette)
     async def test_character_history_repo(self) -> None:

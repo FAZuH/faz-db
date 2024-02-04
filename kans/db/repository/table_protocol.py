@@ -6,7 +6,6 @@ T = TypeVar('T')
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    optConn = None | Connection
 
 
 class TableProtocol(Protocol[T, ID_contra]):
