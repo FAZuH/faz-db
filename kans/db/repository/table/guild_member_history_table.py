@@ -30,7 +30,7 @@ class GuildMemberHistoryTable(GuildMemberHistoryRepo):
                 entity.joined,
                 entity.uuid,
                 entity.contributed,
-                entity.datetime
+                entity.datetime.datetime
             ) for entity in entities),
             conn
         )

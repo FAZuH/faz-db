@@ -3,12 +3,10 @@ from threading import Thread
 from typing import TYPE_CHECKING
 
 from kans import (
-    FetchCoreTask,
-    FetchGuildTask,
-    FetchOnlineTask,
-    FetchPlayerTask,
     HeartBeatTask,
     RequestQueue,
+    WynnApiFetcher,
+    WynnDataLogger,
 )
 
 if TYPE_CHECKING:
@@ -23,16 +21,11 @@ class HeartBeat(Thread):
         self._logger = app.logger
 
         self._tasks: list[HeartBeatTask] = []
-
         request_queue = RequestQueue()
-        fetch_guild = FetchGuildTask(app, request_queue)
-        fetch_online = FetchOnlineTask(app, request_queue)
-        fetch_player = FetchPlayerTask(app, request_queue)
 
-        self._add_task(FetchCoreTask(app, fetch_guild, fetch_online, fetch_player, request_queue))
-        self._add_task(fetch_guild)
-        self._add_task(fetch_online)
-        self._add_task(fetch_player)
+        wynndatalogger = WynnDataLogger(app.logger, app.wynnapi, app.wynnrepo, request_queue)
+        self._add_task(WynnApiFetcher(app.logger, app.wynnapi, wynndatalogger, request_queue))
+        self._add_task(wynndatalogger)
 
     def _add_task(self, task: TaskBase) -> None:
         self._tasks.append(HeartBeatTask(self._logger, task))

@@ -36,7 +36,6 @@ from .api.wynn.guild_response import GuildResponse  # Guild, WynnResponse
 from .api.wynn.players_response import PlayersResponse  # Players, WynnResponse
 from .api.wynn.player_response import PlayerResponse  # Player, WynnResponse
 from .db.database_query import DatabaseQuery  # ErrorHandler
-from .heartbeat.tasks.abstract_fetch import AbstractFetch  # TaskBase
 from .utils.http_request import HttpRequest  # ResponseSet
 from .api.wynn.wynn_api import WynnApi  # HttpRequest, Ratelimit, WynnResponse
 
@@ -88,10 +87,8 @@ from .db.repository.table.player_info_table import PlayerInfoTable
 from .db.wynndata_database import WynnDataDatabase
 
 # tasks. needs all above
-from .heartbeat.tasks.fetch_core_task import FetchCoreTask
-from .heartbeat.tasks.fetch_guild_task import FetchGuildTask
-from .heartbeat.tasks.fetch_online_task import FetchOnlineTask
-from .heartbeat.tasks.fetch_player_task import FetchPlayerTask
+from .heartbeat.tasks.wynn_api_fetcher import WynnApiFetcher
+from .heartbeat.tasks.wynn_data_logger import WynnDataLogger
 from .heartbeat.heartbeat import HeartBeat
 
 from .app.kans import Kans

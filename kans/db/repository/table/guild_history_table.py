@@ -34,7 +34,7 @@ class GuildHistoryTable(GuildHistoryRepo):
                 entity.online_members,
                 entity.territories,
                 entity.wars,
-                entity.datetime
+                entity.datetime.datetime
             ) for entity in entities),
             conn
         )
