@@ -14,7 +14,7 @@ from kans import (
     ServerError,
     TooManyRetries,
     Unauthorized,
-    VindicatorError
+    KansError
 )
 
 if TYPE_CHECKING:
@@ -60,7 +60,7 @@ class HttpRequest:
                 raise ValueError("Retries must be set if retry_on_exc is True")
 
         if self._session is None or self._session.closed:
-            raise VindicatorError("Session is not open")
+            raise KansError("Session is not open")
 
         response: ClientResponse
         if self._ratelimit:

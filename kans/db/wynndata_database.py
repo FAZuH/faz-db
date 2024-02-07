@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from kans import (
     Database,
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 class WynnDataDatabase(Database):
 
-    def __init__(self, config: dict[str, str], logger: Logger) -> None:
+    def __init__(self, config: dict[str, Any], logger: Logger) -> None:
         self._wynndb: DatabaseQuery = DatabaseQuery(
             config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
         )

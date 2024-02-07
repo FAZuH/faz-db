@@ -1,7 +1,6 @@
 from __future__ import annotations
 import asyncio
-from threading import Lock
-from typing import TYPE_CHECKING, Any, Generator
+from typing import TYPE_CHECKING
 
 from kans import (
     CharacterHistory,
@@ -23,11 +22,11 @@ if TYPE_CHECKING:
     from datetime import datetime as dt
     from loguru import Logger
     from kans import (
+        Api,
         Database,
         Player,
-        RequestQueue,
-        WynnApi,
-        WynnResponse,
+        RequestList,
+        ResponseList,
     )
 
 
@@ -37,43 +36,34 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
     def __init__(
         self,
         logger: Logger,
-        wynnapi: WynnApi,
+        wynnapi: Api,
         wynnrepo: Database,
-        request_queue: RequestQueue
+        request_list: RequestList,
+        response_list: ResponseList
     ) -> None:
         self._logger = logger
         self._wynnapi = wynnapi
         self._wynnrepo = wynnrepo
-        self._request_queue = request_queue
+        self._request_list = request_list
+        self._response_list = response_list
 
         self._event_loop = asyncio.new_event_loop()
-        self._response_lock = Lock()
-        self._responses = []
 
         self._prev_online_guilds: set[str] = set()
         self._logon_timestamps: dict[str, dt] = {}
         self._prev_online_uuids: set[str] = set()
 
-        self._request_queue.put(0, self._wynnapi.get_online_uuids)
+        self._request_list.put(0, self._wynnapi.get_online_uuids)
 
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
-
-    def put_response(self, response: WynnResponse[Any]) -> None:
-        with self._response_lock:
-            self._responses.append(response)
-
-    def popall_responses(self) -> Generator[WynnResponse[Any], Any, None]:
-        with self._response_lock:
-            while len(self._responses) > 0:
-                yield self._responses.pop()
 
     async def _run(self) -> None:
         player_resps: list[PlayerResponse] = []
         players_resps: list[PlayersResponse] = []
         guild_resps: list[GuildResponse] = []
 
-        for resp in self.popall_responses():
+        for resp in self._response_list.get():
             if isinstance(resp, PlayerResponse):
                 player_resps.append(resp)
             elif isinstance(resp, PlayersResponse):
@@ -120,16 +110,16 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
         for resp in resps:
             # requeue if player is online
             if resp.body.online is True:
-                self._request_queue.put(
+                self._request_list.put(
                     resp.get_expiry_datetime().timestamp() + 480,  # due to ratelimit
                     self._wynnapi.get_player_stats,
-                    resp.body.uuid.uuid
+                    tuple(resp.body.uuid.uuid)
                 )
 
         # queue newly logged on guilds
         for guild_name in logged_on_guilds:
             # Timestamp doesn't matter here
-            self._request_queue.put(0, self._wynnapi.get_guild_stats, guild_name)
+            self._request_list.put(0, self._wynnapi.get_guild_stats, tuple(guild_name))
 
     async def _handle_players_response(self, resps: list[PlayersResponse]) -> None:
         if len(resps) == 0:
@@ -152,10 +142,10 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
 
             # queue newly logged on players
             for uuid in logged_on:
-                self._request_queue.put(
+                self._request_list.put(
                     0,
                     self._wynnapi.get_player_stats,
-                    uuid
+                    tuple(uuid)
                 )
 
             # to db
@@ -172,7 +162,7 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
             await self._wynnrepo.player_activity_history_repository.insert(playeractivityhistory)
 
             # always requeue
-            self._request_queue.put(resp.get_expiry_datetime().timestamp(), self._wynnapi.get_online_uuids)
+            self._request_list.put(resp.get_expiry_datetime().timestamp(), self._wynnapi.get_online_uuids)
 
     async def _handle_guild_response(self, resps: list[GuildResponse]) -> None:
         if len(resps) == 0:
@@ -186,10 +176,10 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
         # requeue if there's online members in guild
         for resp in resps:
             if resp.body.members.get_online_members() > 0:
-                self._request_queue.put(
+                self._request_list.put(
                     resp.get_expiry_datetime().timestamp(),
                     self._wynnapi.get_guild_stats,
-                    resp.body.name
+                    tuple(resp.body.name)
                 )
 
     @property

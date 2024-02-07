@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-class VindicatorError(Exception):
+class KansError(Exception):
     """Base error class for all library-related exceptions in this file.
     Essentially, this could be caught to handle any exceptions thrown from this library.
     """
@@ -11,11 +11,10 @@ class VindicatorError(Exception):
             message = f"{self.__class__.__doc__}\n{message}"
         else:
             message = self.__class__.__doc__
-
         super().__init__(message)
 
 
-class HTTPError(VindicatorError):
+class HTTPError(KansError):
     """Base error class for all HTTP-related exceptions in this file."""
 
 

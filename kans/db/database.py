@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
-
 if TYPE_CHECKING:
     from loguru import Logger
     from kans import (

@@ -3,6 +3,7 @@ from typing import Any, TYPE_CHECKING
 
 from kans import (
     __version__,
+    Api,
     GuildResponse,
     HttpRequest,
     PlayerResponse,
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
 
 
 
-class WynnApi:
+class WynnApi(Api):
 
     def __init__(self) -> None:
         self._request: HttpRequest = HttpRequest("https://api.wynncraft.com", ratelimit=Ratelimit(180, 60), headers={
@@ -31,13 +32,6 @@ class WynnApi:
     async def close(self) -> None:
         await self._request.close()
 
-    async def __aenter__(self) -> WynnApi:
-        await self._request.__aenter__()
-        return self
-
-    async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
-        await self._request.__aexit__(exc_type, exc, tb)
-
     async def get_guild_stats(self, name_or_prefix: str, is_prefix: bool = False) -> GuildResponse:
         response: ResponseSet[Any, Any] = await self._request.get(
                 f"/v3/guild/{'prefix/' if is_prefix else ''}{name_or_prefix}",
@@ -46,7 +40,7 @@ class WynnApi:
         )
         return GuildResponse(response.body, response.headers)
 
-    async def get_online_uuids(self, *args) -> PlayersResponse:  # TODO: change requestqueue design
+    async def get_online_uuids(self) -> PlayersResponse:  # TODO: change requestqueue design
         response: ResponseSet[Any, Any] = await self._request.get(
                 "/v3/player?identifier=uuid",
                 retries=3,
@@ -61,3 +55,10 @@ class WynnApi:
                 retry_on_exc=True
         )
         return PlayerResponse(response.body, response.headers)
+
+    async def __aenter__(self) -> Api:
+        await self._request.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
+        await self._request.__aexit__(exc_type, exc, tb)

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import Database, WynnApi
+    from kans import Database, Api
 
 
 class App(Protocol):
@@ -12,6 +12,6 @@ class App(Protocol):
     @property
     def logger(self) -> Logger: ...
     @property
-    def wynnapi(self) -> WynnApi: ...
+    def wynnapi(self) -> Api: ...
     @property
     def wynnrepo(self) -> Database: ...

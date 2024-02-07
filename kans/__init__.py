@@ -4,6 +4,7 @@ from .constants import *
 from .errors import *
 
 # No dependencies
+from .api.wynn.api import Api
 from .api.wynn.model.field.nullable import Nullable
 from .api.wynn.model.field.character_type_field import CharacterTypeField
 from .api.wynn.model.field.date_field import DateField
@@ -19,15 +20,15 @@ from .db.model.uuid_column import UuidColumn
 from .db.repository.table_protocol import TableProtocol
 from .heartbeat.heartbeat_task import HeartBeatTask
 from .heartbeat.task_base import TaskBase
-from .heartbeat.tasks.request_queue import RequestQueue
+from .heartbeat.tasks.request_list import RequestList
+from .heartbeat.tasks.response_list import ResponseList
 from .utils.error_handler import ErrorHandler
 from .utils.ratelimit import Ratelimit
-from .webhook.vindicator_webhook import VindicatorWebhook
 
 # Has Dependencies
 from .api.wynn.model.field.body_date_field import BodyDateField  # DateField
 from .api.wynn.model.field.header_date_field import HeaderDateField  # DateField
-from .api.wynn.model.common.headers import Headers  # HeaderDateField
+from .api.wynn.model.headers import Headers  # HeaderDateField
 from .api.wynn.model.guild import Guild  # BodyDateField, UsernameOrUuidField, UuidField
 from .api.wynn.model.players import Players  # UsernameOrUuidField
 from .api.wynn.model.player import Player  # BodyDateField, CharacterTypeField, GamemodeField, UuidField
@@ -88,7 +89,7 @@ from .db.wynndata_database import WynnDataDatabase
 
 # tasks. needs all above
 from .heartbeat.tasks.wynn_api_fetcher import WynnApiFetcher
-from .heartbeat.tasks.wynn_data_logger import WynnDataLogger
+from .heartbeat.tasks.wynndata_logger import WynnDataLogger
 from .heartbeat.heartbeat import HeartBeat
 
 from .app.kans import Kans
