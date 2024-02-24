@@ -25,3 +25,6 @@ class AbstractWynnResponse(ResponseSet[T, Headers], ABC):
             dt: The timestamp of the response.
         """
         return self.headers.get_datetime()
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__

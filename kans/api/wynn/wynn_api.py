@@ -1,18 +1,21 @@
 from __future__ import annotations
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from . import Api
 from .endpoint import GuildEndpoint, PlayerEndpoint, PlayersEndpoint
 from kans import __version__
 from kans.util import HttpRequest, Ratelimit
 
+if TYPE_CHECKING:
+    from loguru import Logger
+
 
 class WynnApi(Api):
 
-    def __init__(self) -> None:
+    def __init__(self, logger: Logger) -> None:
         self._request: HttpRequest = HttpRequest(
                 "https://api.wynncraft.com",
-                ratelimit=Ratelimit(180, 60),
+                ratelimit=Ratelimit(180, 60, logger),
                 headers={"User-Agent": f"Kans/{__version__}", "Content-Type": "application/json"
         })
 

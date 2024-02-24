@@ -16,16 +16,18 @@ class HeartbeatTask:
         self._timer: Timer = Timer(self.task.first_delay, self.get_task())
 
     def start(self) -> None:
+        self._task.setup()
         self._timer.start()
 
     def cancel(self) -> None:
         self._timer.cancel()
+        self._task.teardown()
 
     def get_task(self) -> Callable[..., None]:
         def run() -> None:
             t1 = perf_counter()
             self._task.run()
-            self._logger.debug(f"Task {self.task.name} took {perf_counter() - t1:.2f} seconds")
+            self._logger.success(f"Task {self.task.name} took {perf_counter() - t1:.2f} seconds")
             self._reschedule()
         return run
 

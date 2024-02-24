@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from dotenv import dotenv_values
-from loguru import logger
+from loguru import logger  # TODO: implement own logger method
 
 from .app import App
 from kans.api import WynnApi
@@ -22,9 +22,9 @@ class Kans(App):
     def __init__(self) -> None:
         self._config: ConfigT = dotenv_values(".env")  # type: ignore
         self._logger: Logger = logger
-        self._wynnapi: Api = WynnApi()
-        self._wynnrepo: Database = WynndataDatabase(self.config, self.logger)
-        self._heartbeat: Heartbeat = SimpleHeartbeat(self)
+        self._api: Api = WynnApi(self.logger)
+        self._db: Database = WynndataDatabase(self.config, self.logger)
+        self._heartbeat: Heartbeat = SimpleHeartbeat(self.logger, self.api, self.db)
 
     def start(self) -> None:
         self.logger.info("Starting Heartbeat")
@@ -47,9 +47,9 @@ class Kans(App):
         return self._logger
 
     @property
-    def wynnapi(self) -> Api:
-        return self._wynnapi
+    def api(self) -> Api:
+        return self._api
 
     @property
-    def wynnrepo(self) -> Database:
-        return self._wynnrepo
+    def db(self) -> Database:
+        return self._db

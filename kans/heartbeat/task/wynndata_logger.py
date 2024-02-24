@@ -3,6 +3,7 @@ import asyncio
 from datetime import datetime as dt
 from typing import TYPE_CHECKING, Generator, Iterable
 
+from .task import Task
 from kans.api.wynn.response import GuildResponse, PlayerResponse, PlayersResponse
 from kans.db.model import (
     CharacterHistory,
@@ -16,7 +17,6 @@ from kans.db.model import (
     PlayerHistory,
     PlayerInfo,
 )
-from kans.heartbeat.task import Task
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
@@ -51,6 +51,9 @@ class WynndataLogger(Task):  # TODO: find better name
         self._request_list.put(0, self._wynnapi.players.get)
         self._start_time = dt.now()
 
+    def setup(self) -> None: ...
+    def teardown(self) -> None: ...
+
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
 
@@ -83,7 +86,7 @@ class WynndataLogger(Task):  # TODO: find better name
 
             # Queue new
             for uuid in logged_on:
-                self._request_list.put(0, self._wynnapi.player.get, (uuid,))
+                self._request_list.put(0, self._wynnapi.player.get, uuid)
 
             # Requeue
             self._request_list.put(resp.get_expiry_datetime().timestamp(), self._wynnapi.players.get)
@@ -104,7 +107,7 @@ class WynndataLogger(Task):  # TODO: find better name
 
         # Queue new
         for guild_name in logged_on_guilds:
-            self._request_list.put(0, self._wynnapi.guild.get, (guild_name,))  # Timestamp doesn't matter here
+            self._request_list.put(0, self._wynnapi.guild.get, guild_name)  # Timestamp doesn't matter here
 
         character_history: list[CharacterHistory] = []
         character_info: list[CharacterInfo] = []
@@ -116,7 +119,7 @@ class WynndataLogger(Task):  # TODO: find better name
                 self._request_list.put(
                         resp.get_expiry_datetime().timestamp() + 480,  # due to ratelimit
                         self._wynnapi.player.get,
-                        (resp.body.uuid.uuid,)
+                        resp.body.uuid.uuid
                 )
 
             # Create DB models

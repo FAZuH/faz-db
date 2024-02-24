@@ -1,12 +1,15 @@
 from __future__ import annotations
 from datetime import datetime as dt
 from threading import Lock
-from typing import Any, Awaitable, Callable, Generator
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, Generator
+
+if TYPE_CHECKING:
+    from kans.api.wynn.response import AbstractWynnResponse
 
 
 class _RequestItem:
 
-    def __init__(self, req_ts: float, afunc: Callable[..., Awaitable[Any]], args: tuple[Any, ...] = tuple()) -> None:
+    def __init__(self, req_ts: float, afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]], args: tuple[Any, ...] = tuple()) -> None:
         self._req_time = req_ts
         self._afunc = afunc
         self._args = args
@@ -25,7 +28,7 @@ class _RequestItem:
         return self._req_time
 
     @property
-    def afunc(self) -> Callable[..., Awaitable[Any]]:
+    def afunc(self) -> Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]]:
         return self._afunc
 
     @property
@@ -39,7 +42,7 @@ class RequestList:
         self._list: list[_RequestItem] = []
         self._lock: Lock = Lock()
 
-    def get(self, amount: int) -> Generator[Awaitable[Any], Any, None]:
+    def get(self, amount: int) -> Generator[Coroutine[AbstractWynnResponse[Any], Any, Any], Any, None]:
         now: float = dt.now().timestamp()
 
         with self._lock:
@@ -54,10 +57,14 @@ class RequestList:
                 else:
                     return
 
-    def put(self, request_ts: float, afunc: Callable[..., Awaitable[Any]], *args: Any) -> bool:
+    def put(self, request_ts: float, afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]], *args: Any) -> bool:
         with self._lock:
             _item = _RequestItem(request_ts, afunc, args)
             if _item in self._list:
                 return False
             self._list.append(_item)
             return True
+
+    @property
+    def length(self) -> int:
+        return len(self._list)
