@@ -68,9 +68,9 @@ class WynnDataLogger(Task):  # TODO: find better name
             elif isinstance(resp, GuildResponse):
                 guild_resps.append(resp)
 
-            await self._handle_player_responses(player_resps)
-            await self._handle_players_response(players_resps)
-            await self._handle_guild_response(guild_resps)
+        await self._handle_player_responses(player_resps)
+        await self._handle_players_response(players_resps)
+        await self._handle_guild_response(guild_resps)
 
     async def _handle_players_response(self, resps: list[PlayersResponse]) -> None:
         if len(resps) == 0:
