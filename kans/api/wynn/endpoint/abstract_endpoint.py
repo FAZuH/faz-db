@@ -3,11 +3,11 @@ from abc import ABC
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from kans import HttpRequest
+    from kans.util import HttpRequest
 
 
-class Endpoint(ABC):
-    """<<interface>>
+class AbstractEndpoint(ABC):
+    """<<abstract>>
     An endpoint that can be used to get data from a source."""
 
     def __init__(self, request: HttpRequest, retries: int, retry_on_exc: bool) -> None:

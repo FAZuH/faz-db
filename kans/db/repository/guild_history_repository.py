@@ -1,14 +1,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Iterable
 
-from kans import GuildHistory, Repository
+from . import Repository
+from ..model import GuildHistory, GuildHistoryId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from kans import DatabaseQuery
+    from .. import DatabaseQuery
 
 
-class GuildHistoryRepository(Repository[GuildHistory]):
+class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
 
     _TABLE_NAME: str = "guild_history"
 

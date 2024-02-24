@@ -1,9 +1,10 @@
 from typing import Any
 
-from kans import Headers, Player, WynnResponse
+from ..model import Headers, Player
+from . import AbstractWynnResponse
 
 
-class PlayerResponse(WynnResponse[Player]):
+class PlayerResponse(AbstractWynnResponse[Player]):
 
     def __init__(self, body: dict[str, Any], headers: dict[str, Any]) -> None:
         super().__init__(Player(body), Headers(headers))

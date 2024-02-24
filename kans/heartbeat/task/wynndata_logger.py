@@ -3,32 +3,27 @@ import asyncio
 from datetime import datetime as dt
 from typing import TYPE_CHECKING, Generator, Iterable
 
-from kans import (
+from kans.api.wynn.response import GuildResponse, PlayerResponse, PlayersResponse
+from kans.db.model import (
     CharacterHistory,
     CharacterInfo,
     GuildHistory,
     GuildInfo,
     GuildMemberHistory,
-    GuildResponse,
     KansUptime,
     OnlinePlayers,
     PlayerActivityHistory,
     PlayerHistory,
     PlayerInfo,
-    PlayerResponse,
-    PlayersResponse,
-    Task,
 )
+from kans.heartbeat.task import Task
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
     from loguru import Logger
-    from kans import (
-        Api,
-        Database,
-        RequestList,
-        ResponseList,
-    )
+    from . import RequestList, ResponseList
+    from kans.api import Api
+    from kans.db import Database
 
 
 class WynnDataLogger(Task):  # TODO: find better name
@@ -73,14 +68,9 @@ class WynnDataLogger(Task):  # TODO: find better name
             elif isinstance(resp, GuildResponse):
                 guild_resps.append(resp)
 
-        async with asyncio.TaskGroup() as tg:
-            t1 = tg.create_task(self._handle_player_responses(player_resps))
-            t2 = tg.create_task(self._handle_players_response(players_resps))
-            t3 = tg.create_task(self._handle_guild_response(guild_resps))
-
-        for r in (t1, t2, t3):
-            if r.done() and r.exception():
-                await r
+            await self._handle_player_responses(player_resps)
+            await self._handle_players_response(players_resps)
+            await self._handle_guild_response(guild_resps)
 
     async def _handle_players_response(self, resps: list[PlayersResponse]) -> None:
         if len(resps) == 0:

@@ -2,11 +2,12 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Any
 
-from kans import Task
+from . import Task
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import Api, RequestList, ResponseList
+    from . import RequestList, ResponseList
+    from kans.api import Api
 
 
 class WynnApiFetcher(Task):
@@ -30,7 +31,13 @@ class WynnApiFetcher(Task):
         async with self._wynnapi:
             results: list[Any | BaseException] = await asyncio.gather(*coros, return_exceptions=True)
 
-        self._response_list.put(tuple(res for res in results if not isinstance(res, BaseException)))
+        ok_results = []
+        for res in results:
+            if isinstance(res, BaseException):
+                self._logger.error(f"Error fetching data: {res}")
+            else:
+                ok_results.append(res)
+        self._response_list.put(ok_results)
 
     @property
     def first_delay(self) -> float:

@@ -1,13 +1,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from kans import Endpoint, PlayerResponse
+from . import AbstractEndpoint
+from ..response import PlayerResponse
 
 if TYPE_CHECKING:
     from uuid import UUID
 
 
-class PlayerEndpoint(Endpoint):
+class PlayerEndpoint(AbstractEndpoint):
 
     _PATH = "/v3/player/%s?fullResult=True"
 

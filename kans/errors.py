@@ -1,12 +1,9 @@
-from typing import Optional
-
-
 class KansError(Exception):
     """Base error class for all library-related exceptions in this file.
     Essentially, this could be caught to handle any exceptions thrown from this library.
     """
 
-    def __init__(self, message: Optional[str] = None):
+    def __init__(self, message: None | str = None):
         if message:
             message = f"{self.__class__.__doc__}\n{message}"
         else:

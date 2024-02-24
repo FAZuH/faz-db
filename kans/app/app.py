@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import Database, Api
+    from kans.api import Api
+    from kans.db import Database
     from constants import ConfigT
 
 

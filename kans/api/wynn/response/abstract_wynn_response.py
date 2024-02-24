@@ -3,12 +3,13 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from typing import TypeVar
 
-from kans import Headers, ResponseSet
+from ..model import Headers
+from kans.util import ResponseSet
 
 T = TypeVar("T")
 
 
-class WynnResponse(ABC, ResponseSet[T, Headers]):
+class AbstractWynnResponse(ResponseSet[T, Headers], ABC):
 
     def get_expiry_datetime(self) -> dt:
         return self.headers.get_expiry_datetime()

@@ -1,14 +1,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-
-from kans import DateColumn, UuidColumn
+from . import PlayerActivityHistoryId
+from .. import DateColumn
 
 if TYPE_CHECKING:
+    from .. import UuidColumn
     from datetime import datetime as dt
 
 
-class PlayerActivityHistory:
+class PlayerActivityHistory(PlayerActivityHistoryId):
     """implements
 
     id: `uuid`, `logon_datetime`
@@ -20,17 +21,9 @@ class PlayerActivityHistory:
         logon_datetime: dt | DateColumn,
         logoff_datetime: dt | DateColumn
     ) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn.from_str(uuid)
-        self._logon_datetime = logon_datetime if isinstance(logon_datetime, DateColumn) else DateColumn(logon_datetime)
+        super().__init__(uuid, logon_datetime)
         self._logoff_datetime = logoff_datetime if isinstance(logoff_datetime, DateColumn) else DateColumn(logoff_datetime)
 
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
-
-    @property
-    def logon_datetime(self) -> DateColumn:
-        return self._logon_datetime
 
     @property
     def logoff_datetime(self) -> DateColumn:

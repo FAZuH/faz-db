@@ -1,11 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from kans import (
+from . import Database, DatabaseQuery
+from .repository import (
     CharacterInfoRepository,
     CharacterHistoryRepository,
-    Database,
-    DatabaseQuery,
     GuildInfoRepository,
     GuildHistoryRepository,
     GuildMemberHistoryRepository,

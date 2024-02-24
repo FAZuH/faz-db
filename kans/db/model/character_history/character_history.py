@@ -1,14 +1,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from kans import DateColumn, GamemodeColumn, UuidColumn
+from . import CharacterHistoryId
+from .. import GamemodeColumn
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
     from decimal import Decimal
+    from .. import DateColumn, UuidColumn
 
 
-class CharacterHistory:
+class CharacterHistory(CharacterHistoryId):
     """id: `character_uuid`, `datetime`"""
 
     def __init__(
@@ -41,7 +43,7 @@ class CharacterHistory:
         raid_completions: int,
         datetime: dt | DateColumn
     ) -> None:
-        self._character_uuid = character_uuid if isinstance(character_uuid, UuidColumn) else UuidColumn(character_uuid)
+        super().__init__(character_uuid, datetime)
         self._level = level
         self._xp = xp
         self._wars = wars
@@ -67,11 +69,6 @@ class CharacterHistory:
         self._dungeon_completions = dungeon_completions
         self._quest_completions = quest_completions
         self._raid_completions = raid_completions
-        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
-
-    @property
-    def character_uuid(self) -> UuidColumn:
-        return self._character_uuid
 
     @property
     def level(self) -> int:
@@ -172,7 +169,3 @@ class CharacterHistory:
     @property
     def raid_completions(self) -> int:
         return self._raid_completions
-
-    @property
-    def datetime(self) -> DateColumn:
-        return self._datetime

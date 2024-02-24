@@ -2,14 +2,14 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-
-from kans import DateColumn, UuidColumn
+from . import PlayerHistoryId
 
 if TYPE_CHECKING:
+    from .. import DateColumn, UuidColumn
     from datetime import datetime as dt
 
 
-class PlayerHistory:
+class PlayerHistory(PlayerHistoryId):
     """implements `PlayerHistoryId`
 
     id: `uuid`, `datetime`"""
@@ -25,18 +25,13 @@ class PlayerHistory:
         rank: None | str,
         datetime: dt | DateColumn
     ) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
+        super().__init__(uuid, datetime)
         self._username = username
         self._support_rank = support_rank
         self._playtime = playtime
         self._guild_name = guild_name
         self._guild_rank = guild_rank
         self._rank = rank
-        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
-
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
 
     @property
     def username(self) -> str:
@@ -61,7 +56,3 @@ class PlayerHistory:
     @property
     def rank(self) -> None | str:
         return self._rank
-
-    @property
-    def datetime(self) -> DateColumn:
-        return self._datetime

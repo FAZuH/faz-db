@@ -2,8 +2,9 @@ from __future__ import annotations
 from threading import Thread
 from typing import TYPE_CHECKING
 
-from kans import (
-    HeartbeatTask,
+from . import Heartbeat
+from . import HeartbeatTask
+from .task import (
     RequestList,
     ResponseList,
     WynnApiFetcher,
@@ -11,10 +12,11 @@ from kans import (
 )
 
 if TYPE_CHECKING:
-    from kans import App, Task
+    from kans.app import App
+    from .task import Task
 
 
-class Heartbeat(Thread):
+class SimpleHeartbeat(Thread, Heartbeat):
 
     def __init__(self, app: App) -> None:
         super().__init__(target=self.run, daemon=True)
@@ -28,7 +30,7 @@ class Heartbeat(Thread):
         self._add_task(WynnApiFetcher(app.logger, app.wynnapi, request_list, response_list))
         self._add_task(WynnDataLogger(app.logger, app.wynnapi, app.wynnrepo, request_list, response_list))
 
-    def run(self) -> None:
+    def start(self) -> None:
         for task in self._tasks:
             task.start()
 

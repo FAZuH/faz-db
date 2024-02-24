@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from kans import Kans
+from kans.app import Kans
 
 
 class Main:

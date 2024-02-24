@@ -2,7 +2,7 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from typing import Any
 
-from kans import HeaderDateField
+from .field import HeaderDateField
 
 
 class Headers:

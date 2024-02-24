@@ -2,13 +2,14 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from kans import DateColumn
+from . import GuildHistoryId
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
+    from .. import DateColumn
 
 
-class GuildHistory:
+class GuildHistory(GuildHistoryId):
     """implements `GuildHistoryId`
 
     id: `name`, `datetime`"""
@@ -23,17 +24,12 @@ class GuildHistory:
         online_members: int,
         datetime: dt | DateColumn
     ) -> None:
-        self._name = name
+        super().__init__(name, datetime)
         self._level = level
         self._territories = territories
         self._wars = wars
         self._member_total = member_total
         self._online_members = online_members
-        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
-
-    @property
-    def name(self) -> str:
-        return self._name
 
     @property
     def level(self) -> Decimal:
@@ -54,7 +50,3 @@ class GuildHistory:
     @property
     def online_members(self) -> int:
         return self._online_members
-
-    @property
-    def datetime(self) -> DateColumn:
-        return self._datetime

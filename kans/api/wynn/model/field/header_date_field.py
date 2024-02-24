@@ -1,4 +1,4 @@
-from kans import DateField
+from . import DateField
 
 
 class HeaderDateField(DateField):

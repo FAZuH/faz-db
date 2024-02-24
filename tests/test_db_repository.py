@@ -2,17 +2,13 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 import unittest
 
+from loguru import logger
+
+from kans import config
+from kans.api.wynn.response import PlayerResponse, PlayersResponse, GuildResponse
+from kans.db import Database, WynnDataDatabase
+from kans.db.model import KansUptime
 from kans.heartbeat.task.wynndata_logger import _Converter  # type: ignore
-from kans import (
-    logger,
-    config,
-    Database,
-    GuildResponse,
-    KansUptime,
-    PlayerResponse,
-    PlayersResponse,
-    WynnDataDatabase
-)
 from tests.mock_wynnapi import MockWynnApi
 
 

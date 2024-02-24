@@ -1,14 +1,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Iterable
 
-from kans import OnlinePlayers, Repository
+from . import Repository
+from ..model import OnlinePlayers, OnlinePlayersId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from kans import DatabaseQuery
+    from .. import DatabaseQuery
 
 
-class OnlinePlayersRepository(Repository[OnlinePlayers]):
+class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
 
     _TABLE_NAME = "online_players"
 

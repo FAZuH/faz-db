@@ -1,14 +1,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Iterable
 
-from kans import CharacterInfo, Repository
+from . import Repository
+from ..model import CharacterInfo, CharacterInfoId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from kans import DatabaseQuery
+    from .. import DatabaseQuery
 
 
-class CharacterInfoRepository(Repository[CharacterInfo]):
+class CharacterInfoRepository(Repository[CharacterInfo, CharacterInfoId]):
 
     _TABLE_NAME: str = "character_info"
 

@@ -13,7 +13,9 @@ class ErrorHandler:
     @staticmethod
     def retry_decorator(max_retries: int, exceptions: type[BaseException] | Iterable[type[BaseException]]):
         """ Retries the wrapped function/method `times` times if the exceptions listed in `exceptions` are thrown """
+
         def decorator(f: Callable[P, T]) -> Callable[P, Awaitable[T]]:
+
             @wraps(f)
             async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:  # type: ignore
                 for _ in range(max_retries + 1):
@@ -26,5 +28,7 @@ class ErrorHandler:
                             f"kwargs:{str(kwargs)[:30]}"
                         ))
                         raise
+
             return wrapper
+
         return decorator

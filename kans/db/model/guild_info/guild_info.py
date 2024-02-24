@@ -1,13 +1,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from kans import DateColumn
+from . import GuildInfoId
+from .. import DateColumn
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
 
 
-class GuildInfo:
+class GuildInfo(GuildInfoId):
     """implements `GuildInfoId`
 
     id: `name`"""
@@ -18,13 +19,9 @@ class GuildInfo:
         prefix: str,
         created: dt | DateColumn
     ) -> None:
-        self._name = name
+        super().__init__(name)
         self._prefix = prefix
         self._created = created if isinstance(created, DateColumn) else DateColumn(created)
-
-    @property
-    def name(self) -> str:
-        return self._name
 
     @property
     def prefix(self) -> str:

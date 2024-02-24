@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
-    from kans import GuildEndpoint, PlayersEndpoint, PlayerEndpoint
+    from .endpoint import GuildEndpoint, PlayersEndpoint, PlayerEndpoint
 
 
 class Api(Protocol):

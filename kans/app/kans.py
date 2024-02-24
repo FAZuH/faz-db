@@ -4,12 +4,17 @@ from typing import TYPE_CHECKING
 from dotenv import dotenv_values
 from loguru import logger
 
-from kans import App, Heartbeat, WynnApi, WynnDataDatabase
+from .app import App
+from kans.api import WynnApi
+from kans.db import WynnDataDatabase
+from kans.heartbeat import SimpleHeartbeat
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import Api, Database
-    from constants import ConfigT
+    from kans import ConfigT
+    from kans.api import Api
+    from kans.db import Database
+    from kans.heartbeat import Heartbeat
 
 
 class Kans(App):
@@ -19,7 +24,7 @@ class Kans(App):
         self._logger: Logger = logger
         self._wynnapi: Api = WynnApi()
         self._wynnrepo: Database = WynnDataDatabase(self.config, self.logger)
-        self._heartbeat: Heartbeat = Heartbeat(self)
+        self._heartbeat: Heartbeat = SimpleHeartbeat(self)
 
     def start(self) -> None:
         self.logger.info("Starting Heartbeat")

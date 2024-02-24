@@ -4,19 +4,18 @@ from types import NoneType
 from typing import TYPE_CHECKING
 import unittest
 
-from tests.mock_wynnapi import MockWynnApi
-from kans import (
+from kans.api.wynn.model import Guild, Player
+from kans.api.wynn.model.field import (
     BodyDateField,
     CharacterTypeField,
     GamemodeField,
-    Guild,
-    Player,
     UsernameOrUuidField,
     UuidField
 )
+from tests.mock_wynnapi import MockWynnApi
 
 if TYPE_CHECKING:
-    from kans import (
+    from kans.api.wynn.response import (
         GuildResponse,
         PlayerResponse,
         PlayersResponse
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
 class TestApiResponses(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         self.mockwynnapi = MockWynnApi()
-        self.wynnapi = self.mockwynnapi.wynnapi
+        # self.wynnapi = self.mockwynnapi.wynnapi
         # await self.wynnapi.start()
 
         self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore

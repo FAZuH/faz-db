@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import (
+    from . import DatabaseQuery
+    from .repository import (
         CharacterInfoRepository,
         CharacterHistoryRepository,
-        DatabaseQuery,
         GuildInfoRepository,
         GuildHistoryRepository,
         GuildMemberHistoryRepository,

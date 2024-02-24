@@ -5,7 +5,7 @@ from warnings import filterwarnings
 
 from aiomysql import connect, DictCursor, Warning
 
-from kans import ErrorHandler
+from kans.util import ErrorHandler
 
 if TYPE_CHECKING:
     from aiomysql import Connection

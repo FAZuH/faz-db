@@ -1,11 +1,10 @@
 import json
 import os
 
-from kans import (
+from kans.api.wynn.response import (
     GuildResponse,
     PlayerResponse,
     PlayersResponse,
-    WynnApi
 )
 
 ONLINEUUIDS_MOCK_FP = "tests/mock_data/mock_onlineUuids.json"
@@ -16,7 +15,6 @@ ONLINEGUILDSTATS_MOCK_FP = "tests/mock_data/mock_onlineGuildStats.json"
 class MockWynnApi:
 
     def __init__(self) -> None:
-        self.wynnapi = WynnApi()
         self.onlineuuids = None
         if os.path.exists(ONLINEUUIDS_MOCK_FP):
             with open(ONLINEUUIDS_MOCK_FP, 'r') as f:

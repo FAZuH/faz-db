@@ -10,16 +10,16 @@ from kans import (
     HTTPError,
     NotFound,
     Ratelimited,
-    ResponseSet,
     ServerError,
     TooManyRetries,
     Unauthorized,
     KansError
 )
+from kans.util import ResponseSet
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
-    from kans import Ratelimit
+    from kans.util import Ratelimit
 
 
 class HttpRequest:

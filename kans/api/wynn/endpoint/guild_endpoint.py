@@ -1,7 +1,8 @@
-from kans import Endpoint, GuildResponse
+from . import AbstractEndpoint
+from ..response import GuildResponse
 
 
-class GuildEndpoint(Endpoint):
+class GuildEndpoint(AbstractEndpoint):
 
     _PATH = "/v3/guild/%s%s"
 

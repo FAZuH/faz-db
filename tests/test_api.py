@@ -1,6 +1,6 @@
 import unittest
 
-from kans import Api, WynnApi
+from kans.api import Api, WynnApi
 
 
 class TestApi(unittest.IsolatedAsyncioTestCase):

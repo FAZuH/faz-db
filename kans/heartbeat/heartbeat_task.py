@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import Task
+    from .task import Task
 
 
 class HeartbeatTask:

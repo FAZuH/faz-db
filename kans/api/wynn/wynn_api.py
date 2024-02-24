@@ -1,15 +1,10 @@
 from __future__ import annotations
 from typing import Any
 
-from kans import (
-    __version__,
-    Api,
-    GuildEndpoint,
-    HttpRequest,
-    PlayerEndpoint,
-    PlayersEndpoint,
-    Ratelimit,
-)
+from . import Api
+from .endpoint import GuildEndpoint, PlayerEndpoint, PlayersEndpoint
+from kans import __version__
+from kans.util import HttpRequest, Ratelimit
 
 
 class WynnApi(Api):

@@ -3,13 +3,11 @@ from types import NoneType
 import unittest
 
 from kans.heartbeat.task.wynndata_logger import _Converter  # type: ignore
-from kans import (
+from kans.api.wynn.response import PlayerResponse, PlayersResponse, GuildResponse
+from kans.db.model import (
     CharacterHistory,
     DateColumn,
     GamemodeColumn,
-    GuildResponse,
-    PlayerResponse,
-    PlayersResponse,
     UuidColumn,
 )
 from tests.mock_wynnapi import MockWynnApi

@@ -1,6 +1,6 @@
 from typing import Any, Generator
 
-from kans import UsernameOrUuidField
+from .field import UsernameOrUuidField
 
 
 class Players:

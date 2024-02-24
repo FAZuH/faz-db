@@ -1,7 +1,8 @@
-from kans import Endpoint, PlayersResponse
+from . import AbstractEndpoint
+from ..response import PlayersResponse
 
 
-class PlayersEndpoint(Endpoint):
+class PlayersEndpoint(AbstractEndpoint):
 
     _PATH = "/v3/player?identifier=uuid"
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Generator
 
-from kans import BodyDateField, Nullable, UsernameOrUuidField, UuidField
+from .field import BodyDateField, Nullable, UsernameOrUuidField, UuidField
 
 
 class Guild:

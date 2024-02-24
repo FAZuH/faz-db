@@ -1,20 +1,20 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 
-from kans import UuidColumn
+from . import OnlinePlayersId
+
+if TYPE_CHECKING:
+    from .. import UuidColumn
 
 
-class OnlinePlayers:
+class OnlinePlayers(OnlinePlayersId):
     """implements `OnlinePlayersId`
 
     id: `uuid`"""
 
     def __init__(self, uuid: bytes | UuidColumn, server: str) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
+        super().__init__(uuid)
         self._server = server
-
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
 
     @property
     def server(self) -> str:

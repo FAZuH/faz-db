@@ -2,7 +2,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Generator
 
-from kans import (
+from .field import (
     BodyDateField,
     CharacterTypeField,
     GamemodeField,
