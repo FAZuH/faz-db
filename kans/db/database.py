@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class Database(Protocol):
     """<<interface>>
 
-    implemented by `WynnDataDatabase`"""
+    implemented by `WynndataDatabase`"""
     def __init__(self, config: dict[str, str], logger: Logger) -> None: ...
     @property
     def character_history_repository(self) -> CharacterHistoryRepository: ...

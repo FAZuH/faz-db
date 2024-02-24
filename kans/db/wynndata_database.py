@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from constants import ConfigT
 
 
-class WynnDataDatabase(Database):
+class WynndataDatabase(Database):
 
     def __init__(self, config: ConfigT, logger: Logger) -> None:
         self._wynndb: DatabaseQuery = DatabaseQuery(

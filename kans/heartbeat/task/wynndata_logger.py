@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from kans.db import Database
 
 
-class WynnDataLogger(Task):  # TODO: find better name
+class WynndataLogger(Task):  # TODO: find better name
     """implements `TaskBase`"""
 
     def __init__(
@@ -167,7 +167,7 @@ class WynnDataLogger(Task):  # TODO: find better name
 
     @property
     def name(self) -> str:
-        return "WynnDataLogger"
+        return "WynndataLogger"
 
 
 class _OnlinePlayersManager:

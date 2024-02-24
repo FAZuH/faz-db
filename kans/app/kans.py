@@ -6,7 +6,7 @@ from loguru import logger
 
 from .app import App
 from kans.api import WynnApi
-from kans.db import WynnDataDatabase
+from kans.db import WynndataDatabase
 from kans.heartbeat import SimpleHeartbeat
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ class Kans(App):
         self._config: ConfigT = dotenv_values(".env")  # type: ignore
         self._logger: Logger = logger
         self._wynnapi: Api = WynnApi()
-        self._wynnrepo: Database = WynnDataDatabase(self.config, self.logger)
+        self._wynnrepo: Database = WynndataDatabase(self.config, self.logger)
         self._heartbeat: Heartbeat = SimpleHeartbeat(self)
 
     def start(self) -> None:
