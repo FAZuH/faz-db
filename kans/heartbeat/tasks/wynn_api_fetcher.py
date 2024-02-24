@@ -2,14 +2,14 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from kans import TaskBase
+from kans import Task
 
 if TYPE_CHECKING:
     from loguru import Logger
     from kans import Api, RequestList, ResponseList
 
 
-class WynnApiFetcher(TaskBase):
+class WynnApiFetcher(Task):
     """implements `TaskBase`"""
 
     def __init__(self, logger: Logger, wynnapi: Api, request_list: RequestList, response_list: ResponseList) -> None:

@@ -1,3 +1,5 @@
+from datetime import datetime as dt
+from datetime import timedelta as td
 from time import perf_counter
 import unittest
 
@@ -5,17 +7,18 @@ from tests.mock_wynnapi import MockWynnApi
 from kans import (
     logger,
     config,
+    CharacterHistory,
     CharacterInfo,
     GuildHistory,
     GuildInfo,
     GuildMemberHistory,
+    KansUptime,
     OnlinePlayers,
     # PlayerActivityHistory,
     PlayerHistory,
     PlayerInfo,
     WynnDataDatabase
 )
-from kans import *
 
 
 class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
@@ -31,7 +34,7 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         self.wynnrepo: WynnDataDatabase = WynnDataDatabase(config, logger)
 
     # @vcr(use_cassette)
-    async def test_character_history_repo(self) -> None:
+    async def test_character_history_repository(self) -> None:
         if self.mock_playerstats is None:
             self.assertTrue(False)
             return
@@ -44,12 +47,10 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_character_history")
 
-    async def test_character_info_repo(self) -> None:
+    async def test_character_info_repository(self) -> None:
         if self.mock_playerstats is None:
             self.assertTrue(False)
             return
@@ -62,12 +63,10 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_character_info")
 
-    async def test_guild_history_repo(self) -> None:
+    async def test_guild_history_repository(self) -> None:
         if self.mock_guildstats is None:
             self.assertTrue(False)
             return
@@ -80,12 +79,10 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_history")
 
-    async def test_guild_info_repo(self) -> None:
+    async def test_guild_info_repository(self) -> None:
         if self.mock_guildstats is None:
             self.assertTrue(False)
             return
@@ -98,12 +95,10 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_info")
 
-    async def test_guild_member_history_repo(self) -> None:
+    async def test_guild_member_history_repository(self) -> None:
         if self.mock_guildstats is None:
             self.assertTrue(False)
             return
@@ -116,12 +111,25 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_member_history")
 
-    async def test_online_players_repo(self) -> None:
+    async def test_kans_uptime_repository(self) -> None:
+        self.wynnrepo.kans_uptime_repository._TABLE_NAME = "temp_kans_uptime"  # type: ignore
+        try:
+            await self.wynnrepo.kans_uptime_repository.create_table()
+            t1 = perf_counter()
+            affectedrows = await self.wynnrepo.kans_uptime_repository.insert([KansUptime(
+                    dt.now(),
+                    dt.now() + td(days=1.0)
+            )])
+            t2 = perf_counter()
+            logger.success(f"inserted {affectedrows} rows in {t2 - t1} seconds")
+            self.assertGreaterEqual(affectedrows, 0)
+        finally:
+            await self.wynnrepo.wynndb.execute("DROP TABLE temp_kans_uptime")
+
+    async def test_online_players_repository(self) -> None:
         if self.mock_onlineuuids is None:
             self.assertTrue(False)
             return
@@ -134,13 +142,11 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_online_players")
 
     @unittest.skip("Needs long and time-consuming process to test.")
-    async def test_player_activity_history_repo(self) -> None:
+    async def test_player_activity_history_repository(self) -> None:
         pass
         # if self.toTest_guildStats is None:
         #     self.assertTrue(False)
@@ -159,7 +165,7 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         # finally:
         #     await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_activity_history")
 
-    async def test_player_history_repo(self) -> None:
+    async def test_player_history_repository(self) -> None:
         if self.mock_playerstats is None:
             self.assertTrue(False)
             return
@@ -172,12 +178,10 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_history")
 
-    async def test_player_info_repo(self) -> None:
+    async def test_player_info_repository(self) -> None:
         if self.mock_playerstats is None:
             self.assertTrue(False)
             return
@@ -190,8 +194,6 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
             t2 = perf_counter()
             logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
-        except Exception:
-            raise
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_info")
 

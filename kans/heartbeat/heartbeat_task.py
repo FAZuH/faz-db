@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import TaskBase
+    from kans import Task
 
 
-class HeartBeatTask:
+class HeartbeatTask:
 
-    def __init__(self, logger: Logger, task: TaskBase) -> None:
+    def __init__(self, logger: Logger, task: Task) -> None:
         self._logger = logger
         self._task = task
         self._timer: Timer = Timer(self.task.first_delay, self.get_task())
@@ -34,5 +34,5 @@ class HeartBeatTask:
         self._timer.start()
 
     @property
-    def task(self) -> TaskBase:
+    def task(self) -> Task:
         return self._task

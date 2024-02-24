@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 from loguru import logger  # type: ignore
 
 
-_ConfigT = TypedDict("_ConfigT", {
+ConfigT = TypedDict("ConfigT", {
     "WYNNDATA_DB_USER": str,
     "WYNNDATA_DB_PASSWORD": str,
     "WYNNDATA_DB_DBNAME": str,
@@ -14,7 +14,7 @@ _ConfigT = TypedDict("_ConfigT", {
     "WYNNDATA_LOGGER_WEBHOOK": str,
 })
 
-config: _ConfigT = dotenv_values(".env")  # type: ignore
+config: ConfigT = dotenv_values(".env")  # type: ignore
 
 __version__ = "0.0.1"
 __author__ = "FAZuH"

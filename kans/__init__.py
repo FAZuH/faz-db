@@ -3,8 +3,17 @@ from .constants import __version__
 from .constants import *
 from .errors import *
 
-# No dependencies
+# Protocols
 from .api.wynn.api import Api
+from .app.app import App
+from .db.database import Database
+from .heartbeat.heartbeat import Heartbeat
+
+from .db.repository.repository import Repository
+from .heartbeat.tasks.task import Task
+
+
+# No dependencies
 from .api.wynn.model.field.nullable import Nullable
 from .api.wynn.model.field.character_type_field import CharacterTypeField
 from .api.wynn.model.field.date_field import DateField
@@ -12,14 +21,11 @@ from .api.wynn.model.field.gamemode_field import GamemodeField
 from .api.wynn.model.field.username_or_uuid_field import UsernameOrUuidField
 from .api.wynn.model.field.uuid_field import UuidField
 from .api.wynn.response_set import ResponseSet
-from .app.app import App
-from .db.database import Database
 from .db.model.date_column import DateColumn
 from .db.model.gamemode_column import GamemodeColumn
 from .db.model.uuid_column import UuidColumn
-from .db.repository.table_protocol import TableProtocol
-from .heartbeat.heartbeat_task import HeartBeatTask
-from .heartbeat.task_base import TaskBase
+from .db.repository.repository import Repository
+from .heartbeat.heartbeat_task import HeartbeatTask
 from .heartbeat.tasks.request_list import RequestList
 from .heartbeat.tasks.response_list import ResponseList
 from .utils.error_handler import ErrorHandler
@@ -40,56 +46,36 @@ from .db.database_query import DatabaseQuery  # ErrorHandler
 from .utils.http_request import HttpRequest  # ResponseSet
 from .api.wynn.wynn_api import WynnApi  # HttpRequest, Ratelimit, WynnResponse
 
-# db models.id
-from .db.model.character_history.character_history_id import CharacterHistoryId
-from .db.model.character_info.character_info_id import CharacterInfoId
-from .db.model.guild_history.guild_history_id import GuildHistoryId
-from .db.model.guild_info.guild_info_id import GuildInfoId
-from .db.model.guild_member_history.guild_member_history_id import GuildMemberHistoryId
-from .db.model.online_players.online_players_id import OnlinePlayersId
-from .db.model.player_activity_history.player_activity_history_id import PlayerActivityHistoryId
-from .db.model.player_history.player_history_id import PlayerHistoryId
-from .db.model.player_info.player_info_id import PlayerInfoId
+# db models
+from .db.model.character_history import CharacterHistory
+from .db.model.character_info import CharacterInfo
+from .db.model.guild_info import GuildInfo
+from .db.model.guild_history import GuildHistory
+from .db.model.guild_member_history import GuildMemberHistory
+from .db.model.kans_uptime import KansUptime
+from .db.model.online_players import OnlinePlayers
+from .db.model.player_activity_history import PlayerActivityHistory
+from .db.model.player_history import PlayerHistory
+from .db.model.player_info import PlayerInfo
 
-# db models. needs models.id
-from .db.model.character_history.character_history import CharacterHistory
-from .db.model.character_info.character_info import CharacterInfo
-from .db.model.guild_info.guild_info import GuildInfo
-from .db.model.guild_history.guild_history import GuildHistory
-from .db.model.guild_member_history.guild_member_history import GuildMemberHistory
-from .db.model.online_players.online_players import OnlinePlayers
-from .db.model.player_activity_history.player_activity_history import PlayerActivityHistory
-from .db.model.player_history.player_history import PlayerHistory
-from .db.model.player_info.player_info import PlayerInfo
+# db repositories. needs db models
+from .db.repository.guild_history_repository import GuildHistoryRepository
+from .db.repository.guild_info_repository import GuildInfoRepository
+from .db.repository.guild_member_history_repository import GuildMemberHistoryRepository
+from .db.repository.character_history_repository import CharacterHistoryRepository
+from .db.repository.character_info_repository import CharacterInfoRepository
+from .db.repository.kans_uptime_repository import KansUptimeRepository
+from .db.repository.online_players_repository import OnlinePlayersRepository
+from .db.repository.player_activity_history_repository import PlayerActivityHistoryRepository
+from .db.repository.player_history_repository import PlayerHistoryRepository
+from .db.repository.player_info_repository import PlayerInfoRepository
 
-# db base. needs db models
-from .db.repository.base.character_history_repo import CharacterHistoryRepo
-from .db.repository.base.character_info_repo import CharacterInfoRepo
-from .db.repository.base.guild_history_repo import GuildHistoryRepo
-from .db.repository.base.guild_info_repo import GuildInfoRepo
-from .db.repository.base.guild_member_history_repo import GuildMemberHistoryRepo
-from .db.repository.base.online_players_repo import OnlinePlayersRepo
-from .db.repository.base.player_activity_history_repo import PlayerActivityHistoryRepo
-from .db.repository.base.player_history_repo import PlayerHistoryRepo
-from .db.repository.base.player_info_repo import PlayerInfoRepo
-
-# db tables. needs db base
-from .db.repository.table.guild_history_table import GuildHistoryTable
-from .db.repository.table.guild_info_table import GuildInfoTable
-from .db.repository.table.guild_member_history_table import GuildMemberHistoryTable
-from .db.repository.table.character_history_table import CharacterHistoryTable
-from .db.repository.table.character_info_table import CharacterInfoTable
-from .db.repository.table.online_players_table import OnlinePlayersTable
-from .db.repository.table.player_activity_history_table import PlayerActivityHistoryTable
-from .db.repository.table.player_history_table import PlayerHistoryTable
-from .db.repository.table.player_info_table import PlayerInfoTable
-
-# needs all tables above
+# needs all repositories above
 from .db.wynndata_database import WynnDataDatabase
 
 # tasks. needs all above
 from .heartbeat.tasks.wynn_api_fetcher import WynnApiFetcher
 from .heartbeat.tasks.wynndata_logger import WynnDataLogger
-from .heartbeat.heartbeat import HeartBeat
+from .heartbeat.simple_heartbeat import Heartbeat
 
 from .app.kans import Kans

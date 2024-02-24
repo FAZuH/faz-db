@@ -54,7 +54,7 @@ class RequestList:
                 else:
                     return
 
-    def put(self, request_ts: float, afunc: Callable[..., Awaitable[Any]], args: tuple[Any, ...] = tuple()) -> bool:
+    def put(self, request_ts: float, afunc: Callable[..., Awaitable[Any]], *args) -> bool:
         with self._lock:
             _item = _RequestItem(request_ts, afunc, args)
             if _item in self._list:

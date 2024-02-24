@@ -15,7 +15,7 @@ from kans import (
     PlayerInfo,
     PlayerResponse,
     PlayersResponse,
-    TaskBase,
+    Task,
 )
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     )
 
 
-class WynnDataLogger(TaskBase):  # TODO: find better name
+class WynnDataLogger(Task):  # TODO: find better name
     """implements `TaskBase`"""
 
     def __init__(
@@ -113,13 +113,13 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
                 self._request_list.put(
                     resp.get_expiry_datetime().timestamp() + 480,  # due to ratelimit
                     self._wynnapi.get_player_stats,
-                    tuple(resp.body.uuid.uuid)
+                    (resp.body.uuid.uuid,)
                 )
 
         # queue newly logged on guilds
         for guild_name in logged_on_guilds:
             # Timestamp doesn't matter here
-            self._request_list.put(0, self._wynnapi.get_guild_stats, tuple(guild_name))
+            self._request_list.put(0, self._wynnapi.get_guild_stats, (guild_name,))
 
     async def _handle_players_response(self, resps: list[PlayersResponse]) -> None:
         if len(resps) == 0:
@@ -145,7 +145,7 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
                 self._request_list.put(
                     0,
                     self._wynnapi.get_player_stats,
-                    tuple(uuid)
+                    (uuid,)
                 )
 
             # to db
@@ -179,7 +179,7 @@ class WynnDataLogger(TaskBase):  # TODO: find better name
                 self._request_list.put(
                     resp.get_expiry_datetime().timestamp(),
                     self._wynnapi.get_guild_stats,
-                    tuple(resp.body.name)
+                    resp.body.name
                 )
 
     @property

@@ -1,74 +1,81 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from kans import (
+    CharacterInfoRepository,
+    CharacterHistoryRepository,
     Database,
     DatabaseQuery,
-    GuildInfoTable,
-    GuildHistoryTable,
-    GuildMemberHistoryTable,
-    PlayerActivityHistoryTable,
-    CharacterInfoTable,
-    CharacterHistoryTable,
-    PlayerInfoTable,
-    PlayerHistoryTable,
-    OnlinePlayersTable
+    GuildInfoRepository,
+    GuildHistoryRepository,
+    GuildMemberHistoryRepository,
+    KansUptimeRepository,
+    OnlinePlayersRepository,
+    PlayerActivityHistoryRepository,
+    PlayerInfoRepository,
+    PlayerHistoryRepository,
 )
 
 if TYPE_CHECKING:
     from loguru import Logger
+    from constants import ConfigT
 
 
 class WynnDataDatabase(Database):
 
-    def __init__(self, config: dict[str, Any], logger: Logger) -> None:
+    def __init__(self, config: ConfigT, logger: Logger) -> None:
         self._wynndb: DatabaseQuery = DatabaseQuery(
             config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
         )
-        self._guild_history_repository = GuildHistoryTable(self.wynndb)
-        self._guild_info_repository = GuildInfoTable(self.wynndb)
-        self._guild_member_history_repository = GuildMemberHistoryTable(self.wynndb)
-        self._player_activity_history_repository = PlayerActivityHistoryTable(self.wynndb)
-        self._character_history_repository = CharacterHistoryTable(self.wynndb)
-        self._character_info_repository = CharacterInfoTable(self.wynndb)
-        self._player_history_repository = PlayerHistoryTable(self.wynndb)
-        self._player_info_repository = PlayerInfoTable(self.wynndb)
-        self._online_players_repository = OnlinePlayersTable(self.wynndb)
+        self._character_history_repository = CharacterHistoryRepository(self.wynndb)
+        self._character_info_repository = CharacterInfoRepository(self.wynndb)
+        self._guild_history_repository = GuildHistoryRepository(self.wynndb)
+        self._guild_info_repository = GuildInfoRepository(self.wynndb)
+        self._guild_member_history_repository = GuildMemberHistoryRepository(self.wynndb)
+        self._kans_uptime_repository = KansUptimeRepository(self.wynndb)
+        self._online_players_repository = OnlinePlayersRepository(self.wynndb)
+        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.wynndb)
+        self._player_history_repository = PlayerHistoryRepository(self.wynndb)
+        self._player_info_repository = PlayerInfoRepository(self.wynndb)
 
     @property
-    def guild_history_repository(self) -> GuildHistoryTable:
+    def guild_history_repository(self) -> GuildHistoryRepository:
         return self._guild_history_repository
 
     @property
-    def guild_info_repository(self) -> GuildInfoTable:
+    def guild_info_repository(self) -> GuildInfoRepository:
         return self._guild_info_repository
 
     @property
-    def guild_member_history_repository(self) -> GuildMemberHistoryTable:
+    def guild_member_history_repository(self) -> GuildMemberHistoryRepository:
         return self._guild_member_history_repository
 
     @property
-    def player_activity_history_repository(self) -> PlayerActivityHistoryTable:
+    def kans_uptime_repository(self) -> KansUptimeRepository:
+        return self._kans_uptime_repository
+
+    @property
+    def player_activity_history_repository(self) -> PlayerActivityHistoryRepository:
         return self._player_activity_history_repository
 
     @property
-    def character_history_repository(self) -> CharacterHistoryTable:
+    def character_history_repository(self) -> CharacterHistoryRepository:
         return self._character_history_repository
 
     @property
-    def character_info_repository(self) -> CharacterInfoTable:
+    def character_info_repository(self) -> CharacterInfoRepository:
         return self._character_info_repository
 
     @property
-    def player_history_repository(self) -> PlayerHistoryTable:
+    def player_history_repository(self) -> PlayerHistoryRepository:
         return self._player_history_repository
 
     @property
-    def player_info_repository(self) -> PlayerInfoTable:
+    def player_info_repository(self) -> PlayerInfoRepository:
         return self._player_info_repository
 
     @property
-    def online_players_repository(self) -> OnlinePlayersTable:
+    def online_players_repository(self) -> OnlinePlayersRepository:
         return self._online_players_repository
 
     @property
