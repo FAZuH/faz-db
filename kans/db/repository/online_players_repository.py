@@ -19,8 +19,8 @@ class OnlinePlayersRepository(Repository[OnlinePlayers]):
         async with self._db.transaction_group() as tg:
             tg.add(f"DELETE FROM `{self.table_name}` WHERE `uuid` IS NOT NULL")
             tg.add(
-                f"INSERT INTO `{self.table_name}` (`uuid`, `server`) VALUES (%s, %s)",
-                tuple((entity.uuid.uuid, entity.server) for entity in entities)
+                    f"INSERT INTO `{self.table_name}` (`uuid`, `server`) VALUES (%s, %s)",
+                    tuple((entity.uuid.uuid, entity.server) for entity in entities)
             )
         return 0
 
@@ -40,10 +40,10 @@ class OnlinePlayersRepository(Repository[OnlinePlayers]):
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
-        CREATE TABLE IF NOT EXISTS `{self.table_name}` (
-            `uuid` binary(16) NOT NULL,
-            `server` varchar(10) NOT NULL
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
+                `uuid` binary(16) NOT NULL,
+                `server` varchar(10) NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(sql)
 

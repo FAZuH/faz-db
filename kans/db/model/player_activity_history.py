@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class PlayerActivityHistory:
-    """implements `PlayerActivityHistoryId`
+    """implements
 
     id: `uuid`, `logon_datetime`
     """

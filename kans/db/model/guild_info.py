@@ -1,11 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterable
-
+from typing import TYPE_CHECKING
 
 from kans import DateColumn
 
 if TYPE_CHECKING:
-    from kans import GuildResponse
+    from datetime import datetime as dt
 
 
 class GuildInfo:
@@ -17,19 +16,11 @@ class GuildInfo:
         self,
         name: str,
         prefix: str,
-        created: DateColumn
+        created: dt | DateColumn
     ) -> None:
         self._name = name
         self._prefix = prefix
-        self._created = created
-
-    @classmethod
-    def from_responses(cls, resps: Iterable[GuildResponse]) -> tuple[GuildInfo, ...]:
-        return tuple(cls(
-            name=resp.body.name,
-            prefix=resp.body.prefix,
-            created=DateColumn(resp.body.created.to_datetime())
-        ) for resp in resps)
+        self._created = created if isinstance(created, DateColumn) else DateColumn(created)
 
     @property
     def name(self) -> str:

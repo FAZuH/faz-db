@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 
 
 class PlayerActivityHistoryRepository(Repository[PlayerActivityHistory]):
-    """implements `PlayerActivityHistoryRepo`"""
 
     _TABLE_NAME: str = "player_activity_history"
 
@@ -17,18 +16,18 @@ class PlayerActivityHistoryRepository(Repository[PlayerActivityHistory]):
         self._db = db
 
     async def insert(self, entities: Iterable[PlayerActivityHistory], conn: None | Connection = None) -> int:
-        sql = (
-        f"REPLACE INTO `{self.table_name}` (`uuid`, `logon_datetime`, `logoff_datetime`) "
-        "VALUES (%s, %s, %s)"
-        )
+        sql = f"""
+            REPLACE INTO `{self.table_name}` (`uuid`, `logon_datetime`, `logoff_datetime`)
+            VALUES (%s, %s, %s)
+        """
         return await self._db.execute_many(
-            sql,
-            tuple((
-                entity.uuid.uuid,
-                entity.logon_datetime.datetime,
-                entity.logoff_datetime.datetime
-            ) for entity in entities),
-            conn
+                sql,
+                tuple((
+                        entity.uuid.uuid,
+                        entity.logon_datetime.datetime,
+                        entity.logoff_datetime.datetime
+                ) for entity in entities),
+                conn
         )
 
     async def exists(self, id_: Any, conn: None | Connection = None) -> bool: ...
@@ -47,14 +46,14 @@ class PlayerActivityHistoryRepository(Repository[PlayerActivityHistory]):
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
-        CREATE TABLE IF NOT EXISTS `{self.table_name}` (
-            `uuid` binary(16) NOT NULL,
-            `logon_datetime` datetime NOT NULL,
-            `logoff_datetime` datetime NOT NULL,
-            UNIQUE KEY `player_uptime_uq_uuidlogon` (`uuid`,`logon_datetime`),
-            KEY `player_uptime_fk_uuid_idx` (`uuid`),
-            KEY `player_uptime_idx_logon_timestamp` (`logon_datetime` DESC)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
+                `uuid` binary(16) NOT NULL,
+                `logon_datetime` datetime NOT NULL,
+                `logoff_datetime` datetime NOT NULL,
+                UNIQUE KEY `player_uptime_uq_uuidlogon` (`uuid`,`logon_datetime`),
+                KEY `player_uptime_fk_uuid_idx` (`uuid`),
+                KEY `player_uptime_idx_logon_timestamp` (`logon_datetime` DESC)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(sql)
 

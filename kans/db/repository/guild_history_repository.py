@@ -16,21 +16,21 @@ class GuildHistoryRepository(Repository[GuildHistory]):
         self._db = db
 
     async def insert(self, entities: Iterable[GuildHistory], conn: None | Connection = None) -> int:
-        sql = (
-        f"INSERT IGNORE INTO `{self.table_name}`"
-        "    (`level`, `member_total`, `name`, `online_members`, `territories`, `wars`, `datetime`) "
-        "VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        )
+        sql = f"""
+            INSERT IGNORE INTO `{self.table_name}`
+                (`level`, `member_total`, `name`, `online_members`, `territories`, `wars`, `datetime`)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
         return await self._db.execute_many(
             sql,
             tuple((
-                entity.level,
-                entity.member_total,
-                entity.name,
-                entity.online_members,
-                entity.territories,
-                entity.wars,
-                entity.datetime.datetime
+                    entity.level,
+                    entity.member_total,
+                    entity.name,
+                    entity.online_members,
+                    entity.territories,
+                    entity.wars,
+                    entity.datetime.datetime
             ) for entity in entities),
             conn
         )
@@ -51,16 +51,16 @@ class GuildHistoryRepository(Repository[GuildHistory]):
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
-        CREATE TABLE IF NOT EXISTS `{self.table_name}` (
-            `name` varchar(30) NOT NULL,
-            `level` decimal(5,2) unsigned NOT NULL,
-            `territories` smallint unsigned NOT NULL,
-            `wars` int unsigned NOT NULL,
-            `member_total` tinyint unsigned NOT NULL,
-            `online_members` tinyint unsigned NOT NULL,
-            `datetime` datetime NOT NULL,
-            KEY `guildmain_fk_guildmaininfo_idx` (`name`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
+                `name` varchar(30) NOT NULL,
+                `level` decimal(5,2) unsigned NOT NULL,
+                `territories` smallint unsigned NOT NULL,
+                `wars` int unsigned NOT NULL,
+                `member_total` tinyint unsigned NOT NULL,
+                `online_members` tinyint unsigned NOT NULL,
+                `datetime` datetime NOT NULL,
+                KEY `guildmain_fk_guildmaininfo_idx` (`name`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(sql)
 

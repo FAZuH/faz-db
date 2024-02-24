@@ -1,29 +1,24 @@
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 from kans import (
     __version__,
     Api,
-    GuildResponse,
+    GuildEndpoint,
     HttpRequest,
-    PlayerResponse,
-    PlayersResponse,
-    ResponseSet,
+    PlayerEndpoint,
+    PlayersEndpoint,
     Ratelimit,
 )
-
-if TYPE_CHECKING:
-    from uuid import UUID
-    from kans import ResponseSet
-
 
 
 class WynnApi(Api):
 
     def __init__(self) -> None:
-        self._request: HttpRequest = HttpRequest("https://api.wynncraft.com", ratelimit=Ratelimit(180, 60), headers={
-            "User-Agent": f"Vindicator/{__version__}",
-            "Content-Type": "application/json"
+        self._request: HttpRequest = HttpRequest(
+                "https://api.wynncraft.com",
+                ratelimit=Ratelimit(180, 60),
+                headers={"User-Agent": f"Kans/{__version__}", "Content-Type": "application/json"
         })
 
     async def start(self) -> None:
@@ -32,29 +27,17 @@ class WynnApi(Api):
     async def close(self) -> None:
         await self._request.close()
 
-    async def get_guild_stats(self, name_or_prefix: str, is_prefix: bool = False) -> GuildResponse:
-        response: ResponseSet[Any, Any] = await self._request.get(
-                f"/v3/guild/{'prefix/' if is_prefix else ''}{name_or_prefix}",
-                retries=3,
-                retry_on_exc=True
-        )
-        return GuildResponse(response.body, response.headers)
+    @property
+    def guild(self) -> GuildEndpoint:
+        return GuildEndpoint(self._request, 3, True)
 
-    async def get_online_uuids(self) -> PlayersResponse:  # TODO: change requestqueue design
-        response: ResponseSet[Any, Any] = await self._request.get(
-                "/v3/player?identifier=uuid",
-                retries=3,
-                retry_on_exc=True
-        )
-        return PlayersResponse(response.body, response.headers)
+    @property
+    def players(self) -> PlayersEndpoint:
+        return PlayersEndpoint(self._request, 3, True)
 
-    async def get_player_stats(self, username_or_uuid: str | UUID) -> PlayerResponse:
-        response: ResponseSet[Any, Any] = await self._request.get(
-                f"/v3/player/{username_or_uuid}?fullResult=True",
-                retries=3,
-                retry_on_exc=True
-        )
-        return PlayerResponse(response.body, response.headers)
+    @property
+    def player(self) -> PlayerEndpoint:
+        return PlayerEndpoint(self._request, 3, True)
 
     async def __aenter__(self) -> Api:
         await self._request.__aenter__()

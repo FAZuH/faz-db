@@ -16,19 +16,19 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory]):
         self._db = db
 
     async def insert(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
-        sql = (
-        f"INSERT IGNORE INTO `{self.table_name}` (`joined`, `uuid`, `contributed`, `datetime`) "
-        "VALUES (%s, %s, %s, %s)"
-        )
+        sql = f"""
+            INSERT IGNORE INTO `{self.table_name}` (`joined`, `uuid`, `contributed`, `datetime`)
+            VALUES (%s, %s, %s, %s)
+        """
         return await self._db.execute_many(
-            sql,
-            tuple((
-                entity.joined,
-                entity.uuid,
-                entity.contributed,
-                entity.datetime.datetime
-            ) for entity in entities),
-            conn
+                sql,
+                tuple((
+                        entity.joined,
+                        entity.uuid,
+                        entity.contributed,
+                        entity.datetime.datetime
+                ) for entity in entities),
+                conn
         )
 
     async def exists(self,id_: Any, conn: None | Connection = None) -> bool: ...
@@ -47,12 +47,12 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory]):
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
-        CREATE TABLE IF NOT EXISTS `{self.table_name}` (
-            `uuid` binary(16) NOT NULL,
-            `contributed` bigint unsigned NOT NULL,
-            `joined` datetime NOT NULL,
-            `datetime` datetime NOT NULL
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
+                `uuid` binary(16) NOT NULL,
+                `contributed` bigint unsigned NOT NULL,
+                `joined` datetime NOT NULL,
+                `datetime` datetime NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(sql)
 

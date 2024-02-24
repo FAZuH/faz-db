@@ -1,4 +1,5 @@
 from __future__ import annotations
+from decimal import Decimal
 from typing import Any, Generator
 
 from kans import (
@@ -27,7 +28,7 @@ class Player:
         self._veteran = raw["veteran"] or False
         self._first_join = BodyDateField(raw["firstJoin"])
         self._last_join = BodyDateField(raw["lastJoin"])
-        self._playtime = raw["playtime"]
+        self._playtime = Decimal(raw["playtime"])
         self._guild = Nullable(Player.Guild, raw.get("guild", None))
         self._global_data = Player.GlobalData(raw["globalData"])
         self._forum_link = raw["forumLink"]
@@ -180,7 +181,7 @@ class Player:
             self._xp_percent = node["xpPercent"]
             self._total_level = node["totalLevel"]
             self._wars = node["wars"]
-            self._playtime = node["playtime"]
+            self._playtime = Decimal(node["playtime"])
             self._mobs_killed = node["mobsKilled"]
             self._chests_found = node["chestsFound"]
             self._items_identified = node["itemsIdentified"] or 0
@@ -246,8 +247,8 @@ class Player:
                     self._level = node.get("level", 0)
                     self._xp_percent = node.get("xpPercent", 0)
 
-                def to_float(self) -> float:
-                    return self.level + (self.xp_percent / 100)
+                def to_decimal(self) -> Decimal:
+                    return self.level + (Decimal(self.xp_percent) / 100)
 
                 @property
                 def level(self) -> int:
@@ -335,7 +336,7 @@ class Player:
             return self._wars
 
         @property
-        def playtime(self) -> float:
+        def playtime(self) -> Decimal:
             return self._playtime
 
         @property
@@ -456,7 +457,7 @@ class Player:
         return self._last_join
 
     @property
-    def playtime(self) -> float:
+    def playtime(self) -> Decimal:
         return self._playtime
 
     @property

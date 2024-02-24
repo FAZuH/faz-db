@@ -16,10 +16,10 @@ class KansUptimeRepository(Repository[KansUptime]):
         self._db = db
 
     async def insert(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int:
-        sql = (
-        f"REPLACE INTO `{self.table_name}` (`start_time`, `stop_time`) "
-        "VALUES (%s, %s)"
-        )
+        sql = f"""
+            REPLACE INTO `{self.table_name}` (`start_time`, `stop_time`)
+            VALUES (%s, %s)
+        """
         return await self._db.execute_many(
                 sql,
                 tuple((e.start_time, e.stop_time) for e in entities),
@@ -33,15 +33,16 @@ class KansUptimeRepository(Repository[KansUptime]):
     async def update(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int: ...
     async def delete(self, id_: Any, conn: None | Connection = None) -> int: ...
     async def create_table(self, conn: None | Connection = None) -> None:
-        sql = f"""CREATE TABLE `{self.table_name}` (
-            `nth` int NOT NULL AUTO_INCREMENT,
-            `start_time` datetime NOT NULL,
-            `stop_time` datetime NOT NULL,
-            PRIMARY KEY (`nth`),
-            UNIQUE KEY `start_time_UNIQUE` (`start_time`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;"""
+        sql = f"""
+            CREATE TABLE `{self.table_name}` (
+                `nth` int NOT NULL AUTO_INCREMENT,
+                `start_time` datetime NOT NULL,
+                `stop_time` datetime NOT NULL,
+                PRIMARY KEY (`nth`),
+                UNIQUE KEY `start_time_UNIQUE` (`start_time`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        """
         await self._db.execute(sql)
-
 
     @property
     def table_name(self) -> str:

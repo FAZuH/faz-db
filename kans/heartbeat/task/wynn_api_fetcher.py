@@ -1,6 +1,6 @@
 from __future__ import annotations
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from kans import Task
 
@@ -28,7 +28,7 @@ class WynnApiFetcher(Task):
         coros = tuple(coro for coro in self._request_list.get(self._concurrent_request))
 
         async with self._wynnapi:
-            results = await asyncio.gather(*coros, return_exceptions=True)
+            results: list[Any | BaseException] = await asyncio.gather(*coros, return_exceptions=True)
 
         self._response_list.put(tuple(res for res in results if not isinstance(res, BaseException)))
 

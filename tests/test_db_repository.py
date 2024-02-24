@@ -1,115 +1,78 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
-from time import perf_counter
 import unittest
 
-from tests.mock_wynnapi import MockWynnApi
+from kans.heartbeat.task.wynndata_logger import _Converter  # type: ignore
 from kans import (
     logger,
     config,
-    CharacterHistory,
-    CharacterInfo,
-    GuildHistory,
-    GuildInfo,
-    GuildMemberHistory,
+    Database,
+    GuildResponse,
     KansUptime,
-    OnlinePlayers,
-    # PlayerActivityHistory,
-    PlayerHistory,
-    PlayerInfo,
+    PlayerResponse,
+    PlayersResponse,
     WynnDataDatabase
 )
+from tests.mock_wynnapi import MockWynnApi
 
 
-class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
+class TestDbRepository(unittest.IsolatedAsyncioTestCase):
+
     async def asyncSetUp(self) -> None:
+        self.converter = _Converter(None)  # type: ignore
         self.mockwynnapi = MockWynnApi()
-        self.wynnapi = self.mockwynnapi.wynnapi
-        # await self.wynnapi.start()
+        self.wynnrepo: Database = WynnDataDatabase(config, logger)
 
-        self.mock_guildstats = self.mockwynnapi.onlineguildstats
-        self.mock_onlineuuids = self.mockwynnapi.onlineuuids
-        self.mock_playerstats = self.mockwynnapi.onlineplayerstats
+        self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
+        self.mock_onlineuuids: PlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
+        self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
 
-        self.wynnrepo: WynnDataDatabase = WynnDataDatabase(config, logger)
-
-    # @vcr(use_cassette)
     async def test_character_history_repository(self) -> None:
-        if self.mock_playerstats is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.character_history_repository._TABLE_NAME = "temp_character_history"  # type: ignore
         try:
             await self.wynnrepo.character_history_repository.create_table()
-            t1 = perf_counter()
-            l = CharacterHistory.from_responses(self.mock_playerstats)
+            l = self.converter.to_character_history(self.mock_playerstats)
             affectedrows = await self.wynnrepo.character_history_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_character_history")
 
     async def test_character_info_repository(self) -> None:
-        if self.mock_playerstats is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.character_info_repository._TABLE_NAME = "temp_character_info"  # type: ignore
         try:
             await self.wynnrepo.character_info_repository.create_table()
-            t1 = perf_counter()
-            l = CharacterInfo.from_responses(self.mock_playerstats)
+            l = self.converter.to_character_info(self.mock_playerstats)
             affectedrows = await self.wynnrepo.character_info_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_character_info")
 
     async def test_guild_history_repository(self) -> None:
-        if self.mock_guildstats is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.guild_history_repository._TABLE_NAME = "temp_guild_history"  # type: ignore
         try:
             await self.wynnrepo.guild_history_repository.create_table()
-            t1 = perf_counter()
-            l = GuildHistory.from_responses(self.mock_guildstats)
+            l = self.converter.to_guild_history(self.mock_guildstats)
             affectedrows = await self.wynnrepo.guild_history_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_history")
 
     async def test_guild_info_repository(self) -> None:
-        if self.mock_guildstats is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.guild_info_repository._TABLE_NAME = "temp_guild_info"  # type: ignore
         try:
             await self.wynnrepo.guild_info_repository.create_table()
-            t1 = perf_counter()
-            l = GuildInfo.from_responses(self.mock_guildstats)
+            l = self.converter.to_guild_info(self.mock_guildstats)
             affectedrows = await self.wynnrepo.guild_info_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_info")
 
     async def test_guild_member_history_repository(self) -> None:
-        if self.mock_guildstats is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.guild_member_history_repository._TABLE_NAME = "temp_guild_member_history"  # type: ignore
         try:
             await self.wynnrepo.guild_member_history_repository.create_table()
-            t1 = perf_counter()
-            l = GuildMemberHistory.from_responses(self.mock_guildstats)
+            l = self.converter.to_guild_member_history(self.mock_guildstats)
             affectedrows = await self.wynnrepo.guild_member_history_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_member_history")
@@ -118,29 +81,20 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         self.wynnrepo.kans_uptime_repository._TABLE_NAME = "temp_kans_uptime"  # type: ignore
         try:
             await self.wynnrepo.kans_uptime_repository.create_table()
-            t1 = perf_counter()
             affectedrows = await self.wynnrepo.kans_uptime_repository.insert([KansUptime(
                     dt.now(),
                     dt.now() + td(days=1.0)
             )])
-            t2 = perf_counter()
-            logger.success(f"inserted {affectedrows} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_kans_uptime")
 
     async def test_online_players_repository(self) -> None:
-        if self.mock_onlineuuids is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.online_players_repository._TABLE_NAME = "temp_online_players"  # type: ignore
         try:
             await self.wynnrepo.online_players_repository.create_table()
-            t1 = perf_counter()
-            l = OnlinePlayers.from_response(self.mock_onlineuuids)
+            l = self.converter.to_online_players((self.mock_onlineuuids,))
             affectedrows = await self.wynnrepo.online_players_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_online_players")
@@ -166,37 +120,21 @@ class TestWynnDbRepository(unittest.IsolatedAsyncioTestCase):
         #     await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_activity_history")
 
     async def test_player_history_repository(self) -> None:
-        if self.mock_playerstats is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.player_history_repository._TABLE_NAME = "temp_player_history"  # type: ignore
         try:
             await self.wynnrepo.player_history_repository.create_table()
-            t1 = perf_counter()
-            l = PlayerHistory.from_responses(self.mock_playerstats)
+            l = self.converter.to_player_history(self.mock_playerstats)
             affectedrows = await self.wynnrepo.player_history_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_history")
 
     async def test_player_info_repository(self) -> None:
-        if self.mock_playerstats is None:
-            self.assertTrue(False)
-            return
         self.wynnrepo.player_info_repository._TABLE_NAME = "temp_player_info"  # type: ignore
         try:
             await self.wynnrepo.player_info_repository.create_table()
-            t1 = perf_counter()
-            l = PlayerInfo.from_responses(self.mock_playerstats)
+            l = self.converter.to_player_info(self.mock_playerstats)
             affectedrows = await self.wynnrepo.player_info_repository.insert(l)
-            t2 = perf_counter()
-            logger.success(f"inserted {len(l)} rows in {t2 - t1} seconds")
             self.assertGreaterEqual(affectedrows, 0)
         finally:
             await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_info")
-
-    async def asyncTearDown(self) -> None:
-        # await self.wynnapi.close()
-        return

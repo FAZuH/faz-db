@@ -7,7 +7,7 @@ H = TypeVar('H')
 
 
 class ResponseSet(Generic[B, H]):
-    """Base class for storing importation from a HTTP response."""
+    """Class for storing data from a HTTP response."""
 
     def __init__(self, body: B, headers: H) -> None:
         self._body: B = body

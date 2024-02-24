@@ -1,22 +1,19 @@
 from __future__ import annotations
-from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable
-
+from typing import TYPE_CHECKING
 
 from kans import DateColumn, GamemodeColumn, UuidColumn
 
 if TYPE_CHECKING:
-    from kans import PlayerResponse
+    from datetime import datetime as dt
+    from decimal import Decimal
 
 
 class CharacterHistory:
-    """implements `CharacterHistoryId`
-
-    id: `character_uuid`, `datetime`"""
+    """id: `character_uuid`, `datetime`"""
 
     def __init__(
         self,
-        character_uuid: UuidColumn,
+        character_uuid: bytes | UuidColumn,
         level: int,
         xp: int,
         wars: int,
@@ -26,7 +23,7 @@ class CharacterHistory:
         logins: int,
         deaths: int,
         discoveries: int,
-        gamemode: GamemodeColumn,
+        gamemode: bytes | GamemodeColumn,
         alchemism: Decimal,
         armouring: Decimal,
         cooking: Decimal,
@@ -42,9 +39,9 @@ class CharacterHistory:
         dungeon_completions: int,
         quest_completions: int,
         raid_completions: int,
-        datetime: DateColumn
+        datetime: dt | DateColumn
     ) -> None:
-        self._character_uuid = character_uuid
+        self._character_uuid = character_uuid if isinstance(character_uuid, UuidColumn) else UuidColumn(character_uuid)
         self._level = level
         self._xp = xp
         self._wars = wars
@@ -54,7 +51,7 @@ class CharacterHistory:
         self._logins = logins
         self._deaths = deaths
         self._discoveries = discoveries
-        self._gamemode = gamemode
+        self._gamemode = gamemode if isinstance(gamemode, GamemodeColumn) else GamemodeColumn(gamemode)
         self._alchemism = alchemism
         self._armouring = armouring
         self._cooking = cooking
@@ -70,41 +67,7 @@ class CharacterHistory:
         self._dungeon_completions = dungeon_completions
         self._quest_completions = quest_completions
         self._raid_completions = raid_completions
-        self._datetime = datetime
-
-    @classmethod
-    def from_responses(cls, resps: Iterable[PlayerResponse]) -> tuple[CharacterHistory, ...]:
-        return tuple(
-            cls(
-                character_uuid=UuidColumn(ch_uuid.to_bytes()),
-                level=ch.level,
-                xp=ch.xp,
-                wars=ch.wars,
-                playtime=Decimal(ch.playtime),
-                mobs_killed=ch.mobs_killed,
-                chests_found=ch.chests_found,
-                logins=ch.logins,
-                deaths=ch.deaths,
-                discoveries=ch.discoveries,
-                gamemode=GamemodeColumn(ch.gamemode.to_bytes()),
-                alchemism=Decimal(ch.professions.alchemism.to_float()),
-                armouring=Decimal(ch.professions.armouring.to_float()),
-                cooking=Decimal(ch.professions.cooking.to_float()),
-                jeweling=Decimal(ch.professions.jeweling.to_float()),
-                scribing=Decimal(ch.professions.scribing.to_float()),
-                tailoring=Decimal(ch.professions.tailoring.to_float()),
-                weaponsmithing=Decimal(ch.professions.weaponsmithing.to_float()),
-                woodworking=Decimal(ch.professions.woodworking.to_float()),
-                mining=Decimal(ch.professions.mining.to_float()),
-                woodcutting=Decimal(ch.professions.woodcutting.to_float()),
-                farming=Decimal(ch.professions.farming.to_float()),
-                fishing=Decimal(ch.professions.fishing.to_float()),
-                dungeon_completions=ch.dungeons.total,
-                quest_completions=len(ch.quests),
-                raid_completions=ch.raids.total,
-                datetime=DateColumn(resp.get_datetime())
-            ) for resp in resps for ch_uuid, ch in resp.body.iter_characters()
-        )
+        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
     @property
     def character_uuid(self) -> UuidColumn:

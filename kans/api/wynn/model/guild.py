@@ -1,4 +1,5 @@
 from __future__ import annotations
+from decimal import Decimal
 from typing import Any, Generator
 
 from kans import BodyDateField, Nullable, UsernameOrUuidField, UuidField
@@ -11,7 +12,7 @@ class Guild:
         self._uuid = UuidField(raw["uuid"])
         self._name = raw["name"]
         self._prefix = raw["prefix"]
-        self._level = raw["level"]
+        self._level = Decimal(raw["level"])
         self._xp_percent = raw["xpPercent"]
         self._territories = raw["territories"]
         self._wars = raw["wars"] or 0
@@ -200,7 +201,7 @@ class Guild:
         return self._prefix
 
     @property
-    def level(self) -> int:
+    def level(self) -> Decimal:
         return self._level
 
     @property

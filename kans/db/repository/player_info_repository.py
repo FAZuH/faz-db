@@ -16,23 +16,18 @@ class PlayerInfoRepository(Repository[PlayerInfo]):
         self._db = db
 
     async def insert(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int:
-        sql = (
-        f"REPLACE INTO `{self.table_name}` (`first_join`, `latest_username`, `uuid`) "
-        "VALUES (%s, %s, %s)"
-        )
-        # ON DUPLICATE KEY UPDATE
-        # latest_username = CASE
-        #     WHEN VALUES(latest_username) <> latest_username THEN VALUES(latest_username)
-        #     ELSE latest_username
-        # END
+        sql = f"""
+            REPLACE INTO `{self.table_name}` (`first_join`, `latest_username`, `uuid`)
+            VALUES (%s, %s, %s)
+        """
         return await self._db.execute_many(
-            sql,
-            tuple((
-                entity.first_join.datetime,
-                entity.latest_username,
-                entity.uuid.uuid
-            ) for entity in entities),
-            conn
+                sql,
+                tuple((
+                        entity.first_join.datetime,
+                        entity.latest_username,
+                        entity.uuid.uuid
+                ) for entity in entities),
+                conn
         )
 
     async def exists(self, id_: Any, conn: None | Connection = None) -> bool: ...
@@ -51,12 +46,12 @@ class PlayerInfoRepository(Repository[PlayerInfo]):
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
-        CREATE TABLE IF NOT EXISTS `{self.table_name}` (
-            `uuid` binary(16) NOT NULL,
-            `latest_username` varchar(16) NOT NULL,
-            `first_join` datetime NOT NULL,
-            PRIMARY KEY (`uuid`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
+                `uuid` binary(16) NOT NULL,
+                `latest_username` varchar(16) NOT NULL,
+                `first_join` datetime NOT NULL,
+                PRIMARY KEY (`uuid`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(sql)
 

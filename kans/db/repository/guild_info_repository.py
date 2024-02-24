@@ -17,16 +17,16 @@ class GuildInfoRepository(Repository[GuildInfo]):
 
     async def insert(self, entities: Iterable[GuildInfo], conn: None | Connection = None) -> int:
         # NOTE: This doesn't change. Ignore duplicates.
-        sql = (
-        f"INSERT IGNORE INTO `{self.table_name}` (`created`, `name`, `prefix`) "
-        "VALUES (%s, %s, %s)"
-        )
+        sql = f"""
+            INSERT IGNORE INTO `{self.table_name}` (`created`, `name`, `prefix`)
+            VALUES (%s, %s, %s)
+        """
         return await self._db.execute_many(
                 sql,
                 tuple((
-                    entity.created,
-                    entity.name,
-                    entity.prefix
+                        entity.created,
+                        entity.name,
+                        entity.prefix
                 ) for entity in entities),
                 conn
         )
@@ -47,12 +47,12 @@ class GuildInfoRepository(Repository[GuildInfo]):
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
-        CREATE TABLE IF NOT EXISTS `{self.table_name}` (
-            `name` varchar(30) NOT NULL,
-            `prefix` varchar(4) NOT NULL,
-            `created` datetime NOT NULL,
-            PRIMARY KEY (`name`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
+                `name` varchar(30) NOT NULL,
+                `prefix` varchar(4) NOT NULL,
+                `created` datetime NOT NULL,
+                PRIMARY KEY (`name`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(sql)
 

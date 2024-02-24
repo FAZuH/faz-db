@@ -1,10 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING
 
 from kans import DateColumn, UuidColumn
 
 if TYPE_CHECKING:
-    from kans import PlayerResponse
+    from datetime import datetime as dt
 
 
 class PlayerInfo:
@@ -12,18 +12,10 @@ class PlayerInfo:
 
     id: `uuid`"""
 
-    def __init__(self, uuid: UuidColumn, latest_username: str, first_join: DateColumn) -> None:
-        self._uuid = uuid
+    def __init__(self, uuid: bytes | UuidColumn, latest_username: str, first_join: dt | DateColumn) -> None:
+        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._latest_username = latest_username
-        self._first_join = first_join
-
-    @classmethod
-    def from_responses(cls, resps: Iterable[PlayerResponse]) -> tuple[PlayerInfo, ...]:
-        return tuple(cls(
-            uuid=UuidColumn(resp.body.uuid.to_bytes()),
-            latest_username=resp.body.username,
-            first_join=DateColumn(resp.body.first_join.to_datetime())
-        ) for resp in resps)
+        self._first_join = first_join if isinstance(first_join, DateColumn) else DateColumn(first_join)
 
     @property
     def uuid(self) -> UuidColumn:

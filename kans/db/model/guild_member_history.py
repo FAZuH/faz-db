@@ -1,11 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterable, Self
-
+from typing import TYPE_CHECKING
 
 from kans import DateColumn, UuidColumn
 
 if TYPE_CHECKING:
-    from kans import GuildResponse
+    from datetime import datetime as dt
 
 
 class GuildMemberHistory:
@@ -15,24 +14,15 @@ class GuildMemberHistory:
 
     def __init__(
         self,
-        uuid: UuidColumn,
+        uuid: bytes | UuidColumn,
         contributed: int,
-        joined: DateColumn,
-        datetime: DateColumn
+        joined: dt | DateColumn,
+        datetime: dt | DateColumn
     ) -> None:
-        self._uuid = uuid
+        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._contributed = contributed
-        self._joined = joined
-        self._datetime = datetime
-
-    @classmethod
-    def from_responses(cls, resps: Iterable[GuildResponse]) -> tuple[Self]:
-        return tuple(cls(
-            uuid=UuidColumn(uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes()),  # type: ignore
-            contributed=memberinfo.contributed,
-            joined=DateColumn(memberinfo.joined.to_datetime()),
-            datetime=DateColumn(resp.get_datetime())
-        ) for resp in resps for rank, uuid, memberinfo in resp.body.members.iter_online_members())  # type: ignore
+        self._joined = joined if isinstance(joined, DateColumn) else DateColumn(joined)
+        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
     @property
     def uuid(self) -> UuidColumn:

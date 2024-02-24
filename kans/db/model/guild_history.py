@@ -1,12 +1,11 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable
-
+from typing import TYPE_CHECKING
 
 from kans import DateColumn
 
 if TYPE_CHECKING:
-    from kans import GuildResponse
+    from datetime import datetime as dt
 
 
 class GuildHistory:
@@ -22,7 +21,7 @@ class GuildHistory:
         wars: int,
         member_total: int,
         online_members: int,
-        datetime: DateColumn
+        datetime: dt | DateColumn
     ) -> None:
         self._name = name
         self._level = level
@@ -30,19 +29,7 @@ class GuildHistory:
         self._wars = wars
         self._member_total = member_total
         self._online_members = online_members
-        self._datetime = datetime
-
-    @classmethod
-    def from_responses(cls, resps: Iterable[GuildResponse]) -> tuple[GuildHistory, ...]:
-        return tuple(cls(
-            name=resp.body.name,
-            level=Decimal(resp.body.level),
-            territories=resp.body.territories,
-            wars=resp.body.wars,
-            member_total=resp.body.members.total,
-            online_members=resp.body.members.get_online_members(),
-            datetime=DateColumn(resp.get_datetime())
-        ) for resp in resps)
+        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
     @property
     def name(self) -> str:
