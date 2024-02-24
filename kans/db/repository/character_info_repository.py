@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Iterable
 
-from typing_extensions import override
-
 from kans import CharacterInfo, Repository
 
 if TYPE_CHECKING:
@@ -17,7 +15,6 @@ class CharacterInfoRepository(Repository[CharacterInfo]):
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    @override
     async def insert(self, entities: Iterable[CharacterInfo], conn: None | Connection = None) -> int:
         # NOTE: This doesn't change. Ignore duplicates.
         sql = (

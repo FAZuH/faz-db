@@ -1,6 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing_extensions import override, Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 from kans import OnlinePlayers, Repository
 
@@ -16,7 +15,6 @@ class OnlinePlayersRepository(Repository[OnlinePlayers]):
     def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
 
-    @override
     async def insert(self, entities: Iterable[OnlinePlayers], conn: None | Connection = None) -> int:
         async with self._db.transaction_group() as tg:
             tg.add(f"DELETE FROM `{self.table_name}` WHERE `uuid` IS NOT NULL")
