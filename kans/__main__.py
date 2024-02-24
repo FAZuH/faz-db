@@ -10,9 +10,9 @@ class Main:
         kans = Kans()
         kans.start()
         while True:
-            inp = input("")
+            inp = input()
             if inp == "exit":
-                kans.heartbeat.stop()
+                kans.stop()
                 exit(0)
 
 

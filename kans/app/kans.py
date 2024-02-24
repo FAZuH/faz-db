@@ -22,8 +22,12 @@ class Kans(App):
         self._heartbeat: Heartbeat = Heartbeat(self)
 
     def start(self) -> None:
-        self.logger.info("Starting HeartBeat")
-        self._heartbeat.start()
+        self.logger.info("Starting Heartbeat")
+        self.heartbeat.start()
+
+    def stop(self) -> None:
+        self.logger.info("Stopping Heartbeat")
+        self.heartbeat.stop()
 
     @property
     def config(self) -> ConfigT:
