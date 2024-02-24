@@ -7,7 +7,7 @@ from loguru import logger  # type: ignore
 ConfigT = TypedDict("ConfigT", {
     "WYNNDATA_DB_USER": str,
     "WYNNDATA_DB_PASSWORD": str,
-    "WYNNDATA_DB_DBNAME": str,
+    "WYNNDATA_SCHEMA_NAME": str,
     "DATABASE_WEBHOOK": str,
     "ERROR_WEBHOOK": str,
     "WYNNAPI_FETCHER_WEBHOOK": str,

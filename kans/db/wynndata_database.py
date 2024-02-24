@@ -25,7 +25,7 @@ class WynnDataDatabase(Database):
 
     def __init__(self, config: ConfigT, logger: Logger) -> None:
         self._wynndb: DatabaseQuery = DatabaseQuery(
-            config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_DB_DBNAME'], 2
+            config['WYNNDATA_DB_USER'], config['WYNNDATA_DB_PASSWORD'], config['WYNNDATA_SCHEMA_NAME'], 2
         )
         self._character_history_repository = CharacterHistoryRepository(self.wynndb)
         self._character_info_repository = CharacterInfoRepository(self.wynndb)
