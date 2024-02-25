@@ -16,11 +16,11 @@ class WynnApiFetcher(Task):
 
     def __init__(self, logger: Logger, api: Api, request_list: RequestList, response_list: ResponseList) -> None:
         self._logger = logger
+        self._api: Api = api
         self._request_list = request_list
         self._response_list = response_list
-        self._api = api
 
-        self._concurrent_request = 14  # NOTE: request/min need to stay below 180, else running requests will increase without bound
+        self._concurrent_request = 20  # NOTE: request/min need to stay below 180, else running requests will increase without bound
         self._event_loop = asyncio.new_event_loop()
         self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
 
@@ -35,6 +35,7 @@ class WynnApiFetcher(Task):
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
         self._logger.debug(f"{self._request_list.length} in {self._request_list.__class__.__name__}")
+        self._logger.debug(f"{self._request_list.count_gettable()} gettable")
         self._logger.debug(f"{len(self._running_requests)} running")
         self._logger.debug(f"{self._api.ratelimit.remaining} remaining ratelimit")
 
@@ -52,6 +53,8 @@ class WynnApiFetcher(Task):
             tasks_to_remove.append(req)
             if req.exception():
                 self._logger.error(f"Error fetching from Wynn API: {req.exception()}")
+                if req.get_coro().__qualname__ == self._api.players.get_uuid.__qualname__:
+                    self._request_list.put(0, self._api.players.get_uuid)
             else:
                 ok_results.append(req.result())
 

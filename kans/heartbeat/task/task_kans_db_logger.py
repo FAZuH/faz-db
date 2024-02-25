@@ -4,7 +4,7 @@ from datetime import datetime as dt
 from typing import TYPE_CHECKING, Generator, Iterable
 
 from .task import Task
-from kans.api.wynn.response import GuildResponse, PlayerResponse, PlayersResponse
+from kans.api.wynn.response import GuildResponse, PlayerResponse, OnlinePlayersResponse
 from kans.db.model import (
     CharacterHistory,
     CharacterInfo,
@@ -26,30 +26,30 @@ if TYPE_CHECKING:
     from kans.db import Database
 
 
-class WynndataLogger(Task):  # TODO: find better name
+class TaskKansDbLogger(Task):  # TODO: find better name
     """implements `TaskBase`"""
 
     def __init__(
         self,
         logger: Logger,
-        wynnapi: Api,
-        wynnrepo: Database,
+        api: Api,
+        db: Database,
         request_list: RequestList,
         response_list: ResponseList
     ) -> None:
         self._logger = logger
-        self._wynnapi = wynnapi
-        self._wynnrepo = wynnrepo
+        self._api = api
+        self._db = db
         self._request_list = request_list
         self._response_list = response_list
 
         self._event_loop = asyncio.new_event_loop()
         self._online_players_manager = _OnlinePlayersManager()
-        self._online_guilds_manager = _OnlineGuildsManager()
         self._converter = _Converter(self._online_players_manager)
-
-        self._request_list.put(0, self._wynnapi.players.get)
+        self._online_guilds_manager = _OnlineGuildsManager()
         self._start_time = dt.now()
+
+        self._request_list.put(0, self._api.player.get_online_uuids)
 
     def setup(self) -> None: ...
     def teardown(self) -> None: ...
@@ -58,56 +58,50 @@ class WynndataLogger(Task):  # TODO: find better name
         self._event_loop.run_until_complete(self._run())
 
     async def _run(self) -> None:
-        await self._wynnrepo.kans_uptime_repository.insert((KansUptime(self._start_time, dt.now()),))
+        await self._db.kans_uptime_repository.insert((KansUptime(self._start_time, dt.now()),))
 
         player_resps: list[PlayerResponse] = []
-        players_resps: list[PlayersResponse] = []
         guild_resps: list[GuildResponse] = []
         for resp in self._response_list.get():
             if isinstance(resp, PlayerResponse):
                 player_resps.append(resp)
-            elif isinstance(resp, PlayersResponse):
-                players_resps.append(resp)
+            elif isinstance(resp, OnlinePlayersResponse):
+                await self._handle_players_response(resp)
             elif isinstance(resp, GuildResponse):
                 guild_resps.append(resp)
 
-        await self._handle_player_responses(player_resps)
-        await self._handle_players_response(players_resps)
-        await self._handle_guild_response(guild_resps)
+        if player_resps:
+            await self._handle_player_responses(player_resps)
+        if guild_resps:
+            await self._handle_guild_response(guild_resps)
 
-    async def _handle_players_response(self, resps: list[PlayersResponse]) -> None:
-        if len(resps) == 0:
-            return
-
+    async def _handle_players_response(self, resp: OnlinePlayersResponse) -> None:
         online_players: list[OnlinePlayers] = []
         player_activity_history: list[PlayerActivityHistory] = []
-        for resp in resps:
-            logged_on: set[str] = self._online_players_manager.run(resp)
 
-            # Queue new
-            for uuid in logged_on:
-                self._request_list.put(0, self._wynnapi.player.get, uuid)
+        logged_on: set[str] = self._online_players_manager.run(resp)
 
-            # Requeue
-            self._request_list.put(resp.get_expiry_datetime().timestamp(), self._wynnapi.players.get)
+        # Queue new
+        for uuid in logged_on:
+            self._request_list.put(0, self._api.player.get_full_stats, uuid)
 
-            # Create DB models
-            online_players.extend(self._converter.to_online_players((resp,)))
-            player_activity_history.extend(self._converter.to_player_activity_history((resp,), logged_on))
+        # Requeue
+        self._request_list.put(resp.get_expiry_datetime().timestamp(), self._api.player.get_online_uuids, priority=0)
+
+        # Create DB models
+        online_players.extend(self._converter.to_online_players((resp,)))
+        player_activity_history.extend(self._converter.to_player_activity_history((resp,), logged_on))
 
         # Insert to DB
-        await self._wynnrepo.online_players_repository.insert(online_players)
-        await self._wynnrepo.player_activity_history_repository.insert(player_activity_history)
+        await self._db.online_players_repository.insert(online_players)
+        await self._db.player_activity_history_repository.insert(player_activity_history)
 
     async def _handle_player_responses(self, resps: list[PlayerResponse]) -> None:
-        if len(resps) == 0:
-            return
-
         logged_on_guilds = self._online_guilds_manager.run(resps)
 
         # Queue new
         for guild_name in logged_on_guilds:
-            self._request_list.put(0, self._wynnapi.guild.get, guild_name)  # Timestamp doesn't matter here
+            self._request_list.put(0, self._api.guild.get, guild_name)  # Timestamp doesn't matter here
 
         character_history: list[CharacterHistory] = []
         character_info: list[CharacterInfo] = []
@@ -118,7 +112,7 @@ class WynndataLogger(Task):  # TODO: find better name
             if resp.body.online is True:
                 self._request_list.put(
                         resp.get_expiry_datetime().timestamp() + 480,  # due to ratelimit
-                        self._wynnapi.player.get,
+                        self._api.player.get_full_stats,
                         resp.body.uuid.uuid
                 )
 
@@ -129,15 +123,12 @@ class WynndataLogger(Task):  # TODO: find better name
             player_info.extend(self._converter.to_player_info((resp,)))
 
         # Insert to DB
-        await self._wynnrepo.player_info_repository.insert(player_info)
-        await self._wynnrepo.character_info_repository.insert(character_info)
-        await self._wynnrepo.player_history_repository.insert(player_history)
-        await self._wynnrepo.character_history_repository.insert(character_history)
+        await self._db.player_info_repository.insert(player_info)
+        await self._db.character_info_repository.insert(character_info)
+        await self._db.player_history_repository.insert(player_history)
+        await self._db.character_history_repository.insert(character_history)
 
     async def _handle_guild_response(self, resps: list[GuildResponse]) -> None:
-        if len(resps) == 0:
-            return
-
         guild_info = []
         guild_history = []
         guild_member_history = []
@@ -146,7 +137,7 @@ class WynndataLogger(Task):  # TODO: find better name
             if resp.body.members.get_online_members() > 0:
                 self._request_list.put(
                         resp.get_expiry_datetime().timestamp(),
-                        self._wynnapi.guild.get,
+                        self._api.guild.get,
                         resp.body.name
                 )
 
@@ -156,9 +147,9 @@ class WynndataLogger(Task):  # TODO: find better name
             guild_member_history.extend(self._converter.to_guild_member_history((resp,)))
 
         # Insert to Db
-        await self._wynnrepo.guild_info_repository.insert(guild_info)
-        await self._wynnrepo.guild_history_repository.insert(guild_history)
-        await self._wynnrepo.guild_member_history_repository.insert(guild_member_history)
+        await self._db.guild_info_repository.insert(guild_info)
+        await self._db.guild_history_repository.insert(guild_history)
+        await self._db.guild_member_history_repository.insert(guild_member_history)
 
     @property
     def first_delay(self) -> float:
@@ -180,7 +171,7 @@ class _OnlinePlayersManager:
         self._logon_timestamps: dict[str, dt] = {}
         self._prev_online_uuids: set[str] = set()
 
-    def run(self, resp: PlayersResponse) -> set[str]:
+    def run(self, resp: OnlinePlayersResponse) -> set[str]:
         online_uuids: set[str] = {str(uuid) for uuid in resp.body.players}
         logged_off: set[str] = self._prev_online_uuids - online_uuids
         logged_on: set[str] = online_uuids - self._prev_online_uuids
@@ -287,14 +278,14 @@ class _Converter:
                 datetime=resp.get_datetime()
         ) for resp in resps for rank, uuid, memberinfo in resp.body.members.iter_online_members())  # type: ignore
 
-    def to_online_players(self, resps: Iterable[PlayersResponse]) -> Generator[OnlinePlayers, None, None]:
+    def to_online_players(self, resps: Iterable[OnlinePlayersResponse]) -> Generator[OnlinePlayers, None, None]:
         return (
                 OnlinePlayers(uuid=uuid.to_bytes(), server=server)
                 for resp in resps
                 for uuid, server in resp.body.iter_players()
         )
 
-    def to_player_activity_history(self, resps: Iterable[PlayersResponse], logged_on: set[str]) -> Generator[PlayerActivityHistory, None, None]:
+    def to_player_activity_history(self, resps: Iterable[OnlinePlayersResponse], logged_on: set[str]) -> Generator[PlayerActivityHistory, None, None]:
         return (
                 PlayerActivityHistory(
                         uuid.username_or_uuid,

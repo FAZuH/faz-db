@@ -3,7 +3,7 @@ from typing import Any, Generator
 from .field import UsernameOrUuidField
 
 
-class Players:
+class OnlinePlayers:
 
     def __init__(self, raw: dict[str, Any]) -> None:
         self._raw = raw

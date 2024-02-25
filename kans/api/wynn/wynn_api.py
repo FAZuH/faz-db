@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from . import Api
-from .endpoint import GuildEndpoint, PlayerEndpoint, PlayersEndpoint
+from .endpoint import GuildEndpoint, PlayerEndpoint
 from kans import __version__
 from kans.util import HttpRequest, Ratelimit
 
@@ -29,10 +29,6 @@ class WynnApi(Api):
     @property
     def guild(self) -> GuildEndpoint:
         return GuildEndpoint(self._request, 3, True)
-
-    @property
-    def players(self) -> PlayersEndpoint:
-        return PlayersEndpoint(self._request, 3, True)
 
     @property
     def player(self) -> PlayerEndpoint:

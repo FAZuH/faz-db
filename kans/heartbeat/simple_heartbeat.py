@@ -8,7 +8,7 @@ from .task import (
     RequestList,
     ResponseList,
     WynnApiFetcher,
-    WynndataLogger,
+    TaskKansDbLogger,
 )
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ class SimpleHeartbeat(Thread, Heartbeat):
         response_list = ResponseList()
 
         self._add_task(WynnApiFetcher(logger, api, request_list, response_list))
-        self._add_task(WynndataLogger(logger, api, db, request_list, response_list))
+        self._add_task(TaskKansDbLogger(logger, api, db, request_list, response_list))
 
     def start(self) -> None:
         for task in self._tasks:

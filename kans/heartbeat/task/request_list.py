@@ -9,10 +9,17 @@ if TYPE_CHECKING:
 
 class _RequestItem:
 
-    def __init__(self, req_ts: float, afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]], args: tuple[Any, ...] = tuple()) -> None:
+    def __init__(
+        self,
+        priority: int,
+        req_ts: float,
+        afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]],
+        args: tuple[Any, ...] = tuple(),
+    ) -> None:
         self._req_time = req_ts
         self._afunc = afunc
         self._args = args
+        self._priority = priority
 
     def __eq__(self, other: object | _RequestItem) -> bool:
         if isinstance(other, _RequestItem):
@@ -20,8 +27,9 @@ class _RequestItem:
         return False
 
     def __lt__(self, other: _RequestItem) -> bool:
-        """For min() function."""
-        return self.req_ts < other.req_ts
+        """For +() function."""
+        # NOTE: priority check is used to prioritize online uuids request
+        return (self.req_ts < other.req_ts) or (self.priority < other.priority)
 
     @property
     def req_ts(self) -> float:
@@ -34,6 +42,10 @@ class _RequestItem:
     @property
     def args(self) -> tuple[Any, ...]:
         return self._args
+
+    @property
+    def priority(self) -> int:
+        return self._priority
 
 
 class RequestList:
@@ -57,13 +69,24 @@ class RequestList:
                 else:
                     return
 
-    def put(self, request_ts: float, afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]], *args: Any) -> bool:
+    def put(
+        self,
+        request_ts: float,
+        afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]],
+        *args: Any,
+        priority: int = 100
+    ) -> bool:
         with self._lock:
-            _item = _RequestItem(request_ts, afunc, args)
+            _item = _RequestItem(priority, request_ts, afunc, args)
             if _item in self._list:
                 return False
             self._list.append(_item)
             return True
+
+    def count_gettable(self) -> int:
+        now: float = dt.now().timestamp()
+        with self._lock:
+            return sum(1 for item in self._list if item.req_ts < now)
 
     @property
     def length(self) -> int:

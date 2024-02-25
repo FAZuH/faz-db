@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
-    from .endpoint import GuildEndpoint, PlayersEndpoint, PlayerEndpoint
+    from .endpoint import GuildEndpoint, PlayerEndpoint
     from kans.util import Ratelimit
 
 
@@ -12,8 +12,6 @@ class Api(Protocol):
     async def close(self) -> None: ...
     @property
     def guild(self) -> GuildEndpoint: ...
-    @property
-    def players(self) -> PlayersEndpoint: ...
     @property
     def player(self) -> PlayerEndpoint: ...
     @property

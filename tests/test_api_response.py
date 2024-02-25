@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from kans.api.wynn.response import (
         GuildResponse,
         PlayerResponse,
-        PlayersResponse
+        OnlinePlayers
     )
 
 
@@ -29,7 +29,7 @@ class TestApiResponses(unittest.IsolatedAsyncioTestCase):
         # await self.wynnapi.start()
 
         self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
-        self.mock_onlineuuids: PlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
+        self.mock_onlineuuids: OnlinePlayers = self.mockwynnapi.onlineuuids  # type: ignore
         self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
 
     async def test_guild_response(self) -> None:

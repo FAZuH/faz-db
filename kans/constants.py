@@ -3,13 +3,13 @@ from typing import TypedDict
 from dotenv import dotenv_values
 
 ConfigT = TypedDict("ConfigT", {
-    "WYNNDATA_DB_USER": str,
-    "WYNNDATA_DB_PASSWORD": str,
-    "WYNNDATA_SCHEMA_NAME": str,
+    "DB_USERNAME": str,
+    "DB_PASSWORD": str,
+    "SCHEMA_NAME": str,
     "DATABASE_WEBHOOK": str,
     "ERROR_WEBHOOK": str,
     "WYNNAPI_FETCHER_WEBHOOK": str,
-    "WYNNDATA_LOGGER_WEBHOOK": str,
+    "DB_LOGGER_WEBHOOK": str,
 })
 
 
