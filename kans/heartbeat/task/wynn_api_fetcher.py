@@ -44,15 +44,18 @@ class WynnApiFetcher(Task):
                 self._running_requests.append(self._event_loop.create_task(req))
 
         ok_results: list[AbstractWynnResponse[Any]] = []
+        tasks_to_remove = []
         for req in self._running_requests:
             if not req.done():
                 continue
-            if req.exception():
-                self._running_requests.remove(req)
-                self._logger.error(f"Error fetching from Wynn API: {req.exception()}")
-                continue
 
-            ok_results.append(req.result())
+            tasks_to_remove.append(req)
+            if req.exception():
+                self._logger.error(f"Error fetching from Wynn API: {req.exception()}")
+            else:
+                ok_results.append(req.result())
+
+        for req in tasks_to_remove:
             self._running_requests.remove(req)
 
         self._logger.debug(f"{len(ok_results)} responses from API")
