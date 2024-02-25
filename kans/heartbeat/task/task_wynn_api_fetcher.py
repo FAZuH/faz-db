@@ -53,6 +53,7 @@ class WynnApiFetcher(Task):
             tasks_to_remove.append(req)
             if req.exception():
                 self._logger.error(f"Error fetching from Wynn API: {req.exception()}")
+                # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
                 if req.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
                     self._request_list.put(0, self._api.player.get_online_uuids)
             else:
