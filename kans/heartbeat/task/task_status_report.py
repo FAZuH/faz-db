@@ -79,17 +79,24 @@ class TaskStatusReport(Task):
             "\n."\
             "\n├── Kans Stats/"\
             "\n│   ├── Runtime: {}"\
-            "\n│   ├── RAM: {}"\
-            "\n│   └── Tasks/"\
-            "\n│       ├── Api Request/"\
-            "\n│       │   ├── Latest: {}"\
-            "\n│       │   ├── Queued Request: {}"\
-            "\n│       │   ├── Gettable Request: {}"\
-            "\n│       │   └── Running Request: {}"\
-            "\n│       ├── Db Insert/"\
-            "\n│       │   └── Latest: {}"\
-            "\n│       └── Status Report/"\
-            "\n│           └── Latest: {}"\
+            "\n│   └── RAM: {}"\
+            "\n├── Tasks/"\
+            "\n│   ├── ApiRequest Latest: {}"\
+            "\n│   ├── DbInsert Latest: {}"\
+            "\n│   ├── StatusReport Latest: {}"\
+            "\n│   └── RequestList/"\
+            "\n│       ├── Queued/"\
+            "\n│       │   ├── PlayerStat: {}"\
+            "\n│       │   ├── OnlinePlayers: {}"\
+            "\n│       │   └── GuildStat: {}"\
+            "\n│       ├── Gettable/"\
+            "\n│       │   ├── PlayerStat: {}"\
+            "\n│       │   ├── OnlinePlayers: {}"\
+            "\n│       │   └── GuildStat: {}"\
+            "\n│       └── Running/"\
+            "\n│           ├── PlayerStat: {}"\
+            "\n│           ├── OnlinePlayers: {}"\
+            "\n│           └── GuildStat: {}"\
             "\n├── Db Stats/"\
             "\n│   └── Size: {}"\
             "\n├── Api Stats/"\
@@ -101,22 +108,60 @@ class TaskStatusReport(Task):
             "\n    └── Uptime: {}"\
             "\n```"
 
+    # TODO: unique count of request types on RequestList
+    # TODO: average requests per minute
     async def _get_report(self) -> str:
         now = dt.now()
+        now_ts = now.timestamp()
+        unique_request_list: dict[str, list[int]] = {
+                "queued": [0, 0, 0],
+                "gettable": [0, 0, 0],
+                "running": [0, 0, 0]
+        }
+        for req in self._request_list.iter():
+            index = 3
+            if req.afunc.__qualname__ == "PlayerEndpoint.get_full_stats":
+                index = 0
+            elif req.afunc.__qualname__ == "PlayerEndpoint.get_online_uuids":
+                index = 1
+            elif req.afunc.__qualname__ == "GuildEndpoint.get":
+                index = 2
+
+            unique_request_list["queued"][index] += 1
+            if req.req_ts < now_ts:
+                unique_request_list["gettable"][index] += 1
+
+        for req in self._api_request.running_requests.copy():
+            coro = req.get_coro()
+            index = 3
+            if coro.__qualname__ == "PlayerEndpoint.get_full_stats":
+                index = 0
+            elif coro.__qualname__ == "PlayerEndpoint.get_online_uuids":
+                index = 1
+            elif coro.__qualname__ == "GuildEndpoint.get":
+                index = 2
+
+            unique_request_list["running"][index] += 1
+
         msg = self._DEFAULT_MSG.format(
                 now - self._start_time,  # runtime
                 self.Util.get_memory_usage() / self.Util.MB_TO_BYTE,  # ram
 
-                now - self._api_request.latest_run,  # api request latest
-                self._request_list.length,  # queued request
-                self._request_list.count_gettable(),  # gettable request
-                len(self._api_request.running_requests),  # running request
+                self._api_request.latest_run,  # api request latest
+                self._db_insert.latest_run,  # db insert latest
+                self._latest_run,  # status report latest
 
-                now - self._db_insert.latest_run,  # db insert latest
+                unique_request_list["queued"][0],  # queued player stat
+                unique_request_list["queued"][1],  # queued online players
+                unique_request_list["queued"][2],  # queued guild stat
+                unique_request_list["gettable"][0],  # gettable player stat
+                unique_request_list["gettable"][1],  # gettable online players
+                unique_request_list["gettable"][2],  # gettable guild stat
+                unique_request_list["running"][0],  # running player stat
+                unique_request_list["running"][1],  # running online players
+                unique_request_list["running"][2],  # running guild stat
 
-                now - self._latest_run,  # status report latest
-
-                f"{await self._db.total_size() / self.Util.MB_TO_BYTE} MB",  # TODO: get db size
+                f"{await self._db.total_size() / self.Util.MB_TO_BYTE} MB",  # db size
 
                 self._api.ratelimit.remaining,  # ratelimit
                 len(self._db_insert.online_players_manager.prev_online_uuids),  # online player
@@ -171,17 +216,24 @@ class TaskStatusReport(Task):
 # .
 # ├── Kans Stats/
 # │   ├── Runtime: 
-# │   ├── RAM: 
-# │   └── Tasks/
-# │       ├── Api Request/
-# │       │   ├── Latest: 
-# │       │   ├── Queued Request: 
-# │       │   ├── Gettable Request: 
-# │       │   └── Running Request: 
-# │       ├── Db Insert/
-# │       │   └── Latest: 
-# │       └── Status Report/
-# │           └── Latest: 
+# │   └── RAM: 
+# ├── Tasks/
+# │   ├── ApiRequest Latest: 
+# │   ├── DbInsert Latest: 
+# │   ├── StatusReport Latest: 
+# │   └── RequestList/
+# │       ├── Queued/
+# │       │   ├── PlayerStat: 
+# │       │   ├── OnlinePlayers: 
+# │       │   └── GuildStat: 
+# │       ├── Gettable/
+# │       │   ├── PlayerStat: 
+# │       │   ├── OnlinePlayers: 
+# │       │   └── GuildStat: 
+# │       └── Running/
+# │           ├── PlayerStat: 
+# │           ├── OnlinePlayers: 
+# │           └── GuildStat: 
 # ├── Db Stats/
 # │   └── Size: 
 # ├── Api Stats/
@@ -196,16 +248,23 @@ class TaskStatusReport(Task):
 # - Kans Stats
 #  - Runtime: 
 #  - RAM: 
-#  - Tasks
-#    - Api Request
-#     - Latest: 
-#     - Queued Request: 
-#     - Gettable Request: 
-#     - Running Request: 
-#   - Db Insert
-#    - Latest: 
-#   - Status Report
-#    - Latest: 
+# - Tasks
+#  - ApiRequest Latest: 
+#  - DbInsert Latest: 
+#  - StatusReport Latest: 
+#  - RequestList
+#   - Queued
+#    - PlayerStat: 
+#    - OnlinePlayers: 
+#    - GuildStat: 
+#   - Gettable
+#    - PlayerStat: 
+#    - OnlinePlayers: 
+#    - GuildStat: 
+#   - Running
+#    - PlayerStat: 
+#    - OnlinePlayers: 
+#    - GuildStat: 
  
 # - Db Stats
 #   - Size: 

@@ -83,11 +83,16 @@ class RequestList:
             self._list.append(_item)
             return True
 
-    def count_gettable(self) -> int:
-        now: float = dt.now().timestamp()
+    def iter(self) -> Generator[_RequestItem, Any, None]:
         with self._lock:
-            return sum(1 for item in self._list if item.req_ts < now)
+            for item in self._list:
+                yield item
 
-    @property
-    def length(self) -> int:
-        return len(self._list)
+    # def count_gettable(self) -> int:
+    #     now: float = dt.now().timestamp()
+    #     with self._lock:
+    #         return sum(1 for item in self._list if item.req_ts < now)
+
+    # @property
+    # def length(self) -> int:
+    #     return len(self._list)

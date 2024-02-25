@@ -218,7 +218,7 @@ class _OnlineGuildsManager:
 
     def queue_guild_stats(self, resps: Iterable[PlayerResponse]) -> None:
         online_guilds: set[str] = {resp.body.guild.name for resp in resps if resp.body.guild is not None}
-        logged_on: set[str] = self._prev_online_guilds - online_guilds
+        logged_on: set[str] = online_guilds - self._prev_online_guilds
         self._prev_online_guilds = online_guilds.copy()
 
         for guild_name in logged_on:
