@@ -4,7 +4,7 @@ import os
 from kans.api.wynn.response import (
     GuildResponse,
     PlayerResponse,
-    OnlinePlayers,
+    OnlinePlayersResponse,
 )
 
 ONLINEUUIDS_MOCK_FP = "tests/mock_data/mock_onlineUuids.json"
@@ -18,7 +18,7 @@ class MockWynnApi:
         self.onlineuuids = None
         if os.path.exists(ONLINEUUIDS_MOCK_FP):
             with open(ONLINEUUIDS_MOCK_FP, 'r') as f:
-                self.onlineuuids = OnlinePlayers(*(json.load(f)["0"]))
+                self.onlineuuids = OnlinePlayersResponse(*(json.load(f)["0"]))
 
         self.onlineplayerstats = None
         if os.path.exists(ONLINEPLAYERSTATS_MOCK_FP):

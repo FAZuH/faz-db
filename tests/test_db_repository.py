@@ -5,7 +5,7 @@ import unittest
 from loguru import logger
 
 from kans import config
-from kans.api.wynn.response import PlayerResponse, OnlinePlayers, GuildResponse
+from kans.api.wynn.response import PlayerResponse, OnlinePlayersResponse, GuildResponse
 from kans.db import Database, KansDatabase
 from kans.db.model import KansUptime
 from kans.heartbeat.task.task_kans_db_logger import _Converter  # type: ignore
@@ -20,7 +20,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.wynnrepo: Database = KansDatabase(config, logger)
 
         self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
-        self.mock_onlineuuids: OnlinePlayers = self.mockwynnapi.onlineuuids  # type: ignore
+        self.mock_onlineuuids: OnlinePlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
         self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
 
     async def test_character_history_repository(self) -> None:

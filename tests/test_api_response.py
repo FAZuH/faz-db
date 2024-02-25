@@ -1,5 +1,4 @@
 from datetime import datetime as dt
-from datetime import timedelta as td
 from types import NoneType
 from typing import TYPE_CHECKING
 import unittest
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
     from kans.api.wynn.response import (
         GuildResponse,
         PlayerResponse,
-        OnlinePlayers
+        OnlinePlayersResponse
     )
 
 
@@ -29,7 +28,7 @@ class TestApiResponses(unittest.IsolatedAsyncioTestCase):
         # await self.wynnapi.start()
 
         self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
-        self.mock_onlineuuids: OnlinePlayers = self.mockwynnapi.onlineuuids  # type: ignore
+        self.mock_onlineuuids: OnlinePlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
         self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
 
     async def test_guild_response(self) -> None:
@@ -95,10 +94,6 @@ class TestApiResponses(unittest.IsolatedAsyncioTestCase):
 
     async def test_player_response(self) -> None:
         for playerstat in self.mock_playerstats:
-            self.assertIsInstance(playerstat.get_datetime(), dt)
-            self.assertIsInstance(playerstat.get_expiry_datetime(), dt)
-            self.assertIsInstance(playerstat.get_expiry_timedelta(), td)
-
             body = playerstat.body
             self.assertIsInstance(body, Player)
             self.assertIsInstance(body.username, str)
@@ -263,7 +258,7 @@ class TestApiResponses(unittest.IsolatedAsyncioTestCase):
 
                 self.assertIsInstance(ch.quests, list)
 
-    async def test_players_response(self) -> None:
+    async def test_online_players_response(self) -> None:
         players = self.mock_onlineuuids
         self.assertGreaterEqual(players.body.total, 0)
         self.assertIsInstance(players.body.players, dict)

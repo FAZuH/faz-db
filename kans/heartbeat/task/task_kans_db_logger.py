@@ -66,7 +66,7 @@ class TaskKansDbLogger(Task):  # TODO: find better name
             if isinstance(resp, PlayerResponse):
                 player_resps.append(resp)
             elif isinstance(resp, OnlinePlayersResponse):
-                await self._handle_players_response(resp)
+                await self._handle_online_players_response(resp)
             elif isinstance(resp, GuildResponse):
                 guild_resps.append(resp)
 
@@ -75,7 +75,7 @@ class TaskKansDbLogger(Task):  # TODO: find better name
         if guild_resps:
             await self._handle_guild_response(guild_resps)
 
-    async def _handle_players_response(self, resp: OnlinePlayersResponse) -> None:
+    async def _handle_online_players_response(self, resp: OnlinePlayersResponse) -> None:
         online_players: list[OnlinePlayers] = []
         player_activity_history: list[PlayerActivityHistory] = []
 
@@ -86,7 +86,7 @@ class TaskKansDbLogger(Task):  # TODO: find better name
             self._request_list.put(0, self._api.player.get_full_stats, uuid)
 
         # Requeue
-        self._request_list.put(resp.get_expiry_datetime().timestamp(), self._api.player.get_online_uuids, priority=0)
+        self._request_list.put(resp.headers.expires.to_datetime().timestamp(), self._api.player.get_online_uuids, priority=0)
 
         # Create DB models
         online_players.extend(self._converter.to_online_players((resp,)))
@@ -111,7 +111,7 @@ class TaskKansDbLogger(Task):  # TODO: find better name
             # Requeue
             if resp.body.online is True:
                 self._request_list.put(
-                        resp.get_expiry_datetime().timestamp() + 480,  # due to ratelimit
+                        resp.headers.expires.to_datetime().timestamp() + 480,  # due to ratelimit
                         self._api.player.get_full_stats,
                         resp.body.uuid.uuid
                 )
@@ -136,7 +136,7 @@ class TaskKansDbLogger(Task):  # TODO: find better name
             # Requeue
             if resp.body.members.get_online_members() > 0:
                 self._request_list.put(
-                        resp.get_expiry_datetime().timestamp(),
+                        resp.headers.expires.to_datetime().timestamp(),
                         self._api.guild.get,
                         resp.body.name
                 )
@@ -161,7 +161,7 @@ class TaskKansDbLogger(Task):  # TODO: find better name
 
     @property
     def name(self) -> str:
-        return "WynndataLogger"
+        return self.__class__.__name__
 
 
 class _OnlinePlayersManager:
@@ -181,7 +181,7 @@ class _OnlinePlayersManager:
             del self._logon_timestamps[uuid]
 
         for uuid in logged_on:
-            self._logon_timestamps[uuid] = resp.get_datetime()
+            self._logon_timestamps[uuid] = resp.headers.to_datetime()
 
         return logged_on
 
@@ -242,7 +242,7 @@ class _Converter:
                 dungeon_completions=ch.dungeons.total,
                 quest_completions=len(ch.quests),
                 raid_completions=ch.raids.total,
-                datetime=resp.get_datetime()
+                datetime=resp.headers.to_datetime()
         ) for resp in resps for ch_uuid, ch in resp.body.iter_characters())
 
     def to_character_info(self, resps: Iterable[PlayerResponse]) -> Generator[CharacterInfo, None, None]:
@@ -260,7 +260,7 @@ class _Converter:
                 wars=resp.body.wars,
                 member_total=resp.body.members.total,
                 online_members=resp.body.members.get_online_members(),
-                datetime=resp.get_datetime()
+                datetime=resp.headers.to_datetime()
         ) for resp in resps)
 
     def to_guild_info(self, resps: Iterable[GuildResponse]) -> Generator[GuildInfo, None, None]:
@@ -275,7 +275,7 @@ class _Converter:
                 uuid=uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes(),  # type: ignore
                 contributed=memberinfo.contributed,
                 joined=memberinfo.joined.to_datetime(),
-                datetime=resp.get_datetime()
+                datetime=resp.headers.to_datetime()
         ) for resp in resps for rank, uuid, memberinfo in resp.body.members.iter_online_members())  # type: ignore
 
     def to_online_players(self, resps: Iterable[OnlinePlayersResponse]) -> Generator[OnlinePlayers, None, None]:
@@ -290,7 +290,7 @@ class _Converter:
                 PlayerActivityHistory(
                         uuid.username_or_uuid,
                         self._online_players_manager.logon_timestamps[uuid.username_or_uuid],
-                        resp.get_datetime()
+                        resp.headers.to_datetime()
                 )
                 for resp in resps
                 for uuid in resp.body.players
@@ -306,7 +306,7 @@ class _Converter:
                 guild_name=resp.body.guild.name if resp.body.guild else None,
                 guild_rank=resp.body.guild.rank if resp.body.guild else None,
                 rank=resp.body.rank,
-                datetime=resp.get_datetime()
+                datetime=resp.headers.to_datetime()
         ) for resp in resps)
 
     def to_player_info(self, resps: Iterable[PlayerResponse]) -> Generator[PlayerInfo, None, None]:

@@ -19,8 +19,8 @@ class TestApi(unittest.IsolatedAsyncioTestCase):
         response = await self._api.player.get_full_stats("Maarcus1")
         self.assertIsNotNone(response.body)
 
-    async def test_players(self) -> None:
-        response = await self._api.players.get_uuid()
+    async def test_online_players(self) -> None:
+        response = await self._api.player.get_online_uuids()
         self.assertIsNotNone(response.body)
 
     async def asyncTearDown(self) -> None:

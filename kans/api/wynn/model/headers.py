@@ -16,13 +16,7 @@ class Headers:
         self._ratelimit_remaining: str = raw["RateLimit-Remaining"]
         self._ratelimit_reset: str = raw["RateLimit-Reset"]
 
-    def get_expiry_datetime(self) -> dt:
-        return self.expires.to_datetime()
-
-    def get_expiry_timediff(self) -> td:
-        return self.get_expiry_datetime() - dt.now()
-
-    def get_datetime(self) -> dt:
+    def to_datetime(self) -> dt:
         """
         Get the timestamp of the response.
 
