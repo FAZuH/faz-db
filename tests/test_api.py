@@ -1,12 +1,14 @@
 import unittest
 
+from loguru import logger
+
 from kans.api import Api, WynnApi
 
 
 class TestApi(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
-        self._api: Api = WynnApi()
+        self._api: Api = WynnApi(logger)
         await self._api.start()
 
     async def test_guild(self) -> None:

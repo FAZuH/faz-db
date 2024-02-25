@@ -13,9 +13,10 @@ if TYPE_CHECKING:
 class WynnApi(Api):
 
     def __init__(self, logger: Logger) -> None:
+        self._ratelimit = Ratelimit(180, 60, logger)
         self._request: HttpRequest = HttpRequest(
                 "https://api.wynncraft.com",
-                ratelimit=Ratelimit(180, 60, logger),
+                ratelimit=self._ratelimit,
                 headers={"User-Agent": f"Kans/{__version__}", "Content-Type": "application/json"
         })
 
@@ -36,6 +37,10 @@ class WynnApi(Api):
     @property
     def player(self) -> PlayerEndpoint:
         return PlayerEndpoint(self._request, 3, True)
+
+    @property
+    def ratelimit(self) -> Ratelimit:
+        return self._ratelimit
 
     async def __aenter__(self) -> Api:
         await self._request.__aenter__()

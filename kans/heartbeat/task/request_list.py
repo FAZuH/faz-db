@@ -16,7 +16,7 @@ class _RequestItem:
 
     def __eq__(self, other: object | _RequestItem) -> bool:
         if isinstance(other, _RequestItem):
-            return (self.args == other.args) and (self.afunc is other.afunc)
+            return (self.args == other.args) and (self.afunc.__func__ is other.afunc.__func__)  # type: ignore
         return False
 
     def __lt__(self, other: _RequestItem) -> bool:
