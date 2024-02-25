@@ -2,7 +2,7 @@ from decimal import Decimal
 from types import NoneType
 import unittest
 
-from kans.heartbeat.task.task_kans_db_logger import _Converter  # type: ignore
+from kans.heartbeat.task.task_db_insert import _Converter  # type: ignore
 from kans.api.wynn.response import PlayerResponse, OnlinePlayersResponse, GuildResponse
 from kans.db.model import (
     CharacterHistory,
@@ -14,6 +14,7 @@ from tests.mock_wynnapi import MockWynnApi
 
 
 class TestDbModel(unittest.IsolatedAsyncioTestCase):
+    """Tests if db.models is properly storing data."""
 
     async def asyncSetUp(self) -> None:
         self.converter = _Converter(None)  # type: ignore

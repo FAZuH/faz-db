@@ -1,13 +1,9 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
-from kans.heartbeat import Heartbeat
-
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans.api import Api
-    from kans.db import Database
-    from constants import ConfigT
+    from kans import Api, Database, ConfigT, Heartbeat
 
 
 class App(Protocol):

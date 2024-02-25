@@ -8,11 +8,12 @@ from kans import config
 from kans.api.wynn.response import PlayerResponse, OnlinePlayersResponse, GuildResponse
 from kans.db import Database, KansDatabase
 from kans.db.model import KansUptime
-from kans.heartbeat.task.task_kans_db_logger import _Converter  # type: ignore
+from kans.heartbeat.task.task_db_insert import _Converter  # type: ignore
 from tests.mock_wynnapi import MockWynnApi
 
 
 class TestDbRepository(unittest.IsolatedAsyncioTestCase):
+    """Tests if db.repositories is able to insert data into database."""
 
     async def asyncSetUp(self) -> None:
         self.converter = _Converter(None)  # type: ignore
@@ -31,7 +32,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.character_history_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_character_history")
+            await self.wynnrepo.db.execute("DROP TABLE temp_character_history")
 
     async def test_character_info_repository(self) -> None:
         self.wynnrepo.character_info_repository._TABLE_NAME = "temp_character_info"  # type: ignore
@@ -41,7 +42,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.character_info_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_character_info")
+            await self.wynnrepo.db.execute("DROP TABLE temp_character_info")
 
     async def test_guild_history_repository(self) -> None:
         self.wynnrepo.guild_history_repository._TABLE_NAME = "temp_guild_history"  # type: ignore
@@ -51,7 +52,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.guild_history_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_history")
+            await self.wynnrepo.db.execute("DROP TABLE temp_guild_history")
 
     async def test_guild_info_repository(self) -> None:
         self.wynnrepo.guild_info_repository._TABLE_NAME = "temp_guild_info"  # type: ignore
@@ -61,7 +62,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.guild_info_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_info")
+            await self.wynnrepo.db.execute("DROP TABLE temp_guild_info")
 
     async def test_guild_member_history_repository(self) -> None:
         self.wynnrepo.guild_member_history_repository._TABLE_NAME = "temp_guild_member_history"  # type: ignore
@@ -71,7 +72,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.guild_member_history_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_guild_member_history")
+            await self.wynnrepo.db.execute("DROP TABLE temp_guild_member_history")
 
     async def test_kans_uptime_repository(self) -> None:
         self.wynnrepo.kans_uptime_repository._TABLE_NAME = "temp_kans_uptime"  # type: ignore
@@ -83,7 +84,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             )])
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_kans_uptime")
+            await self.wynnrepo.db.execute("DROP TABLE temp_kans_uptime")
 
     async def test_online_players_repository(self) -> None:
         self.wynnrepo.online_players_repository._TABLE_NAME = "temp_online_players"  # type: ignore
@@ -93,7 +94,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.online_players_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_online_players")
+            await self.wynnrepo.db.execute("DROP TABLE temp_online_players")
 
     @unittest.skip("Needs long and time-consuming process to test.")
     async def test_player_activity_history_repository(self) -> None:
@@ -123,7 +124,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.player_history_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_history")
+            await self.wynnrepo.db.execute("DROP TABLE temp_player_history")
 
     async def test_player_info_repository(self) -> None:
         self.wynnrepo.player_info_repository._TABLE_NAME = "temp_player_info"  # type: ignore
@@ -133,4 +134,4 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             affectedrows = await self.wynnrepo.player_info_repository.insert(l)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.wynnrepo.wynndb.execute("DROP TABLE temp_player_info")
+            await self.wynnrepo.db.execute("DROP TABLE temp_player_info")

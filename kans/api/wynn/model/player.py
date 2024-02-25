@@ -22,21 +22,21 @@ class Player:
         self._uuid = UuidField(raw["uuid"])
         self._rank = raw["rank"]
         self._rank_badge = raw["rankBadge"]
-        self._legacy_rank_colour = Nullable(Player.LegacyRankColour, raw.get("legacyRankColour", None))
+        self._legacy_rank_colour = Nullable(self.LegacyRankColour, raw.get("legacyRankColour", None))
         self._shortened_rank = raw["shortenedRank"]
         self._support_rank = raw["supportRank"]
         self._veteran = raw["veteran"] or False
         self._first_join = BodyDateField(raw["firstJoin"])
         self._last_join = BodyDateField(raw["lastJoin"])
         self._playtime = Decimal(raw["playtime"])
-        self._guild = Nullable(Player.Guild, raw.get("guild", None))
-        self._global_data = Player.GlobalData(raw["globalData"])
+        self._guild = Nullable(self.Guild, raw.get("guild", None))
+        self._global_data = self.GlobalData(raw["globalData"])
         self._forum_link = raw["forumLink"]
         self._ranking = raw["ranking"]
         """`rankingName: nthRank`"""
         self._public_profile = raw["publicProfile"]
         self._characters = {
-            UuidField(character_uuid): Player.Character(character)
+            UuidField(character_uuid): self.Character(character)
             for character_uuid, character in raw["characters"].items()
         }
 
@@ -192,8 +192,8 @@ class Player:
             self._pre_economy = node["preEconomy"] or False
             self._pvp = Player.Pvp(node["pvp"])
             self._gamemode = GamemodeField(node["gamemode"])
-            self._skill_points = Player.Character.SkillPoints(node["skillPoints"])
-            self._professions = Player.Character.Professions(node["professions"])
+            self._skill_points = self.SkillPoints(node["skillPoints"])
+            self._professions = self.Professions(node["professions"])
             self._dungeons = Player.Dungeons(node.get("dungeons", {}) or {})
             self._raids = Player.Raids(node.get("raids", {}) or {})
             self._quests = node["quests"]
@@ -228,7 +228,7 @@ class Player:
 
         class Professions:
             def __init__(self, node: dict[str, Any]) -> None:
-                ProfessionInfo = Player.Character.Professions.ProfessionInfo
+                ProfessionInfo = self.ProfessionInfo
                 self._alchemism = ProfessionInfo(node.get("alchemism", {}))
                 self._armouring = ProfessionInfo(node.get("armouring", {}))
                 self._cooking = ProfessionInfo(node.get("cooking", {}))

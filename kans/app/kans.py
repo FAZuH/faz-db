@@ -11,10 +11,7 @@ from kans.heartbeat import SimpleHeartbeat
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans import ConfigT
-    from kans.api import Api
-    from kans.db import Database
-    from kans.heartbeat import Heartbeat
+    from kans import Api, ConfigT, Database, Heartbeat
 
 
 class Kans(App):
@@ -24,7 +21,7 @@ class Kans(App):
         self._logger: Logger = logger
         self._api: Api = WynnApi(self.logger)
         self._db: Database = KansDatabase(self.config, self.logger)
-        self._heartbeat: Heartbeat = SimpleHeartbeat(self.logger, self.api, self.db)
+        self._heartbeat: Heartbeat = SimpleHeartbeat(self.config, self.logger, self.api, self.db)
 
     def start(self) -> None:
         self.logger.info("Starting Heartbeat")

@@ -38,6 +38,10 @@ class WynnApi(Api):
     def ratelimit(self) -> Ratelimit:
         return self._ratelimit
 
+    @property
+    def request(self) -> HttpRequest:
+        return self._request
+
     async def __aenter__(self) -> Api:
         await self._request.__aenter__()
         return self

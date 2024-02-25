@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+from datetime import datetime as dt
 from typing import TYPE_CHECKING, Any
 
 from . import Task
@@ -7,11 +8,11 @@ from . import Task
 if TYPE_CHECKING:
     from loguru import Logger
     from . import RequestList, ResponseList
-    from kans.api import Api
+    from kans import Api
     from kans.api.wynn.response import AbstractWynnResponse
 
 
-class WynnApiFetcher(Task):
+class TaskApiRequest(Task):
     """implements `TaskBase`"""
 
     def __init__(self, logger: Logger, api: Api, request_list: RequestList, response_list: ResponseList) -> None:
@@ -22,6 +23,7 @@ class WynnApiFetcher(Task):
 
         self._concurrent_request = 20  # NOTE: request/min need to stay below 180, else running requests will increase without bound
         self._event_loop = asyncio.new_event_loop()
+        self._latest_run = dt.now()
         self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
 
     def setup(self) -> None:
@@ -34,12 +36,11 @@ class WynnApiFetcher(Task):
 
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
-        self._logger.debug(f"{self._request_list.length} in {self._request_list.__class__.__name__}")
-        self._logger.debug(f"{self._request_list.count_gettable()} gettable")
-        self._logger.debug(f"{len(self._running_requests)} running")
-        self._logger.debug(f"{self._api.ratelimit.remaining} remaining ratelimit")
+        self._latest_run = dt.now()
 
     async def _run(self) -> None:
+        await self._check_api_session()
+
         if self._api.ratelimit.remaining > 0:
             for req in self._request_list.get(self._concurrent_request):
                 self._running_requests.append(self._event_loop.create_task(req))
@@ -65,13 +66,26 @@ class WynnApiFetcher(Task):
         self._logger.debug(f"{len(ok_results)} responses from API")
         self._response_list.put(ok_results)
 
+    async def _check_api_session(self) -> None:
+        if not self._api.request.is_open():
+            self._logger.warning("HTTP session is closed. Reopening...")
+            await self._api.start()
+
+    @property
+    def running_requests(self) -> list[asyncio.Task[AbstractWynnResponse[Any]]]:
+        return self._running_requests
+
     @property
     def first_delay(self) -> float:
-        return 1.0
+        return 2.0
 
     @property
     def interval(self) -> float:
         return 5.0
+
+    @property
+    def latest_run(self) -> dt:
+        return self._latest_run
 
     @property
     def name(self) -> str:

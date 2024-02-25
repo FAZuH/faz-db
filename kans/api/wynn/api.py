@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
     from .endpoint import GuildEndpoint, PlayerEndpoint
-    from kans.util import Ratelimit
+    from kans.util import Ratelimit, HttpRequest
 
 
 class Api(Protocol):
@@ -16,5 +16,7 @@ class Api(Protocol):
     def player(self) -> PlayerEndpoint: ...
     @property
     def ratelimit(self) -> Ratelimit: ...
+    @property
+    def request(self) -> HttpRequest: ...
     async def __aenter__(self) -> Api: ...
     async def __aexit__(self, exc_type: Any, exc: Any, tb: Any): ...

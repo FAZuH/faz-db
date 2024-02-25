@@ -2,25 +2,24 @@ from __future__ import annotations
 from threading import Thread
 from typing import TYPE_CHECKING
 
-from . import Heartbeat
-from . import HeartbeatTask
+from . import Heartbeat,HeartbeatTask
 from .task import (
     RequestList,
     ResponseList,
-    WynnApiFetcher,
-    TaskKansDbLogger,
+    TaskApiRequest,
+    TaskDbInsert,
+    TaskStatusReport,
 )
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from kans.api.wynn import Api
-    from kans.db import Database
+    from kans import Api, ConfigT, Database
     from .task import Task
 
 
 class SimpleHeartbeat(Thread, Heartbeat):
 
-    def __init__(self, logger: Logger, api: Api, db: Database) -> None:
+    def __init__(self, config: ConfigT, logger: Logger, api: Api, db: Database) -> None:
         super().__init__(target=self.run, daemon=True)
         self._logger = logger
 
@@ -29,8 +28,13 @@ class SimpleHeartbeat(Thread, Heartbeat):
         request_list = RequestList()
         response_list = ResponseList()
 
-        self._add_task(WynnApiFetcher(logger, api, request_list, response_list))
-        self._add_task(TaskKansDbLogger(logger, api, db, request_list, response_list))
+        api_request = TaskApiRequest(logger, api, request_list, response_list)
+        db_insert = TaskDbInsert(logger, api, db, request_list, response_list)
+        status_report = TaskStatusReport(config, logger, api, api_request, db, db_insert, request_list)
+
+        self._add_task(api_request)
+        self._add_task(db_insert)
+        self._add_task(status_report)
 
     def start(self) -> None:
         for task in self._tasks:

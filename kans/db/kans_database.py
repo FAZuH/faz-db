@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
 from . import Database, DatabaseQuery
 from .repository import (
@@ -13,11 +14,12 @@ from .repository import (
     PlayerActivityHistoryRepository,
     PlayerInfoRepository,
     PlayerHistoryRepository,
+    Repository,
 )
 
 if TYPE_CHECKING:
     from loguru import Logger
-    from constants import ConfigT
+    from kans import ConfigT
 
 
 class KansDatabase(Database):
@@ -26,16 +28,39 @@ class KansDatabase(Database):
         self._wynndb: DatabaseQuery = DatabaseQuery(
             config["DB_USERNAME"], config["DB_PASSWORD"], config["SCHEMA_NAME"], 2
         )
-        self._character_history_repository = CharacterHistoryRepository(self.wynndb)
-        self._character_info_repository = CharacterInfoRepository(self.wynndb)
-        self._guild_history_repository = GuildHistoryRepository(self.wynndb)
-        self._guild_info_repository = GuildInfoRepository(self.wynndb)
-        self._guild_member_history_repository = GuildMemberHistoryRepository(self.wynndb)
-        self._kans_uptime_repository = KansUptimeRepository(self.wynndb)
-        self._online_players_repository = OnlinePlayersRepository(self.wynndb)
-        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.wynndb)
-        self._player_history_repository = PlayerHistoryRepository(self.wynndb)
-        self._player_info_repository = PlayerInfoRepository(self.wynndb)
+        self._character_history_repository = CharacterHistoryRepository(self.db)
+        self._character_info_repository = CharacterInfoRepository(self.db)
+        self._guild_history_repository = GuildHistoryRepository(self.db)
+        self._guild_info_repository = GuildInfoRepository(self.db)
+        self._guild_member_history_repository = GuildMemberHistoryRepository(self.db)
+        self._kans_uptime_repository = KansUptimeRepository(self.db)
+        self._online_players_repository = OnlinePlayersRepository(self.db)
+        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.db)
+        self._player_history_repository = PlayerHistoryRepository(self.db)
+        self._player_info_repository = PlayerInfoRepository(self.db)
+
+        self._all_repositories: list[Repository[Any, Any]] = [
+            self._character_history_repository,
+            self._character_info_repository,
+            self._guild_history_repository,
+            self._guild_info_repository,
+            self._guild_member_history_repository,
+            self._kans_uptime_repository,
+            self._online_players_repository,
+            self._player_activity_history_repository,
+            self._player_history_repository,
+            self._player_info_repository,
+        ]
+
+    async def create_all(self) -> None:
+        for repo in self._all_repositories:
+            await repo.create_table()
+
+    async def total_size(self) -> Decimal:
+        sum_size = Decimal(0)
+        for repo in self._all_repositories:
+            sum_size += await repo.table_size()
+        return sum_size
 
     @property
     def guild_history_repository(self) -> GuildHistoryRepository:
@@ -78,5 +103,5 @@ class KansDatabase(Database):
         return self._online_players_repository
 
     @property
-    def wynndb(self) -> DatabaseQuery:
+    def db(self) -> DatabaseQuery:
         return self._wynndb

@@ -106,7 +106,7 @@ class HttpRequest:
                 return await self.get(url_param, retries - 1, retry_on_exc)
             raise
 
-    def is_sessionopen(self) -> bool:
+    def is_open(self) -> bool:
         return self._session is not None and not self._session.closed
 
     async def __aenter__(self) -> HttpRequest:

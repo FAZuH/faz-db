@@ -5,13 +5,15 @@ T = TypeVar('T')
 ID = TypeVar('ID', contravariant=True)
 
 if TYPE_CHECKING:
+    from decimal import Decimal
     from aiomysql import Connection
+    from decimal import Decimal
 
 
 class Repository(Protocol, Generic[T, ID]):
     """<<interface>>
 
-    Generic[T]
+    Generic[T, ID]
     """
     async def insert(self, entities: Iterable[T], conn: None | Connection = None) -> int: ...
     async def exists(self, id_: ID, conn: None | Connection = None) -> bool: ...
@@ -21,5 +23,6 @@ class Repository(Protocol, Generic[T, ID]):
     async def update(self, entities: Iterable[T], conn: None | Connection = None) -> int: ...
     async def delete(self, id_: ID, conn: None | Connection = None) -> int: ...
     async def create_table(self, conn: None | Connection = None) -> None: ...
+    async def table_size(self, conn: None | Connection = None) -> Decimal: ...
     @property
     def table_name(self) -> str: ...

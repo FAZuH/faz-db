@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
 
 
-class TestApiResponses(unittest.IsolatedAsyncioTestCase):
+class TestApiModel(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         self.mockwynnapi = MockWynnApi()
         # self.wynnapi = self.mockwynnapi.wynnapi
