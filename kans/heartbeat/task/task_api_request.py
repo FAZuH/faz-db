@@ -41,7 +41,7 @@ class TaskApiRequest(Task):
     async def _run(self) -> None:
         await self._check_api_session()
 
-        if self._api.ratelimit.remaining > 0:
+        if self._api.ratelimit.remaining > 1:
             for req in self._request_list.get(self._concurrent_request):
                 self._running_requests.append(self._event_loop.create_task(req))
 

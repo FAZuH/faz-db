@@ -100,8 +100,6 @@ class HttpRequest:
         except HTTPError:
             if retry_on_exc is True:
                 if retries <= 0:
-                    # await VindicatorWebhook.log("error", "error", {"url": url_param},
-                    #     title=f"HTTPError: {response.status} - {response.reason}")
                     raise TooManyRetries(url_param)
                 return await self.get(url_param, retries - 1, retry_on_exc)
             raise

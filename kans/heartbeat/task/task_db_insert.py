@@ -47,7 +47,7 @@ class TaskDbInsert(Task):
         self._latest_run = dt.now()
         self._online_players_manager = _OnlinePlayersManager(api, request_list)
         self._converter = _Converter(self._online_players_manager)
-        self._online_guilds_manager = _OnlineGuildsManager(api, request_list)
+        self._online_guilds_manager = _OnlineGuildsManager(api, self._online_players_manager, request_list)
 
     def setup(self) -> None: ...
     def teardown(self) -> None: ...
@@ -61,6 +61,8 @@ class TaskDbInsert(Task):
 
         player_resps: list[PlayerResponse] = []
         guild_resps: list[GuildResponse] = []
+        # NOTE: make sure player response is handled after onlineplayers response.
+        # _OnlineGuildManager needs _OnlinePlayersManager.prev_online_uuids to be updated first.
         for resp in self._response_list.get():
             if isinstance(resp, PlayerResponse):
                 player_resps.append(resp)
@@ -159,16 +161,16 @@ class _OnlinePlayersManager:
 
         self._logged_on: set[str] = set()
         self._logon_timestamps: dict[str, dt] = {}
-        self._prev_online_uuids: set[str] = set()
+        self._online_uuids: set[str] = set()
 
         # Initial request
         self._request_list.put(0, self._api.player.get_online_uuids)
 
     def queue_player_stats(self, resp: OnlinePlayersResponse) -> None:
-        online_uuids: set[str] = {str(uuid) for uuid in resp.body.players}
-        logged_off: set[str] = self._prev_online_uuids - online_uuids
-        self._logged_on: set[str] = online_uuids - self._prev_online_uuids
-        self._prev_online_uuids = online_uuids.copy()
+        new_online_uuids: set[str] = {str(uuid) for uuid in resp.body.players}
+        logged_off: set[str] = self._online_uuids - new_online_uuids
+        self._logged_on: set[str] = new_online_uuids - self._online_uuids
+        self._online_uuids = new_online_uuids.copy()
 
         for uuid in logged_off:
             del self._logon_timestamps[uuid]
@@ -203,27 +205,53 @@ class _OnlinePlayersManager:
         return self._logon_timestamps
 
     @property
-    def prev_online_uuids(self) -> set[str]:
-        return self._prev_online_uuids
+    def online_uuids(self) -> int:
+        return len(self._online_uuids)
 
 
 class _OnlineGuildsManager:
     """Handles computing new online guild responses."""
 
-    def __init__(self, api: Api, request_list: RequestList) -> None:
+    def __init__(self, api: Api, online_players_manager: _OnlinePlayersManager, request_list: RequestList) -> None:
         self._api = api
+        self._online_players_manager = online_players_manager
         self._request_list = request_list
 
-        self._prev_online_guilds: set[str] = set()
+        self._online_guilds: dict[str, set[str]] = {}
+        """guild_name: set(online_uuids)"""
 
     def queue_guild_stats(self, resps: Iterable[PlayerResponse]) -> None:
-        online_guilds: set[str] = {resp.body.guild.name for resp in resps if resp.body.guild is not None}
-        logged_on: set[str] = online_guilds - self._prev_online_guilds
-        self._prev_online_guilds = online_guilds.copy()
+        # NOTE:
+        # 1. store dictionaries of guild_names, paired with uuids of online players in that guild
+        # 2. if an uuid is online, and not in dictionary, create a new guild entry with the uuid.
+        #       this also means that the guild is logged on
+        # 3. if an uuid is offline, and in dictionary, remove the uuid from the set of that guild
+        # 4. check the guild dictionary, if the set is empty, remove the guild from the dictionary
+        #       this also means that the guild is logged off
+        logged_off_guilds: set[str] = set()
+        logged_on_guilds: set[str] = set()
+        for resp in resps:
+            if resp.body.guild is None:
+                continue
 
-        for guild_name in logged_on:
-            # Timestamp doesn't matter here
-            self._request_list.put(0, self._api.guild.get, guild_name)  # Queue new
+            guild_name = resp.body.guild.name
+            is_online = resp.body.online
+            uuid = resp.body.uuid.uuid
+
+            if is_online is True and guild_name not in self._online_guilds:
+                self._online_guilds[guild_name] = {uuid,}
+                logged_on_guilds.add(guild_name)
+
+            if is_online is False and guild_name in self._online_guilds and uuid in self._online_guilds[guild_name]:
+                self._online_guilds[guild_name].remove(uuid)
+
+                if len(self._online_guilds[guild_name]) == 0:
+                    del self._online_guilds[guild_name]
+
+                logged_off_guilds.add(guild_name)
+
+        for guild_name in logged_on_guilds:
+            self._request_list.put(0, self._api.guild.get, guild_name)
 
     def requeue_guild_stats(self, resp: GuildResponse) -> None:
         if resp.body.members.get_online_members() <= 0:
@@ -236,8 +264,8 @@ class _OnlineGuildsManager:
         )
 
     @property
-    def prev_online_guilds(self) -> set[str]:
-        return self._prev_online_guilds
+    def online_guilds(self) -> int:
+        return len(self._online_guilds)
 
 
 class _Converter:

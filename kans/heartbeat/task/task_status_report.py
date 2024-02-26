@@ -113,34 +113,25 @@ class TaskStatusReport(Task):
     async def _get_report(self) -> str:
         now = dt.now()
         now_ts = now.timestamp()
-        unique_request_list: dict[str, list[int]] = {
+        unique_request_list = {
                 "queued": [0, 0, 0],
                 "gettable": [0, 0, 0],
                 "running": [0, 0, 0]
         }
+        match_qualname = {
+                "PlayerEndpoint.get_full_stats": 0,
+                "PlayerEndpoint.get_online_uuids": 1,
+                "GuildEndpoint.get": 2
+        }
         for req in self._request_list.iter():
-            index = 3
-            if req.afunc.__qualname__ == "PlayerEndpoint.get_full_stats":
-                index = 0
-            elif req.afunc.__qualname__ == "PlayerEndpoint.get_online_uuids":
-                index = 1
-            elif req.afunc.__qualname__ == "GuildEndpoint.get":
-                index = 2
-
+            index = match_qualname.get(req.afunc.__qualname__, 3)
             unique_request_list["queued"][index] += 1
             if req.req_ts < now_ts:
                 unique_request_list["gettable"][index] += 1
 
         for req in self._api_request.running_requests.copy():
             coro = req.get_coro()
-            index = 3
-            if coro.__qualname__ == "PlayerEndpoint.get_full_stats":
-                index = 0
-            elif coro.__qualname__ == "PlayerEndpoint.get_online_uuids":
-                index = 1
-            elif coro.__qualname__ == "GuildEndpoint.get":
-                index = 2
-
+            index = match_qualname.get(coro.__qualname__, 3)
             unique_request_list["running"][index] += 1
 
         msg = self._DEFAULT_MSG.format(
@@ -164,8 +155,8 @@ class TaskStatusReport(Task):
                 f"{await self._db.total_size() / self.Util.MB_TO_BYTE} MB",  # db size
 
                 self._api.ratelimit.remaining,  # ratelimit
-                len(self._db_insert.online_players_manager.prev_online_uuids),  # online player
-                len(self._db_insert.online_guilds_manager.prev_online_guilds),  # online guild
+                self._db_insert.online_players_manager.online_uuids,  # online player
+                self._db_insert.online_guilds_manager.online_guilds,  # online guild
 
                 self.Util.get_os_info(),  # os
                 self.Util.get_os_uptime()  # uptime
