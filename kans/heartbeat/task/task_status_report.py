@@ -133,12 +133,11 @@ class TaskStatusReport(Task):
                 "GuildEndpoint.get": 2
         }
 
-        with self._request_list._lock:  # type: ignore
-            for req in self._request_list.iter():
-                index = match_qualname.get(req.coro.__qualname__, 3)
-                unique_request_list["queued"][index] += 1
-                if req.is_elligible(now_ts):
-                    unique_request_list["eligible"][index] += 1
+        for req in self._request_list.iter():
+            index = match_qualname.get(req.coro.__qualname__, 3)
+            unique_request_list["queued"][index] += 1
+            if req.is_elligible(now_ts):
+                unique_request_list["eligible"][index] += 1
 
         for req in self._api_request.running_requests.copy():
             coro = req.get_coro()

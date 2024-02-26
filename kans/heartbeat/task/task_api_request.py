@@ -51,21 +51,21 @@ class TaskApiRequest(Task):
 
         ok_results: list[AbstractWynnResponse[Any]] = []
         tasks_to_remove = []
-        for req in self._running_requests:
-            if not req.done():
+        for task in self._running_requests:
+            if not task.done():
                 continue
 
-            tasks_to_remove.append(req)
-            if req.exception():
-                self._logger.error(f"Error fetching from Wynn API: {req.exception()}")
+            tasks_to_remove.append(task)
+            if task.exception():
+                self._logger.error(f"Error fetching from Wynn API: {task.exception()}")
                 # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
-                if req.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
+                if task.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
                     self._request_list.put(0, self._api.player.get_online_uuids())
             else:
-                ok_results.append(req.result())
+                ok_results.append(task.result())
 
-        for req in tasks_to_remove:
-            self._running_requests.remove(req)
+        for task in tasks_to_remove:
+            self._running_requests.remove(task)
 
         self._logger.debug(f"{len(ok_results)} responses from API")
         self._response_list.put(ok_results)
