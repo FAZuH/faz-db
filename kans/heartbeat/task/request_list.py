@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime as dt
 from threading import Lock
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Generator
+from typing import TYPE_CHECKING, Any, Coroutine, Generator
 
 if TYPE_CHECKING:
     from kans.api.wynn.response import AbstractWynnResponse
@@ -11,37 +11,37 @@ class _RequestItem:
 
     def __init__(
         self,
+        coro: Coroutine[AbstractWynnResponse[Any], Any, Any],
         priority: int,
         req_ts: float,
-        afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]],
-        args: tuple[Any, ...] = tuple(),
     ) -> None:
-        self._req_time = req_ts
-        self._afunc = afunc
-        self._args = args
+        self._req_ts = req_ts
+        self._coro = coro
         self._priority = priority
+
+    def is_elligible(self, timestamp: None | float = None) -> bool:
+        return self.req_ts < (timestamp or dt.now().timestamp())
 
     def __eq__(self, other: object | _RequestItem) -> bool:
         if isinstance(other, _RequestItem):
-            return (self.args == other.args) and (self.afunc.__func__ is other.afunc.__func__)  # type: ignore
+            return (
+                (self.coro.cr_frame.f_locals == other.coro.cr_frame.f_locals) and
+                (self.coro.__qualname__ is other.coro.__qualname__)
+            )
         return False
 
     def __lt__(self, other: _RequestItem) -> bool:
-        """For +() function."""
+        """For min() function."""
         # NOTE: priority check is used to prioritize online uuids request
-        return (self.req_ts < other.req_ts) or (self.priority < other.priority)
+        return (self.req_ts < other.req_ts) or (self.priority > other.priority)
 
     @property
     def req_ts(self) -> float:
-        return self._req_time
+        return self._req_ts
 
     @property
-    def afunc(self) -> Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]]:
-        return self._afunc
-
-    @property
-    def args(self) -> tuple[Any, ...]:
-        return self._args
+    def coro(self) -> Coroutine[AbstractWynnResponse[Any], Any, Any]:
+        return self._coro
 
     @property
     def priority(self) -> int:
@@ -54,48 +54,34 @@ class RequestList:
         self._list: list[_RequestItem] = []
         self._lock: Lock = Lock()
 
-    def get(self, amount: int = -1) -> Generator[Coroutine[AbstractWynnResponse[Any], Any, Any], Any, None]:
-        if amount == 0:
-            return
+    def get(self, amount: int) -> Generator[Coroutine[AbstractWynnResponse[Any], Any, Any], Any, None]:
         now: float = dt.now().timestamp()
 
         with self._lock:
-            amount = len(self._list) if amount == -1 else amount
             for _ in range(amount):
-                if len(self._list) == 0 :
+                if len(self._list) < 1:
                     return
 
-                min_item: _RequestItem = min(self._list)
-                if min_item.req_ts < now:
-                    self._list.remove(min_item)
-                    yield min_item.afunc(*min_item.args)
+                item: _RequestItem = min(self._list)
+                if item.is_elligible(now):
+                    self._list.remove(item)
+                    yield item.coro
                 else:
+                    # Stop yielding because the rest of the list is not eligible
                     return
 
     def put(
         self,
         request_ts: float,
-        afunc: Callable[..., Coroutine[AbstractWynnResponse[Any], Any, Any]],
-        *args: Any,
+        coro: Coroutine[AbstractWynnResponse[Any], Any, Any],
         priority: int = 100
-    ) -> bool:
+    ) -> None:
         with self._lock:
-            _item = _RequestItem(priority, request_ts, afunc, args)
-            if _item in self._list:
-                return False
-            self._list.append(_item)
-            return True
+            item = _RequestItem(coro, priority, request_ts)
+            if item not in self._list:
+                self._list.append(item)
 
     def iter(self) -> Generator[_RequestItem, Any, None]:
         with self._lock:
             for item in self._list:
                 yield item
-
-    # def count_gettable(self) -> int:
-    #     now: float = dt.now().timestamp()
-    #     with self._lock:
-    #         return sum(1 for item in self._list if item.req_ts < now)
-
-    # @property
-    # def length(self) -> int:
-    #     return len(self._list)

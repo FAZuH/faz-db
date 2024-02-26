@@ -1,6 +1,6 @@
 from __future__ import annotations
 from threading import Lock
-from typing import TYPE_CHECKING, Any, Generator, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 if TYPE_CHECKING:
     from kans.api.wynn.response import AbstractWynnResponse
@@ -9,14 +9,15 @@ if TYPE_CHECKING:
 class ResponseList:
 
     def __init__(self):
-        self._list: list[Any] = []
-        self._lock: Lock = Lock()
+        self._list: list[AbstractWynnResponse[Any]] = []
+        self._lock = Lock()
 
-    def get(self) -> Generator[AbstractWynnResponse[Any], Any, None]:
+    def get(self) -> list[AbstractWynnResponse[Any]]:
         with self._lock:
-            while len(self._list) > 0:
-                yield self._list.pop(0)
+            ret = self._list
+            self._list = []
+        return ret
 
     def put(self, responses: Iterable[AbstractWynnResponse[Any]]) -> None:
         with self._lock:
-            self._list.extend(list(responses))
+            self._list.extend(responses)

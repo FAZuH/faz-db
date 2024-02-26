@@ -67,11 +67,18 @@ class TaskStatusReport(Task):
         async with ClientSession() as s:
             hook = discord.Webhook.from_url(self._url, session=s)
             report = await self._get_report()
+
             if self._message_id is None:
                 message = await hook.send(content=report, wait=True)
                 self._message_id = message.id
             else:
-                message = await hook.fetch_message(self._message_id)
+                try:
+                    message = await hook.fetch_message(self._message_id)
+                except discord.DiscordException:
+                    self._logger.exception("Failed to fetch message.")
+                    self._message_id = None
+                    return
+
                 await message.edit(content=report)
 
     _DEFAULT_MSG = \
@@ -110,9 +117,11 @@ class TaskStatusReport(Task):
 
     # TODO: unique count of request types on RequestList
     # TODO: average requests per minute
+    # TODO: clean code
     async def _get_report(self) -> str:
         now = dt.now()
         now_ts = now.timestamp()
+
         unique_request_list = {
                 "queued": [0, 0, 0],
                 "eligible": [0, 0, 0],
@@ -123,11 +132,13 @@ class TaskStatusReport(Task):
                 "PlayerEndpoint.get_online_uuids": 1,
                 "GuildEndpoint.get": 2
         }
-        for req in self._request_list.iter():
-            index = match_qualname.get(req.afunc.__qualname__, 3)
-            unique_request_list["queued"][index] += 1
-            if req.req_ts < now_ts:
-                unique_request_list["eligible"][index] += 1
+
+        with self._request_list._lock:  # type: ignore
+            for req in self._request_list.iter():
+                index = match_qualname.get(req.coro.__qualname__, 3)
+                unique_request_list["queued"][index] += 1
+                if req.is_elligible(now_ts):
+                    unique_request_list["eligible"][index] += 1
 
         for req in self._api_request.running_requests.copy():
             coro = req.get_coro()
