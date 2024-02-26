@@ -8,16 +8,15 @@ Python program that fetches stats of online plays and guilds with online members
 *repository usage guide*
 
 ## Important Todo
-- add tests for database integrity
-- add tests for HeartbeatTask
+- Add tests for database integrity
+- Add tests for HeartbeatTask
 
 ## Todo
-- add documentation to the whole code
-- add tests for heartbeat task
-- implement more magic methods to db and api models
-- implement missing db.repository methods
-- improve TaskStatusReport message
-    - with embeds
-    - add emojis
-    - better date
-    - table form RequestList info
+- Add documentation to the whole code
+- Add more magic methods to db and api models
+- Add missing db.repository methods
+- Improve TaskStatusReport message
+    - Modify webhook send content to embeds
+    - Add emojis
+    - Improve date format
+    - Modify RequestList stats to table structure
