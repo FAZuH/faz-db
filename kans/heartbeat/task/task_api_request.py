@@ -15,13 +15,14 @@ if TYPE_CHECKING:
 class TaskApiRequest(Task):
     """implements `TaskBase`"""
 
+    _CONCURRENT_REQUESTS = 25
+
     def __init__(self, logger: Logger, api: Api, request_list: RequestList, response_list: ResponseList) -> None:
         self._logger = logger
         self._api: Api = api
         self._request_list = request_list
         self._response_list = response_list
 
-        self._concurrent_request = 20  # NOTE: request/min need to stay below 180, else running requests will increase without bound
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = dt.now()
         self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
@@ -41,8 +42,9 @@ class TaskApiRequest(Task):
     async def _run(self) -> None:
         await self._check_api_session()
 
-        if self._api.ratelimit.remaining > 1:
-            for req in self._request_list.get(self._concurrent_request):
+        running_requests = len(self._running_requests)
+        if running_requests < self._CONCURRENT_REQUESTS:
+            for req in self._request_list.get(self._CONCURRENT_REQUESTS - running_requests):
                 self._running_requests.append(self._event_loop.create_task(req))
 
         ok_results: list[AbstractWynnResponse[Any]] = []

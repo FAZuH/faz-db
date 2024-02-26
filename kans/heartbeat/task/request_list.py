@@ -54,10 +54,13 @@ class RequestList:
         self._list: list[_RequestItem] = []
         self._lock: Lock = Lock()
 
-    def get(self, amount: int) -> Generator[Coroutine[AbstractWynnResponse[Any], Any, Any], Any, None]:
+    def get(self, amount: int = -1) -> Generator[Coroutine[AbstractWynnResponse[Any], Any, Any], Any, None]:
+        if amount == 0:
+            return
         now: float = dt.now().timestamp()
 
         with self._lock:
+            amount = len(self._list) if amount == -1 else amount
             for _ in range(amount):
                 if len(self._list) == 0 :
                     return
