@@ -7,9 +7,6 @@ Python program that fetches stats of online plays and guilds with online members
 ## Usage
 *repository usage guide*
 
-## Bug
-- fix online guild computation
-
 ## Important Todo
 - add tests for database integrity
 - add tests for HeartbeatTask
