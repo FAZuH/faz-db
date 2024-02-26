@@ -1,5 +1,5 @@
-# Kans
-*repository description*
+# Kans (INCOMPLETE)
+Program that fetches stats of online plays and guilds with online members, and saves it into database
 
 ## Installation
 *repository installation guide*
