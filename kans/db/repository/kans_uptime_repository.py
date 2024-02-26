@@ -36,7 +36,7 @@ class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
     async def delete(self, id_: Any, conn: None | Connection = None) -> int: ...
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
-            CREATE TABLE `{self.table_name}` (
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
                 `nth` int NOT NULL AUTO_INCREMENT,
                 `start_time` datetime NOT NULL,
                 `stop_time` datetime NOT NULL,
