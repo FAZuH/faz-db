@@ -1,5 +1,5 @@
 # Kans (INCOMPLETE)
-Python program that fetches stats of online plays and guilds with online members, and saves it into a MySQL database.
+Python program that fetches stats of online players and guilds with online members, and saves it into a MySQL database.
 
 ## Installation
 *repository installation guide*
