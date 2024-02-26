@@ -49,7 +49,9 @@ class TaskDbInsert(Task):
         self._converter = _Converter(self._online_players_manager)
         self._online_guilds_manager = _OnlineGuildsManager(api, self._online_players_manager, request_list)
 
-    def setup(self) -> None: ...
+    def setup(self) -> None:
+        self._event_loop.run_until_complete(self._db.create_all())
+
     def teardown(self) -> None: ...
 
     def run(self) -> None:

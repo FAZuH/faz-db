@@ -89,7 +89,7 @@ class TaskStatusReport(Task):
             "\n│       │   ├── PlayerStat: {}"\
             "\n│       │   ├── OnlinePlayers: {}"\
             "\n│       │   └── GuildStat: {}"\
-            "\n│       ├── Gettable/"\
+            "\n│       ├── Eligible/"\
             "\n│       │   ├── PlayerStat: {}"\
             "\n│       │   ├── OnlinePlayers: {}"\
             "\n│       │   └── GuildStat: {}"\
@@ -115,7 +115,7 @@ class TaskStatusReport(Task):
         now_ts = now.timestamp()
         unique_request_list = {
                 "queued": [0, 0, 0],
-                "gettable": [0, 0, 0],
+                "eligible": [0, 0, 0],
                 "running": [0, 0, 0]
         }
         match_qualname = {
@@ -127,7 +127,7 @@ class TaskStatusReport(Task):
             index = match_qualname.get(req.afunc.__qualname__, 3)
             unique_request_list["queued"][index] += 1
             if req.req_ts < now_ts:
-                unique_request_list["gettable"][index] += 1
+                unique_request_list["eligible"][index] += 1
 
         for req in self._api_request.running_requests.copy():
             coro = req.get_coro()
@@ -145,9 +145,9 @@ class TaskStatusReport(Task):
                 unique_request_list["queued"][0],  # queued player stat
                 unique_request_list["queued"][1],  # queued online players
                 unique_request_list["queued"][2],  # queued guild stat
-                unique_request_list["gettable"][0],  # gettable player stat
-                unique_request_list["gettable"][1],  # gettable online players
-                unique_request_list["gettable"][2],  # gettable guild stat
+                unique_request_list["eligible"][0],  # eligible player stat
+                unique_request_list["eligible"][1],  # eligible online players
+                unique_request_list["eligible"][2],  # eligible guild stat
                 unique_request_list["running"][0],  # running player stat
                 unique_request_list["running"][1],  # running online players
                 unique_request_list["running"][2],  # running guild stat
@@ -189,11 +189,11 @@ class TaskStatusReport(Task):
 
     @property
     def first_delay(self) -> float:
-        return 15.0
+        return 5.0
 
     @property
     def interval(self) -> float:
-        return 15.0
+        return 5.0
 
     @property
     def latest_run(self) -> dt:
@@ -217,7 +217,7 @@ class TaskStatusReport(Task):
 # │       │   ├── PlayerStat: 
 # │       │   ├── OnlinePlayers: 
 # │       │   └── GuildStat: 
-# │       ├── Gettable/
+# │       ├── Eligible/
 # │       │   ├── PlayerStat: 
 # │       │   ├── OnlinePlayers: 
 # │       │   └── GuildStat: 
@@ -248,7 +248,7 @@ class TaskStatusReport(Task):
 #    - PlayerStat: 
 #    - OnlinePlayers: 
 #    - GuildStat: 
-#   - Gettable
+#   - Eligible
 #    - PlayerStat: 
 #    - OnlinePlayers: 
 #    - GuildStat: 
