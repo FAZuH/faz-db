@@ -5,17 +5,12 @@ from . import Repository
 from ..model import GuildMemberHistory, GuildMemberHistoryId
 
 if TYPE_CHECKING:
-    from decimal import Decimal
     from aiomysql import Connection
-    from .. import DatabaseQuery
 
 
 class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHistoryId]):
 
     _TABLE_NAME: str = "guild_member_history"
-
-    def __init__(self, db: DatabaseQuery) -> None:
-        self._db = db
 
     async def insert(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
         sql = f"""
@@ -57,19 +52,6 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(sql)
-
-    async def table_size(self, conn: Connection | None = None) -> Decimal:
-        sql = f"""
-            SELECT
-                ROUND(((data_length + index_length)), 2) AS "size_bytes"
-            FROM
-                information_schema.TABLES
-            WHERE
-                table_schema = '{self._db.database}'
-                AND table_name = '{self.table_name}';
-        """
-        res = await self._db.fetch(sql, connection=conn)
-        return res[0].get("size_bytes", 0)
 
     @property
     def table_name(self) -> str:
