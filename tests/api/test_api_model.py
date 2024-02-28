@@ -164,7 +164,7 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
                 self.assertIsInstance(ch_uuid.to_bytes(), bytes)
                 self.assertIsInstance(ch, Player.Character)
                 self.assertIsInstance(ch.type, CharacterTypeField)
-                self.assertIn(ch.type.get_kind(), ("MAGE", "ARCHER", "WARRIOR", "ASSASSIN", "SHAMAN"))
+                self.assertIn(ch.type.get_kind_str(), ("MAGE", "ARCHER", "WARRIOR", "ASSASSIN", "SHAMAN"))
                 self.assertIsInstance(ch.nickname, (NoneType, str))
                 self.assertTrue(ch.level >= 0 and ch.level <= 106)
                 self.assertGreaterEqual(ch.xp, 0)
@@ -186,7 +186,12 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
                 self.assertGreaterEqual(ch.pvp.deaths, 0)
                 # character.gamemode
                 self.assertIsInstance(ch.gamemode, GamemodeField)
-                self.assertIsInstance(ch.gamemode.to_bytes(), bytes)
+                self.assertIsInstance(ch.gamemode.get_liststr(), list)
+                self.assertIsInstance(ch.gamemode.is_craftsman(), bool)
+                self.assertIsInstance(ch.gamemode.is_hardcore(), bool)
+                self.assertIsInstance(ch.gamemode.is_hunted(), bool)
+                self.assertIsInstance(ch.gamemode.is_ironman(), bool)
+                self.assertIsInstance(ch.gamemode.is_ultimate_ironman(), bool)
                 # character.skill_points
                 self.assertIsInstance(ch.skill_points, Player.Character.SkillPoints)
                 self.assertGreaterEqual(ch.skill_points.earth, 0)

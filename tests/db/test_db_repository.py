@@ -8,7 +8,7 @@ from kans import config
 from kans.api.wynn.response import PlayerResponse, OnlinePlayersResponse, GuildResponse
 from kans.db import Database, KansDatabase
 from kans.db.model import KansUptime
-from kans.heartbeat.task import TaskDbInsert
+from kans.util import ApiToDbConverter
 from tests.mock_wynnapi import MockWynnApi
 
 
@@ -16,7 +16,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
     """Tests if db.repositories is able to insert data into database."""
 
     async def asyncSetUp(self) -> None:
-        self.converter = TaskDbInsert._Converter()  # type: ignore
+        self.converter = ApiToDbConverter()  # type: ignore
         self.db: Database = KansDatabase(config, logger)
 
         mockwynnapi = MockWynnApi()
