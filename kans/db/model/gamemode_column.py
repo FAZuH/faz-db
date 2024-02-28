@@ -30,7 +30,7 @@ class GamemodeColumn:
 
     def parse(self) -> list[str]:
         ret = []
-        byte_value = int.from_bytes(self.gamemode, byteorder='big')  # Byte to int
+        byte_value = int.from_bytes(self.gamemode, byteorder="big")  # Byte to int
         if (byte_value & (1 << 0)) != 0:
             ret.append("hardcore")
         if (byte_value & (1 << 1)) != 0:

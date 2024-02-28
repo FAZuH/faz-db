@@ -1,17 +1,27 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from .. import DateColumn, UuidColumn
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
+    from datetime import datetime
 
 
 class PlayerActivityHistoryId:
 
-    def __init__(self, uuid: str | UuidColumn, logon_datetime: dt | DateColumn) -> None:
+    def __init__(self, uuid: str | UuidColumn, logon_datetime: datetime | DateColumn) -> None:
         self._uuid: UuidColumn = uuid if isinstance(uuid, UuidColumn) else UuidColumn.from_str(uuid)
         self._logon_datetime = logon_datetime if isinstance(logon_datetime, DateColumn) else DateColumn(logon_datetime)
+
+    def as_dict(self) -> PlayerActivityHistoryId.Type:
+        return {
+                "uuid": self.uuid.uuid,
+                "logon_datetime": self.logon_datetime.datetime
+        }
+
+    class Type(TypedDict):
+        uuid: bytes
+        logon_datetime: datetime
 
     @property
     def logon_datetime(self) -> DateColumn:
