@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class TaskApiRequest(Task):
     """implements `TaskBase`"""
 
-    _CONCURRENT_REQUESTS = 25
+    _CONCURRENT_REQUESTS = 50
 
     def __init__(self, logger: Logger, api: Api, request_list: RequestList, response_list: ResponseList) -> None:
         self._logger = logger
@@ -41,7 +41,17 @@ class TaskApiRequest(Task):
 
     async def _run(self) -> None:
         await self._check_api_session()
+        await self._start_requests()
+        self._check_responses()
 
+    async def _check_api_session(self) -> None:
+        if not self._api.request.is_open():
+            self._logger.warning("HTTP session is closed. Reopening...")
+            await self._api.start()
+
+    async def _start_requests(self) -> None:
+        # NOTE: This prevents being ratelimited,
+        # since self._running_request won't be decreasing
         running_req_len = len(self._running_requests)
         if running_req_len < self._CONCURRENT_REQUESTS:
             self._running_requests.extend(
@@ -49,6 +59,7 @@ class TaskApiRequest(Task):
                     for req in self._request_list.get(self._CONCURRENT_REQUESTS - running_req_len)
             )
 
+    def _check_responses(self) -> None:
         ok_results: list[AbstractWynnResponse[Any]] = []
         tasks_to_remove = []
         for task in self._running_requests:
@@ -60,8 +71,9 @@ class TaskApiRequest(Task):
                 self._logger.error(f"Error fetching from Wynn API: {task.exception()}")
                 # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
                 if task.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
-                    self._request_list.put(0, self._api.player.get_online_uuids())
+                    self._request_list.enqueue(0, self._api.player.get_online_uuids())
             else:
+                # get_online_uuids will be requeued when the response is computed
                 ok_results.append(task.result())
 
         for task in tasks_to_remove:
@@ -69,11 +81,6 @@ class TaskApiRequest(Task):
 
         self._logger.debug(f"{len(ok_results)} responses from API")
         self._response_list.put(ok_results)
-
-    async def _check_api_session(self) -> None:
-        if not self._api.request.is_open():
-            self._logger.warning("HTTP session is closed. Reopening...")
-            await self._api.start()
 
     @property
     def running_requests(self) -> list[asyncio.Task[AbstractWynnResponse[Any]]]:
