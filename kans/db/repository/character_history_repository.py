@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from aiomysql import Connection
 
@@ -58,19 +58,22 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
                 conn
         )
 
-    async def exists(self, id_: Any, conn: None | Connection = None) -> bool: ...
+    async def exists(self, id_: CharacterHistoryId, conn: None | Connection = None) -> bool:
+        sql = f"SELECT COUNT(*) FROM `{self.table_name}` WHERE `character_uuid` = %s"
+        result = await self._db.fetch(sql, (id_.character_uuid,), connection=conn)
+        return result[0].get("COUNT(*)", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
         sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
         return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
 
-    async def find_one(self, id_: Any, conn: None | Connection = None) -> None | CharacterHistory: ...
+    async def find_one(self, id_: CharacterHistoryId, conn: None | Connection = None) -> None | CharacterHistory: ...
 
     async def find_all(self, conn: None | Connection = None) -> None | list[CharacterHistory]: ...
 
     async def update(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int: ...
 
-    async def delete(self, id_: Any, conn: None | Connection = None) -> int: ...
+    async def delete(self, id_: CharacterHistoryId, conn: None | Connection = None) -> int: ...
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""

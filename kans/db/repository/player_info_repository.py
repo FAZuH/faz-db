@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from . import Repository
 from ..model import PlayerInfo, PlayerInfoId
@@ -27,19 +27,19 @@ class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
                 conn
         )
 
-    async def exists(self, id_: Any, conn: None | Connection = None) -> bool: ...
+    async def exists(self, id_: PlayerInfoId, conn: None | Connection = None) -> bool: ...
 
     async def count(self, conn: None | Connection = None) -> float:
         sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
         return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
 
-    async def find_one(self, id_: Any, conn: None | Connection = None) -> None | PlayerInfo: ...
+    async def find_one(self, id_: PlayerInfoId, conn: None | Connection = None) -> None | PlayerInfo: ...
 
     async def find_all(self, conn: None | Connection = None) -> None | list[PlayerInfo]: ...
 
     async def update(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int: ...
 
-    async def delete(self, id_: Any, conn: None | Connection = None) -> int: ...
+    async def delete(self, id_: PlayerInfoId, conn: None | Connection = None) -> int: ...
 
     async def create_table(self, conn: None | Connection = None) -> None:
         sql = f"""
