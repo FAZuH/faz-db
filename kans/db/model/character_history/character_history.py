@@ -25,7 +25,7 @@ class CharacterHistory(CharacterHistoryId):
         logins: int,
         deaths: int,
         discoveries: int,
-        gamemode: bytes | GamemodeColumn,
+        gamemode: bytes | list[str],
         alchemism: Decimal,
         armouring: Decimal,
         cooking: Decimal,
