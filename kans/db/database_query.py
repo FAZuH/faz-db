@@ -36,7 +36,7 @@ class DatabaseQuery:
     async def fetch_many(
         self,
         sql: str,
-        params: None | Iterable[tuple[Any, ...]] | Iterable[dict[str, Any]] = None,
+        params: None | Iterable[tuple[Any, ...] | dict[str, Any]] = None,
         connection: None | Connection = None
     ) -> list[dict[str, Any]]:
         async with self.get_cursor(connection) as curs:
@@ -56,7 +56,7 @@ class DatabaseQuery:
     async def execute_many(
         self,
         sql: str,
-        params: None | Iterable[tuple[Any, ...]] | Iterable[dict[str, Any]] = None,
+        params: None | Iterable[tuple[Any, ...] | dict[str, Any]] = None,
         connection: None | Connection = None
     ) -> int:
         async with self.get_cursor(connection) as curs:
@@ -88,7 +88,7 @@ class DatabaseQuery:
         decorated = self._retry_decorator(cursor.execute)
         await decorated(sql, params)
 
-    async def _executemany(self, cursor: DictCursor, sql: str, params: None | Iterable[tuple[Any, ...]] | Iterable[dict[str, Any]] = None) -> None:
+    async def _executemany(self, cursor: DictCursor, sql: str, params: None | Iterable[tuple[Any, ...] | dict[str, Any]] = None) -> None:
         decorated = self._retry_decorator(cursor.executemany)
         await decorated(sql, params)
 
