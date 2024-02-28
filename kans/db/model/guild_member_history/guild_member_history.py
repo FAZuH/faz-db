@@ -25,8 +25,13 @@ class GuildMemberHistory(GuildMemberHistoryId):
         self._contributed = contributed
         self._joined = joined if isinstance(joined, DateColumn) else DateColumn(joined)
 
-    def to_tuple(self) -> tuple[Any, ...]:
-        return (self.uuid.uuid, self.contributed, self.joined.datetime, self.datetime.datetime)
+    def to_dict(self) -> dict[str, Any]:
+        return {
+                "uuid": self.uuid.uuid,
+                "contributed": self.contributed,
+                "joined": self.joined.datetime,
+                "datetime": self.datetime.datetime
+        }
 
     @property
     def contributed(self) -> int:

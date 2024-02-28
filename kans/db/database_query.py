@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Iterable
 from warnings import filterwarnings
 
-from aiomysql import connect, DictCursor, Warning
+from aiomysql import DictCursor, connect, Warning
 
 from kans.util import ErrorHandler
 
@@ -77,6 +77,7 @@ class DatabaseQuery:
     async def create_connection(self) -> AsyncGenerator[Connection, Any]:
         conn: Connection
         async with connect(user=self.user, password=self.password, db=self.database) as conn:
+            await conn.begin()
             yield conn
             await conn.commit()
 
@@ -118,7 +119,6 @@ class DatabaseQuery:
             return self
 
         async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
-            curs: DictCursor
             async with self._parent.get_cursor() as curs:
                 for q, p in self._sql:
                     if p:

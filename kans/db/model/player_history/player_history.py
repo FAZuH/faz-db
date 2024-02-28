@@ -33,17 +33,17 @@ class PlayerHistory(PlayerHistoryId):
         self._guild_rank = guild_rank
         self._rank = rank
 
-    def to_tuple(self) -> tuple[Any, ...]:
-        return (
-                self.uuid.uuid,
-                self.username,
-                self.support_rank,
-                self.playtime,
-                self.guild_name,
-                self.guild_rank,
-                self.rank,
-                self.datetime.datetime
-        )
+    def to_dict(self) -> dict[str, Any]:
+        return {
+                "uuid": self.uuid.uuid,
+                "username": self.username,
+                "support_rank": self.support_rank,
+                "playtime": self.playtime,
+                "guild_name": self.guild_name,
+                "guild_rank": self.guild_rank,
+                "rank": self.rank,
+                "datetime": self.datetime.datetime
+        }
 
     @property
     def username(self) -> str:

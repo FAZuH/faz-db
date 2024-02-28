@@ -23,8 +23,12 @@ class GuildInfo(GuildInfoId):
         self._prefix = prefix
         self._created = created if isinstance(created, DateColumn) else DateColumn(created)
 
-    def to_tuple(self) -> tuple[Any, ...]:
-        return (self.name, self.prefix, self.created.datetime)
+    def to_dict(self) -> dict[str, Any]:
+        return {
+                "name": self.name,
+                "prefix": self.prefix,
+                "created": self.created.datetime
+        }
 
     @property
     def prefix(self) -> str:

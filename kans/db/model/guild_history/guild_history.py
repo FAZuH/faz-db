@@ -31,8 +31,16 @@ class GuildHistory(GuildHistoryId):
         self._member_total = member_total
         self._online_members = online_members
 
-    def to_tuple(self) -> tuple[Any, ...]:
-        return (self.name, self.level, self.territories, self.wars, self.member_total, self.online_members, self.datetime)
+    def to_dict(self) -> dict[str, Any]:
+        return {
+                "name": self.name,
+                "level": self.level,
+                "territories": self.territories,
+                "wars": self.wars,
+                "member_total": self.member_total,
+                "online_members": self.online_members,
+                "datetime": self.datetime
+        }
 
     @property
     def level(self) -> Decimal:

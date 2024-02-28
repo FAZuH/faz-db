@@ -14,8 +14,11 @@ class KansUptime(KansUptimeId):
         self._start_time = start_time if isinstance(start_time, DateColumn) else DateColumn(start_time)
         self._stop_time = stop_time if isinstance(stop_time, DateColumn) else DateColumn(stop_time)
 
-    def to_tuple(self) -> tuple[Any, ...]:
-        return (self.start_time.datetime, self.stop_time.datetime)
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "start_time": self.start_time.datetime,
+            "stop_time": self.stop_time.datetime
+        }
 
     @property
     def start_time(self) -> DateColumn:

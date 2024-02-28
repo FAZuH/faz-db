@@ -24,8 +24,12 @@ class PlayerActivityHistory(PlayerActivityHistoryId):
         super().__init__(uuid, logon_datetime)
         self._logoff_datetime = logoff_datetime if isinstance(logoff_datetime, DateColumn) else DateColumn(logoff_datetime)
 
-    def to_tuple(self) -> tuple[Any, ...]:
-        return (self.uuid.uuid, self.logon_datetime.datetime, self.logoff_datetime.datetime)
+    def to_dict(self) -> dict[str, Any]:
+        return {
+                "uuid": self.uuid.uuid,
+                "logon_datetime": self.logon_datetime.datetime,
+                "logoff_datetime": self.logoff_datetime.datetime
+        }
 
     @property
     def logoff_datetime(self) -> DateColumn:

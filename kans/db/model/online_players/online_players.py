@@ -16,8 +16,11 @@ class OnlinePlayers(OnlinePlayersId):
         super().__init__(uuid)
         self._server = server
 
-    def to_tuple(self) -> tuple[Any, ...]:
-        return (self.uuid.uuid, self.server)
+    def to_dict(self) -> dict[str, Any]:
+        return {
+                "uuid": self.uuid.uuid,
+                "server": self.server
+        }
 
     @property
     def server(self) -> str:
