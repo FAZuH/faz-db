@@ -20,8 +20,8 @@ class WynnApi(Api):
                 headers={"User-Agent": f"Kans/{__version__}", "Content-Type": "application/json"
         })
 
-    async def start(self) -> None:
-        await self._request.start()
+    def start(self) -> None:
+        self._request.start()
 
     async def close(self) -> None:
         await self._request.close()

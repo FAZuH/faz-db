@@ -29,7 +29,7 @@ class TaskApiRequest(Task):
 
     def setup(self) -> None:
         self._logger.debug(f"Setting up {self.name}")
-        self._event_loop.run_until_complete(self._api.start())
+        self._api.start()
 
     def teardown(self) -> None:
         self._logger.debug(f"Tearing down {self.name}")
@@ -47,7 +47,7 @@ class TaskApiRequest(Task):
     async def _check_api_session(self) -> None:
         if not self._api.request.is_open():
             self._logger.warning("HTTP session is closed. Reopening...")
-            await self._api.start()
+            self._api.start()
 
     async def _start_requests(self) -> None:
         # NOTE: This prevents being ratelimited,

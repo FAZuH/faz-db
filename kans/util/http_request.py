@@ -42,7 +42,7 @@ class HttpRequest:
             self._headers["apikey"] = self._api_key
         self._session: None | ClientSession = None
 
-    async def start(self) -> None:
+    def start(self) -> None:
         self._session = ClientSession(self._base_url, headers=self._headers, timeout=ClientTimeout(self._timeout))
 
     async def close(self) -> None:
@@ -108,7 +108,7 @@ class HttpRequest:
         return self._session is not None and not self._session.closed
 
     async def __aenter__(self) -> HttpRequest:
-        await self.start()
+        self.start()
         return self
 
     async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> None:

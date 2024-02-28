@@ -9,7 +9,7 @@ class TestApiEndpoint(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self._api: Api = WynnApi(logger)
-        await self._api.start()
+        self._api.start()
 
     async def test_guild_get(self) -> None:
         response = await self._api.guild.get("Avicia")
