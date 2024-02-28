@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Iterable
 from .task import Task
 from kans.api.wynn.response import GuildResponse, PlayerResponse, OnlinePlayersResponse
 from kans.db.model import KansUptime
-from kans.util import ApiToDbConverter
+from kans.util import ApiResponseAdapter
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
@@ -33,9 +33,9 @@ class TaskDbInsert(Task):
         self._response_list = response_list
         self._start_time = dt.now()
 
-        self._converter = ApiToDbConverter()
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = dt.now()
+        self._response_adapter = ApiResponseAdapter()
         self._response_handler = self._ResponseHandler(self._api, self._request_list)
 
     def setup(self) -> None:
@@ -75,8 +75,8 @@ class TaskDbInsert(Task):
             await self._insert_guild_response(guild_resps)
 
     async def _insert_online_players_response(self, resp: OnlinePlayersResponse) -> None:
-        await self._db.online_players_repository.insert(self._converter.to_online_players(resp))
-        await self._db.player_activity_history_repository.insert(self._converter.to_player_activity_history(
+        await self._db.online_players_repository.insert(self._response_adapter.OnlinePlayers.to_online_players(resp))
+        await self._db.player_activity_history_repository.insert(self._response_adapter.OnlinePlayers.to_player_activity_history(
                 resp,
                 self._response_handler.logged_on_players,
                 self._response_handler.online_players
@@ -88,10 +88,10 @@ class TaskDbInsert(Task):
         player_history = []
         player_info = []
         for resp in resps:
-            character_history.extend(self._converter.to_character_history(resp))
-            character_info.extend(self._converter.to_character_info(resp))
-            player_history.append(self._converter.to_player_history(resp))
-            player_info.append(self._converter.to_player_info(resp))
+            character_history.extend(self._response_adapter.Player.to_character_history(resp))
+            character_info.extend(self._response_adapter.Player.to_character_info(resp))
+            player_history.append(self._response_adapter.Player.to_player_history(resp))
+            player_info.append(self._response_adapter.Player.to_player_info(resp))
 
         await self._db.player_info_repository.insert(player_info)
         await self._db.character_info_repository.insert(character_info)
@@ -103,9 +103,9 @@ class TaskDbInsert(Task):
         guild_history = []
         guild_member_history = []
         for resp in resps:
-            guild_info.append(self._converter.to_guild_info(resp))
-            guild_history.append(self._converter.to_guild_history(resp))
-            guild_member_history.extend(self._converter.to_guild_member_history(resp))
+            guild_info.append(self._response_adapter.Guild.to_guild_info(resp))
+            guild_history.append(self._response_adapter.Guild.to_guild_history(resp))
+            guild_member_history.extend(self._response_adapter.Guild.to_guild_member_history(resp))
 
         await self._db.guild_info_repository.insert(guild_info)
         await self._db.guild_history_repository.insert(guild_history)

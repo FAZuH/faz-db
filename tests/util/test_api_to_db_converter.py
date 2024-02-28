@@ -8,15 +8,15 @@ from kans.db.model import (
     GamemodeColumn,
     UuidColumn,
 )
-from kans.util import ApiToDbConverter
+from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
-class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
+class TestApiResponseAdapter(unittest.IsolatedAsyncioTestCase):
     """Tests if db.models is properly storing data."""
 
     async def asyncSetUp(self) -> None:
-        self.converter = ApiToDbConverter()
+        self.adapter = ApiResponseAdapter()
 
         self.fixtures = FixturesApi()
         self.mock_guildstats = self.fixtures.get_guilds()
@@ -25,7 +25,7 @@ class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
 
     async def test_character_history(self) -> None:
         for stat in self.mock_playerstats:
-            for datum in self.converter.to_character_history(stat):
+            for datum in self.adapter.Player.to_character_history(stat):
                 self.assertIsInstance(datum, CharacterHistory)
                 self.assertIsInstance(datum.character_uuid, UuidColumn)
                 self.assertIsInstance(datum.level, int)
@@ -57,14 +57,14 @@ class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
 
     async def test_character_info(self) -> None:
         for stat in self.mock_playerstats:
-            for datum in self.converter.to_character_info(stat):
+            for datum in self.adapter.Player.to_character_info(stat):
                 self.assertIsInstance(datum.character_uuid, UuidColumn)
                 self.assertIsInstance(datum.uuid, UuidColumn)
                 self.assertIsInstance(datum.type, str)
 
     async def test_guild_history(self) -> None:
         for stat in self.mock_guildstats:
-            datum = self.converter.to_guild_history(stat)
+            datum = self.adapter.Guild.to_guild_history(stat)
             self.assertIsInstance(datum.name, str)
             self.assertIsInstance(datum.level, Decimal)
             self.assertIsInstance(datum.territories, int)
@@ -75,21 +75,21 @@ class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
 
     async def test_guild_info(self) -> None:
         for stat in self.mock_guildstats:
-            datum = self.converter.to_guild_info(stat)
+            datum = self.adapter.Guild.to_guild_info(stat)
             self.assertIsInstance(datum.name, str)
             self.assertIsInstance(datum.prefix, str)
             self.assertIsInstance(datum.created, DateColumn)
 
     async def test_guild_member_history(self) -> None:
         for stat in self.mock_guildstats:
-            for datum in self.converter.to_guild_member_history(stat):
+            for datum in self.adapter.Guild.to_guild_member_history(stat):
                 self.assertIsInstance(datum.uuid, UuidColumn)
                 self.assertIsInstance(datum.contributed, int)
                 self.assertIsInstance(datum.joined, DateColumn)
                 self.assertIsInstance(datum.datetime, DateColumn)
 
     async def test_online_players(self) -> None:
-        for datum in self.converter.to_online_players(self.mock_onlineuuids):
+        for datum in self.adapter.OnlinePlayers.to_online_players(self.mock_onlineuuids):
             self.assertIsInstance(datum.uuid, UuidColumn)
             self.assertIsInstance(datum.server, str)
 
@@ -100,7 +100,7 @@ class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
 
     async def test_player_history(self) -> None:
         for stat in self.mock_playerstats:
-            datum = self.converter.to_player_history(stat)
+            datum = self.adapter.Player.to_player_history(stat)
             self.assertIsInstance(datum.uuid, UuidColumn)
             self.assertIsInstance(datum.username, str)
             self.assertIsInstance(datum.support_rank, (NoneType, str))
@@ -112,7 +112,7 @@ class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
 
     async def test_player_info(self) -> None:
         for stat in self.mock_playerstats:
-            datum = self.converter.to_player_info(stat)
+            datum = self.adapter.Player.to_player_info(stat)
             self.assertIsInstance(datum.uuid, UuidColumn)
             self.assertIsInstance(datum.latest_username, str)
             self.assertIsInstance(datum.first_join, DateColumn)

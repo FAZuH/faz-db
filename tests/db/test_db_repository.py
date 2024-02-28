@@ -7,7 +7,7 @@ from loguru import logger
 from kans import config
 from kans.db import Database, KansDatabase
 from kans.db.model import KansUptime
-from kans.util import ApiToDbConverter
+from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
@@ -15,7 +15,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
     """Tests if db.repositories is able to insert data into database."""
 
     async def asyncSetUp(self) -> None:
-        self.converter = ApiToDbConverter()  # type: ignore
+        self.adapter = ApiResponseAdapter()  # type: ignore
         self.db: Database = KansDatabase(config, logger)
 
         fixtures = FixturesApi()
@@ -29,7 +29,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             await self.db.character_history_repository.create_table()
             to_test = []
             for stat in self.mock_playerstats:
-                to_test.extend(self.converter.to_character_history(stat))
+                to_test.extend(self.adapter.Player.to_character_history(stat))
             affectedrows = await self.db.character_history_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -41,7 +41,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             await self.db.character_info_repository.create_table()
             to_test = []
             for stat in self.mock_playerstats:
-                to_test.extend(self.converter.to_character_info(stat))
+                to_test.extend(self.adapter.Player.to_character_info(stat))
             affectedrows = await self.db.character_info_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -53,7 +53,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             await self.db.guild_history_repository.create_table()
             to_test = []
             for stat in self.mock_guildstats:
-                to_test.append(self.converter.to_guild_history(stat))
+                to_test.append(self.adapter.Guild.to_guild_history(stat))
             affectedrows = await self.db.guild_history_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -65,7 +65,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             await self.db.guild_info_repository.create_table()
             to_test = []
             for stat in self.mock_guildstats:
-                to_test.append(self.converter.to_guild_info(stat))
+                to_test.append(self.adapter.Guild.to_guild_info(stat))
             affectedrows = await self.db.guild_info_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -77,7 +77,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             await self.db.guild_member_history_repository.create_table()
             to_test = []
             for stat in self.mock_guildstats:
-                to_test.extend(self.converter.to_guild_member_history(stat))
+                to_test.extend(self.adapter.Guild.to_guild_member_history(stat))
             affectedrows = await self.db.guild_member_history_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -99,7 +99,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.db.online_players_repository._TABLE_NAME = "temp_online_players"  # type: ignore
         try:
             await self.db.online_players_repository.create_table()
-            to_test = self.converter.to_online_players(self.mock_onlineuuids)
+            to_test = self.adapter.OnlinePlayers.to_online_players(self.mock_onlineuuids)
             affectedrows = await self.db.online_players_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -131,7 +131,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             await self.db.player_history_repository.create_table()
             to_test = []
             for stat in self.mock_playerstats:
-                to_test.append(self.converter.to_player_history(stat))
+                to_test.append(self.adapter.Player.to_player_history(stat))
             affectedrows = await self.db.player_history_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -143,7 +143,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
             await self.db.player_info_repository.create_table()
             to_test = []
             for stat in self.mock_playerstats:
-                to_test.append(self.converter.to_player_info(stat))
+                to_test.append(self.adapter.Player.to_player_info(stat))
             affectedrows = await self.db.player_info_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
