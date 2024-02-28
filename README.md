@@ -9,7 +9,6 @@ Python program that fetches stats of online players and guilds with online membe
 
 ## Important Todo
 - Add tests for database integrity
-- Add tests for HeartbeatTask
 
 ## Todo
 - Add documentation to the whole code
