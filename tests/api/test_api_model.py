@@ -11,7 +11,7 @@ from kans.api.wynn.model.field import (
     UsernameOrUuidField,
     UuidField
 )
-from tests.mock_wynnapi import MockWynnApi
+from tests.fixtures_api import FixturesApi
 
 if TYPE_CHECKING:
     from kans.api.wynn.response import (
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 class TestApiModel(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
-        self.mockwynnapi = MockWynnApi()
+        self.mockwynnapi = FixturesApi()
         # self.wynnapi = self.mockwynnapi.wynnapi
         # await self.wynnapi.start()
 

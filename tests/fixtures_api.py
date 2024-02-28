@@ -7,27 +7,29 @@ from kans.api.wynn.response import (
     OnlinePlayersResponse,
 )
 
-ONLINEUUIDS_MOCK_FP = "tests/_mock_data/mock_onlineUuids.json"
-ONLINEPLAYERSTATS_MOCK_FP = "tests/_mock_data/mock_onlinePlayerStats.json"
-ONLINEGUILDSTATS_MOCK_FP = "tests/_mock_data/mock_onlineGuildStats.json"
 
 
-class MockWynnApi:
+
+class FixturesApi:
+
+    ONLINE_PLAYERS_FIXTURE_FP = "tests/_fixtures/online_players.json"
+    PLAYERS_FIXTURE_FP = "tests/_fixtures/players.json"
+    GUILDS_FIXTURE_FP = "tests/_fixtures/guilds.json"
 
     def __init__(self) -> None:
         self.onlineuuids = None
-        if os.path.exists(ONLINEUUIDS_MOCK_FP):
-            with open(ONLINEUUIDS_MOCK_FP, 'r') as f:
+        if os.path.exists(FixturesApi.ONLINE_PLAYERS_FIXTURE_FP):
+            with open(FixturesApi.ONLINE_PLAYERS_FIXTURE_FP, 'r') as f:
                 self.onlineuuids = OnlinePlayersResponse(*(json.load(f)["0"]))
 
         self.onlineplayerstats = None
-        if os.path.exists(ONLINEPLAYERSTATS_MOCK_FP):
-            with open(ONLINEPLAYERSTATS_MOCK_FP, 'r') as f:
+        if os.path.exists(FixturesApi.PLAYERS_FIXTURE_FP):
+            with open(FixturesApi.PLAYERS_FIXTURE_FP, 'r') as f:
                 self.onlineplayerstats = [PlayerResponse(*resp) for resp in json.load(f).values()]
 
         self.onlineguildstats = None
-        if os.path.exists(ONLINEGUILDSTATS_MOCK_FP):
-            with open(ONLINEGUILDSTATS_MOCK_FP, 'r') as f:
+        if os.path.exists(FixturesApi.GUILDS_FIXTURE_FP):
+            with open(FixturesApi.GUILDS_FIXTURE_FP, 'r') as f:
                 self.onlineguildstats = [GuildResponse(*resp) for resp in json.load(f).values()]
 
     # async def response_to_mock(self) -> None:

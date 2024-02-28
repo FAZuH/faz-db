@@ -9,7 +9,7 @@ from kans.api.wynn.response import PlayerResponse, OnlinePlayersResponse, GuildR
 from kans.db import Database, KansDatabase
 from kans.db.model import KansUptime
 from kans.util import ApiToDbConverter
-from tests.mock_wynnapi import MockWynnApi
+from tests.fixtures_api import FixturesApi
 
 
 class TestDbRepository(unittest.IsolatedAsyncioTestCase):
@@ -19,7 +19,7 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.converter = ApiToDbConverter()  # type: ignore
         self.db: Database = KansDatabase(config, logger)
 
-        mockwynnapi = MockWynnApi()
+        mockwynnapi = FixturesApi()
         self.mock_guildstats: list[GuildResponse] = mockwynnapi.onlineguildstats  # type: ignore
         self.mock_onlineuuids: OnlinePlayersResponse = mockwynnapi.onlineuuids  # type: ignore
         self.mock_playerstats: list[PlayerResponse] = mockwynnapi.onlineplayerstats  # type: ignore
