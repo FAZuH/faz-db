@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypedDict
 
 from . import OnlinePlayersId
 
@@ -16,11 +16,15 @@ class OnlinePlayers(OnlinePlayersId):
         super().__init__(uuid)
         self._server = server
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> OnlinePlayers.Type:
         return {
                 "uuid": self.uuid.uuid,
                 "server": self.server
         }
+
+    class Type(TypedDict):
+        uuid: bytes
+        server: str
 
     @property
     def server(self) -> str:

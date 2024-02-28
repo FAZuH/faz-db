@@ -1,12 +1,12 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypedDict
 
 from . import PlayerHistoryId
 
 if TYPE_CHECKING:
     from .. import DateColumn, UuidColumn
-    from datetime import datetime as dt
+    from datetime import datetime
 
 
 class PlayerHistory(PlayerHistoryId):
@@ -23,7 +23,7 @@ class PlayerHistory(PlayerHistoryId):
         guild_name: None | str,
         guild_rank: None | str,
         rank: None | str,
-        datetime: dt | DateColumn
+        datetime: datetime | DateColumn
     ) -> None:
         super().__init__(uuid, datetime)
         self._username = username
@@ -33,7 +33,7 @@ class PlayerHistory(PlayerHistoryId):
         self._guild_rank = guild_rank
         self._rank = rank
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> PlayerHistory.Type:
         return {
                 "uuid": self.uuid.uuid,
                 "username": self.username,
@@ -44,6 +44,16 @@ class PlayerHistory(PlayerHistoryId):
                 "rank": self.rank,
                 "datetime": self.datetime.datetime
         }
+
+    class Type(TypedDict):
+        uuid: bytes
+        username: str
+        support_rank: None | str
+        playtime: Decimal
+        guild_name: None | str
+        guild_rank: None | str
+        rank: None | str
+        datetime: datetime
 
     @property
     def username(self) -> str:

@@ -22,7 +22,7 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
 
     async def exists(self, id_: GuildHistoryId, conn: None | Connection = None) -> bool:
         SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `name` = %(name)s AND `datetime` = %(datetime)s"
-        result = await self._db.fetch(SQL, (id_.name, id_.datetime), conn)
+        result = await self._db.fetch(SQL, (id_.name, id_.datetime.datetime), conn)
         return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
@@ -31,7 +31,7 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
 
     async def find_one(self, id_: GuildHistoryId, conn: None | Connection = None) -> None | GuildHistory:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `name` = %(name)s AND `datetime` = %(datetime)s"
-        result = await self._db.fetch(SQL, (id_.name, id_.datetime), conn)
+        result = await self._db.fetch(SQL, (id_.name, id_.datetime.datetime), conn)
         return GuildHistory(**result[0]) if result else None
 
     async def find_all(self, conn: None | Connection = None) -> None | list[GuildHistory]:
@@ -50,7 +50,7 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
 
     async def delete(self, id_: GuildHistoryId, conn: None | Connection = None) -> int:
         SQL = f"DELETE FROM `{self.table_name}` WHERE `name` = %(name)s AND `datetime` = %(datetime)s"
-        return await self._db.execute(SQL, (id_.name, id_.datetime), conn)
+        return await self._db.execute(SQL, (id_.name, id_.datetime.datetime), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""

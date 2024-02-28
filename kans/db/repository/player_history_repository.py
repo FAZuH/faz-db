@@ -25,7 +25,7 @@ class PlayerHistoryRepository(Repository[PlayerHistory, PlayerHistoryId]):
 
     async def exists(self,id_: PlayerHistoryId, conn: None | Connection = None) -> bool:
         SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        result = await self._db.fetch(SQL, {"uuid": id_.uuid}, connection=conn)
+        result = await self._db.fetch(SQL, {"uuid": id_.uuid.uuid}, connection=conn)
         return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
@@ -34,7 +34,7 @@ class PlayerHistoryRepository(Repository[PlayerHistory, PlayerHistoryId]):
 
     async def find_one(self, id_: PlayerHistoryId, conn: None | Connection = None) -> None | PlayerHistory:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        result = await self._db.fetch(SQL, {"uuid": id_.uuid}, connection=conn)
+        result = await self._db.fetch(SQL, {"uuid": id_.uuid.uuid}, connection=conn)
         return PlayerHistory(**result[0]) if result else None
 
     async def find_all(self, conn: None | Connection = None) -> None | list[PlayerHistory]:
@@ -53,7 +53,7 @@ class PlayerHistoryRepository(Repository[PlayerHistory, PlayerHistoryId]):
 
     async def delete(self, id_: PlayerHistoryId, conn: None | Connection = None) -> int:
         SQL = f"DELETE FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        return await self._db.execute(SQL, {"uuid": id_.uuid}, conn)
+        return await self._db.execute(SQL, {"uuid": id_.uuid.uuid}, conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""

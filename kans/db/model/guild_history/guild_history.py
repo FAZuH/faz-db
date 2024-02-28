@@ -1,11 +1,11 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypedDict
 
 from . import GuildHistoryId
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
+    from datetime import datetime
     from .. import DateColumn
 
 
@@ -22,7 +22,7 @@ class GuildHistory(GuildHistoryId):
         wars: int,
         member_total: int,
         online_members: int,
-        datetime: dt | DateColumn
+        datetime: datetime | DateColumn
     ) -> None:
         super().__init__(name, datetime)
         self._level = level
@@ -31,7 +31,7 @@ class GuildHistory(GuildHistoryId):
         self._member_total = member_total
         self._online_members = online_members
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> GuildHistory.Type:
         return {
                 "name": self.name,
                 "level": self.level,
@@ -39,8 +39,17 @@ class GuildHistory(GuildHistoryId):
                 "wars": self.wars,
                 "member_total": self.member_total,
                 "online_members": self.online_members,
-                "datetime": self.datetime
+                "datetime": self.datetime.datetime
         }
+
+    class Type(TypedDict):
+        name: str
+        level: Decimal
+        territories: int
+        wars: int
+        member_total: int
+        online_members: int
+        datetime: datetime
 
     @property
     def level(self) -> Decimal:

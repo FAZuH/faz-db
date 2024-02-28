@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypedDict
 
 from . import CharacterHistoryId
 from .. import GamemodeColumn
@@ -41,7 +41,7 @@ class CharacterHistory(CharacterHistoryId):
         dungeon_completions: int,
         quest_completions: int,
         raid_completions: int,
-        datetime: dt | DateColumn
+        datetime: dt | DateColumn,
     ) -> None:
         super().__init__(character_uuid, datetime)
         self._level = level
@@ -70,7 +70,7 @@ class CharacterHistory(CharacterHistoryId):
         self._quest_completions = quest_completions
         self._raid_completions = raid_completions
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> CharacterHistory.Type:
         return {
                 "character_uuid": self.character_uuid.uuid,
                 "level": self.level,
@@ -100,6 +100,35 @@ class CharacterHistory(CharacterHistoryId):
                 "raid_completions": self.raid_completions,
                 "datetime": self.datetime.datetime,
         }
+
+    class Type(TypedDict, total=False):
+        character_uuid: bytes
+        level: int
+        xp: int
+        wars: int
+        playtime: Decimal
+        mobs_killed: int
+        chests_found: int
+        logins: int
+        deaths: int
+        discoveries: int
+        gamemode: bytes
+        alchemism: Decimal
+        armouring: Decimal
+        cooking: Decimal
+        jeweling: Decimal
+        scribing: Decimal
+        tailoring: Decimal
+        weaponsmithing: Decimal
+        woodworking: Decimal
+        mining: Decimal
+        woodcutting: Decimal
+        farming: Decimal
+        fishing: Decimal
+        dungeon_completions: int
+        quest_completions: int
+        raid_completions: int
+        datetime: dt
 
     @property
     def level(self) -> int:

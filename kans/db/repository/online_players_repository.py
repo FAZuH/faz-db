@@ -29,7 +29,7 @@ class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
 
     async def find_one(self, id_: OnlinePlayersId, conn: None | Connection = None) -> None | OnlinePlayers:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        result = await self._db.fetch(SQL, {"uuid": id_.uuid}, connection=conn)
+        result = await self._db.fetch(SQL, {"uuid": id_.uuid.uuid}, connection=conn)
         return OnlinePlayers(**result[0]) if result else None
 
     async def find_all(self, conn: None | Connection = None) -> None | list[OnlinePlayers]:
