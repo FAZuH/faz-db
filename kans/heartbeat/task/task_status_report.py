@@ -165,8 +165,8 @@ class TaskStatusReport(Task):
                 f"{await self._db.total_size() / self.Util.MB_TO_BYTE} MB",  # db size
 
                 self._api.ratelimit.remaining,  # ratelimit
-                self._db_insert.online_players_manager.online_uuids,  # online player
-                self._db_insert.online_guilds_manager.online_guilds,  # online guild
+                len(self._db_insert.players_manager.online_uuids),  # online player
+                len(self._db_insert.guilds_manager.online_guilds),  # online guild
 
                 self.Util.get_os_info(),  # os
                 self.Util.get_os_uptime()  # uptime
