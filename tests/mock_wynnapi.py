@@ -7,9 +7,9 @@ from kans.api.wynn.response import (
     OnlinePlayersResponse,
 )
 
-ONLINEUUIDS_MOCK_FP = "tests/mock_data/mock_onlineUuids.json"
-ONLINEPLAYERSTATS_MOCK_FP = "tests/mock_data/mock_onlinePlayerStats.json"
-ONLINEGUILDSTATS_MOCK_FP = "tests/mock_data/mock_onlineGuildStats.json"
+ONLINEUUIDS_MOCK_FP = "tests/_mock_data/mock_onlineUuids.json"
+ONLINEPLAYERSTATS_MOCK_FP = "tests/_mock_data/mock_onlinePlayerStats.json"
+ONLINEGUILDSTATS_MOCK_FP = "tests/_mock_data/mock_onlineGuildStats.json"
 
 
 class MockWynnApi:
