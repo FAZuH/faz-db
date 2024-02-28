@@ -10,15 +10,15 @@ from kans.db.model import (
     UuidColumn,
 )
 from kans.util import ApiToDbConverter
-from tests.mock_wynnapi import MockWynnApi
+from tests.fixtures_api import FixturesApi
 
 
-class TestDbModel(unittest.IsolatedAsyncioTestCase):
+class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
     """Tests if db.models is properly storing data."""
 
     async def asyncSetUp(self) -> None:
         self.converter = ApiToDbConverter()
-        self.mockwynnapi = MockWynnApi()
+        self.mockwynnapi = FixturesApi()
 
         self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
         self.mock_onlineuuids: OnlinePlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
