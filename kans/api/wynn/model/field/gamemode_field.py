@@ -1,29 +1,45 @@
+from ..enum import Gamemode
+
+
 class GamemodeField:
 
     def __init__(self, gamemodes: list[str]) -> None:
-        self._gamemodes: list[str] = gamemodes
+        self._gamemodes_str: list[str] = gamemodes
+        self._gamemodes: list[Gamemode] = []
 
-    def to_bytes(self) -> bytes:
-        bit_position: int
-        gamemode_byte: int = 0  # Initialize a byte to 0
-        # Set the corresponding bits in the byte
-        for gamemode in self._gamemodes:
-            match gamemode:
-                case "hardcore":
-                    bit_position = 0
-                case "ultimate_ironman":
-                    bit_position = 1
-                case "ironman":
-                    bit_position = 2
-                case "craftsman":
-                    bit_position = 3
-                case "hunted":
-                    bit_position = 4
+        for gm in gamemodes:
+            match gm.upper():
+                case Gamemode.HARDCORE.value:
+                    self._gamemodes.append(Gamemode.HARDCORE)
+                case Gamemode.ULTIMATE_IRONMAN.value:
+                    self._gamemodes.append(Gamemode.ULTIMATE_IRONMAN)
+                case Gamemode.IRONMAN.value:
+                    self._gamemodes.append(Gamemode.IRONMAN)
+                case Gamemode.CRAFTSMAN.value:
+                    self._gamemodes.append(Gamemode.CRAFTSMAN)
+                case Gamemode.HUNTED.value:
+                    self._gamemodes.append(Gamemode.HUNTED)
                 case _:
-                    raise ValueError(f"Invalid gamemode: {gamemode}")
-            gamemode_byte |= (1 << bit_position)
-        return gamemode_byte.to_bytes(1, byteorder="big")
+                    raise ValueError(f"Invalid gamemode: {gm}")
+
+    def get_liststr(self) -> list[str]:
+        return self._gamemodes_str
+
+    def is_hardcore(self) -> bool:
+        return Gamemode.HARDCORE in self._gamemodes
+
+    def is_ultimate_ironman(self) -> bool:
+        return Gamemode.ULTIMATE_IRONMAN in self._gamemodes
+
+    def is_ironman(self) -> bool:
+        return Gamemode.IRONMAN in self._gamemodes
+
+    def is_craftsman(self) -> bool:
+        return Gamemode.CRAFTSMAN in self._gamemodes
+
+    def is_hunted(self) -> bool:
+        return Gamemode.HUNTED in self._gamemodes
 
     @property
-    def gamemodes(self) -> list[str]:
+    def gamemodes(self) -> list[Gamemode]:
         return self._gamemodes
