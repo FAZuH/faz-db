@@ -16,7 +16,7 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
 
     async def insert(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int:
         SQL = f"""
-            INSERT IGNORE INTO `{self._TABLE_NAME}` (
+            INSERT IGNORE INTO `{self.table_name}` (
                 `character_uuid`, `level`, `xp`, `wars`, `playtime`, `mobs_killed`, `chests_found`, `logins`,
                 `deaths`, `discoveries`, `gamemode`, `alchemism`, `armouring`, `cooking`, `jeweling`, `scribing`,
                 `tailoring`, `weaponsmithing`, `woodworking`, `mining`, `woodcutting`, `farming`, `fishing`,
@@ -63,17 +63,15 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
                 `quest_completions` = %(quest_completions)s, `raid_completions` = %(raid_completions)s, `gamemode` = %(gamemode)s
             WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s
         """
-        return await self._db.execute_many(
-                SQL,
-                tuple(entity.to_dict() for entity in entities),
-                conn
-        )
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
-    async def delete(self, id_: CharacterHistoryId, conn: None | Connection = None) -> int: ...
+    async def delete(self, id_: CharacterHistoryId, conn: None | Connection = None) -> int:
+        SQL = f"DELETE FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s"
+        return await self._db.execute(SQL, (id_.character_uuid, id_.datetime), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
-            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
+            CREATE TABLE `{self.table_name}` (
                 `character_uuid` binary(16) NOT NULL,
                 `level` tinyint unsigned NOT NULL,
                 `xp` bigint unsigned NOT NULL,
@@ -101,7 +99,8 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
                 `quest_completions` int unsigned NOT NULL,
                 `raid_completions` int unsigned NOT NULL,
                 `datetime` datetime NOT NULL,
-                KEY `player_character_idx_ts` (`datetime` DESC)
+                UNIQUE KEY `characterHistory_uq_ChuuidDt` (`character_uuid`,`datetime`),
+                KEY `characterHistory_idx_ChuuidDt` (`character_uuid`,`datetime` DESC)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(SQL, connection=conn)

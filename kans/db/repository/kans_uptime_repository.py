@@ -19,12 +19,32 @@ class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
         """
         return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
-    async def exists(self, id_: KansUptimeId, conn: None | Connection = None) -> bool: ...
-    async def count(self, conn: None | Connection = None) -> float: ...
-    async def find_one(self, id_: KansUptimeId, conn: None | Connection = None) -> None | KansUptime: ...
-    async def find_all(self, conn: None | Connection = None) -> None | list[KansUptime]: ...
-    async def update(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int: ...
-    async def delete(self, id_: KansUptimeId, conn: None | Connection = None) -> int: ...
+    async def exists(self, id_: KansUptimeId, conn: None | Connection = None) -> bool:
+        raise NotImplementedError
+
+    async def count(self, conn: None | Connection = None) -> float:
+        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
+
+    async def find_one(self, id_: KansUptimeId, conn: None | Connection = None) -> None | KansUptime:
+        raise NotImplementedError
+
+    async def find_all(self, conn: None | Connection = None) -> None | list[KansUptime]:
+        SQL = f"SELECT * FROM `{self.table_name}`"
+        result = await self._db.fetch(SQL, connection=conn)
+        return [KansUptime(**row) for row in result] if result else None
+
+    async def update(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int:
+        SQL = f"""
+            UPDATE `{self.table_name}`
+            SET `stop_time` = %(stop_time)s
+            WHERE `start_time` = %(start_time)s
+        """
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+
+    async def delete(self, id_: KansUptimeId, conn: None | Connection = None) -> int:
+        raise NotImplementedError
+
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
             CREATE TABLE IF NOT EXISTS `{self.table_name}` (
@@ -35,7 +55,7 @@ class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
                 UNIQUE KEY `start_time_UNIQUE` (`start_time`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
-        await self._db.execute(SQL)
+        await self._db.execute(SQL, connection=conn)
 
     @property
     def table_name(self) -> str:

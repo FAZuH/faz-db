@@ -27,11 +27,23 @@ class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
         SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
         return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
 
-    async def find_one(self, id_: OnlinePlayersId, conn: None | Connection = None) -> None | OnlinePlayers: ...
+    async def find_one(self, id_: OnlinePlayersId, conn: None | Connection = None) -> None | OnlinePlayers:
+        SQL = f"SELECT * FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
+        result = await self._db.fetch(SQL, {"uuid": id_.uuid}, connection=conn)
+        return OnlinePlayers(**result[0]) if result else None
 
-    async def find_all(self, conn: None | Connection = None) -> None | list[OnlinePlayers]: ...
+    async def find_all(self, conn: None | Connection = None) -> None | list[OnlinePlayers]:
+        SQL = f"SELECT * FROM `{self.table_name}`"
+        result = await self._db.fetch(SQL, connection=conn)
+        return [OnlinePlayers(**row) for row in result] if result else None
 
-    async def update(self, entities: Iterable[OnlinePlayers], conn: None | Connection = None) -> int: ...
+    async def update(self, entities: Iterable[OnlinePlayers], conn: None | Connection = None) -> int:
+        SQL = f"""
+            UPDATE `{self.table_name}`
+            SET `server` = %(server)s
+            WHERE `uuid` = %(uuid)s
+        """
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def delete(self, id_: OnlinePlayersId, conn: None | Connection = None) -> int: ...
 

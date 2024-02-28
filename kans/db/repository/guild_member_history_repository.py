@@ -19,19 +19,36 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
         """
         return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
-    async def exists(self,id_: GuildMemberHistoryId, conn: None | Connection = None) -> bool: ...
+    async def exists(self,id_: GuildMemberHistoryId, conn: None | Connection = None) -> bool:
+        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
+        result = await self._db.fetch(SQL, {"uuid": id_.uuid}, connection=conn)
+        return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
         SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
         return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
 
-    async def find_one(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> None | GuildMemberHistory: ...
+    async def find_one(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> None | GuildMemberHistory:
+        SQL = f"SELECT * FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
+        result = await self._db.fetch(SQL, {"uuid": id_.uuid}, connection=conn)
+        return GuildMemberHistory(**result[0]) if result else None
 
-    async def find_all(self, conn: None | Connection = None) -> None | list[GuildMemberHistory]: ...
+    async def find_all(self, conn: None | Connection = None) -> None | list[GuildMemberHistory]:
+        SQL = f"SELECT * FROM `{self.table_name}`"
+        result = await self._db.fetch(SQL, connection=conn)
+        return [GuildMemberHistory(**row) for row in result] if result else None
 
-    async def update(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int: ...
+    async def update(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
+        SQL = f"""
+            UPDATE `{self.table_name}`
+            SET `contributed` = %(contributed)s, `joined` = %(joined)s, `datetime` = %(datetime)s
+            WHERE `uuid` = %(uuid)s
+        """
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
-    async def delete(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> int: ...
+    async def delete(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> int:
+        SQL = f"DELETE FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
+        return await self._db.execute(SQL, {"uuid": id_.uuid}, conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
