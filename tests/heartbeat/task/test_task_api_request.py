@@ -36,14 +36,14 @@ class TestTaskApiRequest(unittest.TestCase):
         self.api.start.assert_called_once()
 
     async def test_start_requests(self):
-        # MOCKING
+        # MOCK
         self.task._request_list = MagicMock()
         self.task._request_list.dequeue.return_value = [MagicMock(), MagicMock()]
 
-        # ACTION
+        # ACT
         await self.task._start_requests()
 
-        # ASSERTION
+        # ASSERT
         self.assertEqual(len(self.task._running_requests), 2)
 
     def test_check_responses(self):

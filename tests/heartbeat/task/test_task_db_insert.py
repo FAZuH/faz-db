@@ -18,50 +18,50 @@ class TestTaskDbInsert(unittest.TestCase):
         self._task = TaskDbInsert(MagicMock(), self._api, self._db, self._request_list, self._response_list)
 
     def test_setup(self) -> None:
-        # MOCKING
+        # MOCK
         self._db.create_all = AsyncMock()
 
-        # ACTION
+        # ACT
         self._task.setup()
 
-        # ASSERTION
+        # ASSERT
         self._db.create_all.assert_called_once()
         self._request_list.enqueue.assert_called_once_with(0, self._api.player.get_online_uuids())
 
     def test_run(self) -> None:
-        # MOCKING
+        # MOCK
         self._task._run = AsyncMock()
 
-        # ACTION
+        # ACT
         self._task.run()
 
-        # ASSERTION
+        # ASSERT
         self._task._run.assert_called_once()
 
     async def test__run(self) -> None:
-        # MOCKING
+        # MOCK
         self._response_list.get.return_value = None
         self._task._response_handler = Mock(spec_set=TaskDbInsert._ResponseHandler)
         online_players = Mock(spec_set=OnlinePlayersResponse)
         player = Mock(spec_set=PlayerResponse)
         guild = Mock(spec_set=GuildResponse)
 
-        # ACTION
+        # ACT
         await self._task._run()
 
-        # ASSERTION
+        # ASSERT
         self._db.kans_uptime_repository.insert.assert_called_once()
         self._task._response_handler.handle_onlineplayers_response.assert_not_called()
         self._task._response_handler.handle_player_response.assert_not_called()
         self._task._response_handler.handle_guild_response.assert_not_called()
 
-        # MOCKING
+        # MOCK
         self._response_list.get.return_value = [online_players, player, guild]
 
-        # ACTION
+        # ACT
         await self._task._run()
 
-        # ASSERTION
+        # ASSERT
         self._task._response_handler.handle_onlineplayers_response.assert_called_once_with(online_players)
         self._task._response_handler.handle_player_response.assert_called_once_with(player)
         self._task._response_handler.handle_guild_response.assert_called_once_with(guild)
@@ -78,23 +78,23 @@ class TestTaskDbInsert(unittest.TestCase):
 
     def test__insert_online_players_response(self) -> None:
         # TODO: Implement test
-        # MOCKING
-        # ACTION
-        # ASSERTION
+        # MOCK
+        # ACT
+        # ASSERT
         pass
 
     def test__insert_player_responses(self) -> None:
         # TODO: Implement test
-        # MOCKING
-        # ACTION
-        # ASSERTION
+        # MOCK
+        # ACT
+        # ASSERT
         pass
 
     def test__insert_guild_response(self) -> None:
         # TODO: Implement test
-        # MOCKING
-        # ACTION
-        # ASSERTION
+        # MOCK
+        # ACT
+        # ASSERT
         pass
 
 
@@ -107,7 +107,7 @@ class TestResponseHandler(unittest.TestCase):
 
     # OnlinePlayerResponse
     def test_process_new_response(self) -> None:
-        # MOCKING
+        # MOCK
         uuid0 = "0"
         uuid1 = "1"
         uuid2 = "2"
@@ -120,10 +120,10 @@ class TestResponseHandler(unittest.TestCase):
         resp1.body.players = {uuid1, uuid2}
         resp1.headers.to_datetime.return_value = datetime1
 
-        # ACTION
+        # ACT
         self._manager._process_onlineplayers_response(resp0)
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that player 1 and 2 has logged on.
         self.assertSetEqual(self._manager.logged_on_players, {uuid0, uuid1})
         # NOTE: Assert that player 1 and 2 is online, with the correct logged on datetime.
@@ -132,10 +132,10 @@ class TestResponseHandler(unittest.TestCase):
                 uuid1: datetime0
         })
 
-        # ACTION
+        # ACT
         self._manager._process_onlineplayers_response(resp1)
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that only player 2 has logged on because player 1 is already logged on.
         self.assertSetEqual(self._manager._logged_on_players, {uuid2})
         # NOTE: Assert that player 0 is no longer online, while player 1 and player 2 has the correct logged on datetime.
@@ -145,35 +145,35 @@ class TestResponseHandler(unittest.TestCase):
         })
 
     def test_enqueue_player_stats(self) -> None:
-        # MOCKING
+        # MOCK
         uuid0 = "player0"
         self._manager._logged_on_players = {uuid0}
 
-        # ACTION
+        # ACT
         self._manager._enqueue_player()
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that the correct player is being queued.
         self._api.player.get_full_stats.assert_called_once_with(uuid0)
         # NOTE: Assert that enqueue is called with the correct arguments.
         self.__request_list.enqueue.assert_called_once_with(0, self._api.player.get_full_stats())
 
     def test_requeueonline_players(self) -> None:
-        # MOCKING
+        # MOCK
         resp = MagicMock()
         resp.headers.expires.to_datetime().timestamp.return_value = 69
 
-        # ACTION
+        # ACT
         self._manager._requeue_onlineplayers(resp)
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that enqueue is called with the correct arguments.
         self.__request_list.enqueue.assert_called_once_with(69, self._api.player.get_online_uuids(), priority=0)
 
 
     # PlayerResponse
     def test_process_player_response(self) -> None:
-        # MOCKING
+        # MOCK
         guild0 = "guild0"
         guild1 = "guild1"
         uuid0 = "0"
@@ -192,10 +192,10 @@ class TestResponseHandler(unittest.TestCase):
         mock3.body.uuid.uuid = uuid2
         mock3.body.online = True
 
-        # ACTION
+        # ACT
         self._manager._process_player_response([mock1])
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that guild "test0" is logged on.
         self.assertSetEqual(self._manager._logged_on_guilds, {guild0})
         # NOTE: Assert that guild "test0" is online with correct players.
@@ -203,10 +203,10 @@ class TestResponseHandler(unittest.TestCase):
                 guild0: {uuid0}
         })
 
-        # ACTION
+        # ACT
         self._manager._process_player_response([mock2, mock3])
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that only guild test1 is logged on, because test0 is already logged on.
         self.assertSetEqual(self._manager._logged_on_guilds, {guild1})
         # NOTE: Assert that both guilds are online with correct players.
@@ -215,44 +215,44 @@ class TestResponseHandler(unittest.TestCase):
                 guild1: {uuid2}
         })
 
-        # MOCKING
+        # MOCK
         mock3.body.online = False
 
-        # ACTION
+        # ACT
         self._manager._process_player_response([mock3])
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that guild test1 is no longer online.
         self.assertDictEqual(self._manager.online_guilds, {
                 guild0: {uuid0, uuid1}
         })
 
     def test_enqueue_guild(self) -> None:
-        # MOCKING
+        # MOCK
         guild0 = "guild0"
         self._manager._logged_on_guilds = {guild0}
 
-        # ACTION
+        # ACT
         self._manager._enqueue_guild()
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that the correct guild is being queued.
         self._api.guild.get.assert_called_once_with(guild0)
         # NOTE: Assert that enqueue is called with the correct arguments.
         self.__request_list.enqueue.assert_called_once_with(0, self._api.guild.get())
 
     def test_requeue_player(self) -> None:
-        # MOCKING
+        # MOCK
         resp1 = MagicMock()
         resp2 = MagicMock()  # continued
         resp1.body.online = True
         resp1.headers.expires.to_datetime().timestamp.return_value = 69
         resp2.body.online = False
 
-        # ACTION
+        # ACT
         self._manager._requeue_player([resp2, resp1])
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that self._api.player.get_online_uuids() is called with the correct arguments
         self._api.player.get_full_stats.assert_called_once()
         # NOTE: Assert that enqueue is called with the correct arguments.
@@ -261,7 +261,7 @@ class TestResponseHandler(unittest.TestCase):
 
     # GuildResponse
     def test_requeue_guild(self) -> None:
-        # MOCKING
+        # MOCK
         guild0 = "guild0"
         resp1 = MagicMock()
         resp2 = MagicMock()  # continued
@@ -270,10 +270,10 @@ class TestResponseHandler(unittest.TestCase):
         resp1.headers.expires.to_datetime().timestamp.return_value = 69
         resp2.body.members.get_online_members.return_value = 0
 
-        # ACTION
+        # ACT
         self._manager._requeue_guild([resp1, resp2])
 
-        # ASSERTION
+        # ASSERT
         # NOTE: Assert that self._api.guild.get() is called with the correct arguments
         self._api.guild.get.assert_called_once_with(guild0)
         # NOTE: Assert that enqueue is called with the correct arguments.
