@@ -15,7 +15,7 @@ class RequestList:
         self._list: list[RequestList.RequestItem] = []
         self._lock: Lock = Lock()
 
-    def get(self, amount: int) -> list[Coroutine[AbstractWynnResponse[Any], Any, Any]]:
+    def dequeue(self, amount: int) -> list[Coroutine[AbstractWynnResponse[Any], Any, Any]]:
         now: float = dt.now().timestamp()
 
         ret = []

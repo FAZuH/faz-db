@@ -19,7 +19,7 @@ class TestRequestList(unittest.TestCase):
         request_ts = dt.now().timestamp() - 100
         self.request_list.enqueue(request_ts, coro)
 
-        result = self.request_list.get(1)
+        result = self.request_list.dequeue(1)
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], coro)
@@ -32,13 +32,13 @@ class TestRequestList(unittest.TestCase):
         self.request_list.enqueue(request_ts, coro1, priority=100)
         self.request_list.enqueue(request_ts, coro2, priority=200)  # higher priority
 
-        result = self.request_list.get(1)
+        result = self.request_list.dequeue(1)
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result.pop(), coro2)
 
     def test_get_with_empty_list(self) -> None:
-        result = self.request_list.get(1)
+        result = self.request_list.dequeue(1)
 
         self.assertEqual(len(result), 0)
 

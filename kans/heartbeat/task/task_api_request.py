@@ -56,7 +56,7 @@ class TaskApiRequest(Task):
         if running_req_len < self._CONCURRENT_REQUESTS:
             self._running_requests.extend(
                     self._event_loop.create_task(req)
-                    for req in self._request_list.get(self._CONCURRENT_REQUESTS - running_req_len)
+                    for req in self._request_list.dequeue(self._CONCURRENT_REQUESTS - running_req_len)
             )
 
     def _check_responses(self) -> None:
