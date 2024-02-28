@@ -16,8 +16,8 @@ class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
         async with self._db.transaction_group() as tg:
             tg.add(f"DELETE FROM `{self.table_name}` WHERE `uuid` IS NOT NULL")
             tg.add(
-                    f"INSERT INTO `{self.table_name}` (`uuid`, `server`) VALUES (%s, %s)",
-                    tuple(entity.to_tuple() for entity in entities)
+                    f"INSERT INTO `{self.table_name}` (`uuid`, `server`) VALUES (%(uuid)s, %(server)s)",
+                    tuple(entity.to_dict() for entity in entities)
             )
         return 0
 

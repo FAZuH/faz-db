@@ -15,9 +15,9 @@ class PlayerActivityHistoryRepository(Repository[PlayerActivityHistory, PlayerAc
     async def insert(self, entities: Iterable[PlayerActivityHistory], conn: None | Connection = None) -> int:
         SQL = f"""
             REPLACE INTO `{self.table_name}` (`uuid`, `logon_datetime`, `logoff_datetime`)
-            VALUES (%s, %s, %s)
+            VALUES (%(uuid)s, %(logon_datetime)s, %(logoff_datetime)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self, id_: PlayerActivityHistoryId, conn: None | Connection = None) -> bool: ...
 

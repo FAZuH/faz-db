@@ -16,18 +16,23 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
 
     async def insert(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int:
         SQL = f"""
-            INSERT IGNORE INTO `{self.table_name}` (
+            INSERT IGNORE INTO `{self._TABLE_NAME}` (
                 `character_uuid`, `level`, `xp`, `wars`, `playtime`, `mobs_killed`, `chests_found`, `logins`,
                 `deaths`, `discoveries`, `gamemode`, `alchemism`, `armouring`, `cooking`, `jeweling`, `scribing`,
                 `tailoring`, `weaponsmithing`, `woodworking`, `mining`, `woodcutting`, `farming`, `fishing`,
                 `dungeon_completions`, `quest_completions`, `raid_completions`, `datetime`
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (
+                %(character_uuid)s, %(level)s, %(xp)s, %(wars)s, %(playtime)s, %(mobs_killed)s, %(chests_found)s, %(logins)s,
+                %(deaths)s, %(discoveries)s, %(gamemode)s, %(alchemism)s, %(armouring)s, %(cooking)s, %(jeweling)s, %(scribing)s,
+                %(tailoring)s, %(weaponsmithing)s, %(woodworking)s, %(mining)s, %(woodcutting)s, %(farming)s, %(fishing)s,
+                %(dungeon_completions)s, %(quest_completions)s, %(raid_completions)s, %(datetime)s
+            )
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self, id_: CharacterHistoryId, conn: None | Connection = None) -> bool:
-        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `character_uuid` = %s AND `datetime` = %s"
+        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `character_uuid` = %(character_uuid)s"
         result = await self._db.fetch(SQL, (id_.character_uuid, id_.datetime), connection=conn)
         return result[0].get("count", 0) > 0
 
@@ -37,7 +42,7 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
         return result[0].get("count", 0)
 
     async def find_one(self, id_: CharacterHistoryId, conn: None | Connection = None) -> None | CharacterHistory:
-        SQL = f"SELECT * FROM `{self.table_name}` WHERE `character_uuid` = %s AND `datetime` = %s"
+        SQL = f"SELECT * FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s"
         result = await self._db.fetch(SQL, (id_.character_uuid, id_.datetime), connection=conn)
         return CharacterHistory(**result[0]) if result else None
 
@@ -49,16 +54,18 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
     async def update(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int:
         SQL = f"""
             UPDATE `{self.table_name}`
-            SET `alchemism` = %s, `armouring` = %s, `cooking` = %s, `farming` = %s, `fishing` = %s, `jeweling` = %s,
-                `mining` = %s, `scribing` = %s, `tailoring` = %s, `weaponsmithing` = %s, `woodcutting` = %s,
-                `woodworking` = %s, `chests_found` = %s, `deaths` = %s, `discoveries` = %s, `level` = %s, `logins` = %s,
-                `mobs_killed` = %s, `playtime` = %s, `wars` = %s, `xp` = %s, `dungeon_completions` = %s,
-                `quest_completions` = %s, `raid_completions` = %s, `gamemode` = %s
-            WHERE `character_uuid` = %s AND `datetime` = %s
+            SET `alchemism` = %(alchemism)s, `armouring` = %(armouring)s, `cooking` = %(cooking)s, `farming` = %(farming)s,
+                `fishing` = %(fishing)s, `jeweling` = %(jeweling)s, `mining` = %(mining)s, `scribing` = %(scribing)s,
+                `tailoring` = %(tailoring)s, `weaponsmithing` = %(weaponsmithing)s, `woodcutting` = %(woodcutting)s,
+                `woodworking` = %(woodworking)s, `chests_found` = %(chests_found)s, `deaths` = %(deaths)s,
+                `discoveries` = %(discoveries)s, `level` = %(level)s, `logins` = %(logins)s, `mobs_killed` = %(mobs_killed)s,
+                `playtime` = %(playtime)s, `wars` = %(wars)s, `xp` = %(xp)s, `dungeon_completions` = %(dungeon_completions)s,
+                `quest_completions` = %(quest_completions)s, `raid_completions` = %(raid_completions)s, `gamemode` = %(gamemode)s
+            WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s
         """
         return await self._db.execute_many(
                 SQL,
-                tuple(entity.to_tuple() for entity in entities),
+                tuple(entity.to_dict() for entity in entities),
                 conn
         )
 

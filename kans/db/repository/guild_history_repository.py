@@ -16,9 +16,9 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
         SQL = f"""
             INSERT IGNORE INTO `{self.table_name}`
                 (`name`, `level`, `territories`, `wars`, `member_total`, `online_members`, `datetime`)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%(name)s, %(level)s, %(territories)s, %(wars)s, %(member_total)s, %(online_members)s, %(datetime)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self, id_: GuildHistoryId, conn: None | Connection = None) -> bool: ...
 

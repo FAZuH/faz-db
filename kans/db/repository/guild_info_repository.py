@@ -16,9 +16,9 @@ class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
         # NOTE: This doesn't change. Ignore duplicates.
         SQL = f"""
             INSERT IGNORE INTO `{self.table_name}` (`name`, `prefix`, `created`)
-            VALUES (%s, %s, %s)
+            VALUES (%(name)s, %(prefix)s, %(created)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self, id_: GuildInfoId, conn: None | Connection = None) -> bool: ...
 

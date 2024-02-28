@@ -15,9 +15,9 @@ class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
     async def insert(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int:
         SQL = f"""
             REPLACE INTO `{self.table_name}` (`start_time`, `stop_time`)
-            VALUES (%s, %s)
+            VALUES (%(start_time)s, %(stop_time)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self, id_: KansUptimeId, conn: None | Connection = None) -> bool: ...
     async def count(self, conn: None | Connection = None) -> float: ...

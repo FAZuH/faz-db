@@ -15,9 +15,9 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
     async def insert(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
         SQL = f"""
             INSERT IGNORE INTO `{self.table_name}` (`uuid`, `contributed`, `joined`, `datetime`)
-            VALUES (%s, %s, %s, %s)
+            VALUES (%(uuid)s, %(contributed)s, %(joined)s, %(datetime)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self,id_: GuildMemberHistoryId, conn: None | Connection = None) -> bool: ...
 

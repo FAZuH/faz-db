@@ -17,11 +17,11 @@ class PlayerHistoryRepository(Repository[PlayerHistory, PlayerHistoryId]):
             INSERT INTO `{self.table_name}`
             (`uuid`, `username`, `support_rank`, `playtime`, `guild_name`, `guild_rank`, `rank`, `datetime`)
             VALUES
-            (%s, %s, %s, %s, %s, %s, %s, %s)
+            (%(uuid)s, %(username)s, %(support_rank)s, %(playtime)s, %(guild_name)s, %(guild_rank)s, %(rank)s, %(datetime)s)
             ON DUPLICATE KEY UPDATE
             `datetime` = VALUES(`datetime`)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self,id_: PlayerHistoryId, conn: None | Connection = None) -> bool: ...
 

@@ -16,9 +16,9 @@ class CharacterInfoRepository(Repository[CharacterInfo, CharacterInfoId]):
         # NOTE: This doesn't change. Ignore duplicates.
         SQL = f"""
             INSERT IGNORE INTO `{self.table_name}` (`character_uuid`, `uuid`, `type`)
-            VALUES (%s, %s, %s)
+            VALUES (%(character_uuid)s, %(uuid)s, %(type)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self, id_: CharacterInfoId, conn: None | Connection = None) -> bool: ...
 

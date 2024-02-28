@@ -15,9 +15,9 @@ class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
     async def insert(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int:
         SQL = f"""
             REPLACE INTO `{self.table_name}` (`uuid`, `latest_username`, `first_join`)
-            VALUES (%s, %s, %s)
+            VALUES (%(uuid)s, %(latest_username)s, %(first_join)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
 
     async def exists(self, id_: PlayerInfoId, conn: None | Connection = None) -> bool: ...
 
