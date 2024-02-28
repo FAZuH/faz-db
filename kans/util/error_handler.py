@@ -11,7 +11,7 @@ P = ParamSpec("P")
 class ErrorHandler:
 
     @staticmethod
-    def retry_decorator(max_retries: int, exceptions: type[BaseException] | Iterable[type[BaseException]]):
+    def retry_decorator(max_retries: int, exceptions: type[BaseException] | Iterable[type[BaseException]]) -> Callable[[Callable[P, T]], Callable[P, Awaitable[T]]]:
         """ Retries the wrapped function/method `times` times if the exceptions listed in `exceptions` are thrown """
 
         def decorator(f: Callable[P, T]) -> Callable[P, Awaitable[T]]:
