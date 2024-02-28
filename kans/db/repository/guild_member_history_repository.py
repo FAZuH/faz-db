@@ -13,26 +13,17 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
     _TABLE_NAME: str = "guild_member_history"
 
     async def insert(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
-        sql = f"""
-            INSERT IGNORE INTO `{self.table_name}` (`joined`, `uuid`, `contributed`, `datetime`)
+        SQL = f"""
+            INSERT IGNORE INTO `{self.table_name}` (`uuid`, `contributed`, `joined`, `datetime`)
             VALUES (%s, %s, %s, %s)
         """
-        return await self._db.execute_many(
-                sql,
-                tuple((
-                        entity.joined,
-                        entity.uuid,
-                        entity.contributed,
-                        entity.datetime.datetime
-                ) for entity in entities),
-                conn
-        )
+        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
 
     async def exists(self,id_: GuildMemberHistoryId, conn: None | Connection = None) -> bool: ...
 
     async def count(self, conn: None | Connection = None) -> float:
-        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
-        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
+        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> None | GuildMemberHistory: ...
 
@@ -43,7 +34,7 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
     async def delete(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> int: ...
 
     async def create_table(self, conn: None | Connection = None) -> None:
-        sql = f"""
+        SQL = f"""
             CREATE TABLE IF NOT EXISTS `{self.table_name}` (
                 `uuid` binary(16) NOT NULL,
                 `contributed` bigint unsigned NOT NULL,
@@ -51,7 +42,7 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
                 `datetime` datetime NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
-        await self._db.execute(sql)
+        await self._db.execute(SQL)
 
     @property
     def table_name(self) -> str:

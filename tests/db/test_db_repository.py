@@ -5,7 +5,6 @@ import unittest
 from loguru import logger
 
 from kans import config
-from kans.api.wynn.response import PlayerResponse, OnlinePlayersResponse, GuildResponse
 from kans.db import Database, KansDatabase
 from kans.db.model import KansUptime
 from kans.util import ApiToDbConverter
@@ -19,10 +18,10 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.converter = ApiToDbConverter()  # type: ignore
         self.db: Database = KansDatabase(config, logger)
 
-        mockwynnapi = FixturesApi()
-        self.mock_guildstats: list[GuildResponse] = mockwynnapi.onlineguildstats  # type: ignore
-        self.mock_onlineuuids: OnlinePlayersResponse = mockwynnapi.onlineuuids  # type: ignore
-        self.mock_playerstats: list[PlayerResponse] = mockwynnapi.onlineplayerstats  # type: ignore
+        fixtures = FixturesApi()
+        self.mock_guildstats = fixtures.get_guilds()
+        self.mock_onlineuuids = fixtures.get_online_uuids()
+        self.mock_playerstats  = fixtures.get_players()
 
     async def test_character_history_repository(self) -> None:
         self.db.character_history_repository._TABLE_NAME = "temp_character_history"  # type: ignore

@@ -17,20 +17,37 @@ class FixturesApi:
     GUILDS_FIXTURE_FP = "tests/_fixtures/guilds.json"
 
     def __init__(self) -> None:
-        self.onlineuuids = None
+        pass
+
+    def get_online_uuids(self) -> OnlinePlayersResponse:
+        self._online_uuids = None
         if os.path.exists(FixturesApi.ONLINE_PLAYERS_FIXTURE_FP):
             with open(FixturesApi.ONLINE_PLAYERS_FIXTURE_FP, 'r') as f:
-                self.onlineuuids = OnlinePlayersResponse(*(json.load(f)["0"]))
+                self._online_uuids = OnlinePlayersResponse(*(json.load(f)["0"]))
 
-        self.onlineplayerstats = None
+        if self._online_uuids is None:
+            raise Exception("No online players fixture found")
+        return self._online_uuids
+
+    def get_players(self) -> list[PlayerResponse]:
+        self._player_stats = None
         if os.path.exists(FixturesApi.PLAYERS_FIXTURE_FP):
             with open(FixturesApi.PLAYERS_FIXTURE_FP, 'r') as f:
-                self.onlineplayerstats = [PlayerResponse(*resp) for resp in json.load(f).values()]
+                self._player_stats = [PlayerResponse(*resp) for resp in json.load(f).values()]
 
-        self.onlineguildstats = None
+        if self._player_stats is None:
+             raise Exception("No player stats fixture found")
+        return self._player_stats
+
+    def get_guilds(self) -> list[GuildResponse]:
+        self._guild_stats = None
         if os.path.exists(FixturesApi.GUILDS_FIXTURE_FP):
             with open(FixturesApi.GUILDS_FIXTURE_FP, 'r') as f:
-                self.onlineguildstats = [GuildResponse(*resp) for resp in json.load(f).values()]
+                self._guild_stats = [GuildResponse(*resp) for resp in json.load(f).values()]
+
+        if self._guild_stats is None:
+             raise Exception("No guild stats fixture found")
+        return self._guild_stats
 
     # async def response_to_mock(self) -> None:
     #     online_uuids: PlayersResponse = await self.get_online_uuids()

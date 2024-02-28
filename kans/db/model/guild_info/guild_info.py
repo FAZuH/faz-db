@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import GuildInfoId
 from .. import DateColumn
@@ -22,6 +22,9 @@ class GuildInfo(GuildInfoId):
         super().__init__(name)
         self._prefix = prefix
         self._created = created if isinstance(created, DateColumn) else DateColumn(created)
+
+    def to_tuple(self) -> tuple[Any, ...]:
+        return (self.name, self.prefix, self.created.datetime)
 
     @property
     def prefix(self) -> str:

@@ -1,6 +1,5 @@
 from datetime import datetime as dt
 from types import NoneType
-from typing import TYPE_CHECKING
 import unittest
 
 from kans.api.wynn.model import Guild, Player
@@ -13,26 +12,19 @@ from kans.api.wynn.model.field import (
 )
 from tests.fixtures_api import FixturesApi
 
-if TYPE_CHECKING:
-    from kans.api.wynn.response import (
-        GuildResponse,
-        PlayerResponse,
-        OnlinePlayersResponse
-    )
-
 
 class TestApiModel(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
-        self.mockwynnapi = FixturesApi()
         # self.wynnapi = self.mockwynnapi.wynnapi
         # await self.wynnapi.start()
 
-        self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
-        self.mock_onlineuuids: OnlinePlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
-        self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
+        fixtures_api = FixturesApi()
+        self.guilds = fixtures_api.get_guilds()
+        self.online_uuids = fixtures_api.get_online_uuids()
+        self.players = fixtures_api.get_players()
 
     async def test_guild_response(self) -> None:
-        for guildstat in self.mock_guildstats:
+        for guildstat in self.guilds:
             body = guildstat.body
             self.assertIsInstance(body, Guild)
             self.assertIsInstance(body.uuid, UuidField)
@@ -93,7 +85,7 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
                 self.assertGreaterEqual(season_rank_info.rating, 0)
 
     async def test_player_response(self) -> None:
-        for playerstat in self.mock_playerstats:
+        for playerstat in self.players:
             body = playerstat.body
             self.assertIsInstance(body, Player)
             self.assertIsInstance(body.username, str)
@@ -264,7 +256,7 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
                 self.assertIsInstance(ch.quests, list)
 
     async def test_online_players_response(self) -> None:
-        players = self.mock_onlineuuids
+        players = self.online_uuids
         self.assertGreaterEqual(players.body.total, 0)
         self.assertIsInstance(players.body.players, dict)
         for usernameoruuid, server in players.body.iter_players():

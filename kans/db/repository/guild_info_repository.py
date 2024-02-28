@@ -14,25 +14,17 @@ class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
 
     async def insert(self, entities: Iterable[GuildInfo], conn: None | Connection = None) -> int:
         # NOTE: This doesn't change. Ignore duplicates.
-        sql = f"""
-            INSERT IGNORE INTO `{self.table_name}` (`created`, `name`, `prefix`)
+        SQL = f"""
+            INSERT IGNORE INTO `{self.table_name}` (`name`, `prefix`, `created`)
             VALUES (%s, %s, %s)
         """
-        return await self._db.execute_many(
-                sql,
-                tuple((
-                        entity.created,
-                        entity.name,
-                        entity.prefix
-                ) for entity in entities),
-                conn
-        )
+        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
 
     async def exists(self, id_: GuildInfoId, conn: None | Connection = None) -> bool: ...
 
     async def count(self, conn: None | Connection = None) -> float:
-        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
-        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
+        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: GuildInfoId, conn: None | Connection = None) -> None | GuildInfo: ...
 
@@ -43,7 +35,7 @@ class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
     async def delete(self, id_: GuildInfoId, conn: None | Connection = None) -> int: ...
 
     async def create_table(self, conn: None | Connection = None) -> None:
-        sql = f"""
+        SQL = f"""
             CREATE TABLE IF NOT EXISTS `{self.table_name}` (
                 `name` varchar(30) NOT NULL,
                 `prefix` varchar(4) NOT NULL,
@@ -51,7 +43,7 @@ class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
                 PRIMARY KEY (`name`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
-        await self._db.execute(sql)
+        await self._db.execute(SQL)
 
     @property
     def table_name(self) -> str:

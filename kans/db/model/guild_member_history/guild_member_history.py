@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import GuildMemberHistoryId
 from .. import DateColumn
@@ -24,6 +24,9 @@ class GuildMemberHistory(GuildMemberHistoryId):
         super().__init__(uuid, datetime)
         self._contributed = contributed
         self._joined = joined if isinstance(joined, DateColumn) else DateColumn(joined)
+
+    def to_tuple(self) -> tuple[Any, ...]:
+        return (self.uuid.uuid, self.contributed, self.joined.datetime, self.datetime.datetime)
 
     @property
     def contributed(self) -> int:

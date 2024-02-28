@@ -2,7 +2,6 @@ from decimal import Decimal
 from types import NoneType
 import unittest
 
-from kans.api.wynn.response import PlayerResponse, OnlinePlayersResponse, GuildResponse
 from kans.db.model import (
     CharacterHistory,
     DateColumn,
@@ -18,11 +17,11 @@ class TestApiToDbConverter(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self.converter = ApiToDbConverter()
-        self.mockwynnapi = FixturesApi()
 
-        self.mock_guildstats: list[GuildResponse] = self.mockwynnapi.onlineguildstats  # type: ignore
-        self.mock_onlineuuids: OnlinePlayersResponse = self.mockwynnapi.onlineuuids  # type: ignore
-        self.mock_playerstats: list[PlayerResponse] = self.mockwynnapi.onlineplayerstats  # type: ignore
+        self.fixtures = FixturesApi()
+        self.mock_guildstats = self.fixtures.get_guilds()
+        self.mock_onlineuuids = self.fixtures.get_online_uuids()
+        self.mock_playerstats = self.fixtures.get_players()
 
     async def test_character_history(self) -> None:
         for stat in self.mock_playerstats:

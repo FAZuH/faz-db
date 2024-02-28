@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import GuildHistoryId
 
@@ -30,6 +30,9 @@ class GuildHistory(GuildHistoryId):
         self._wars = wars
         self._member_total = member_total
         self._online_members = online_members
+
+    def to_tuple(self) -> tuple[Any, ...]:
+        return (self.name, self.level, self.territories, self.wars, self.member_total, self.online_members, self.datetime)
 
     @property
     def level(self) -> Decimal:

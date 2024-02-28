@@ -14,26 +14,18 @@ class CharacterInfoRepository(Repository[CharacterInfo, CharacterInfoId]):
 
     async def insert(self, entities: Iterable[CharacterInfo], conn: None | Connection = None) -> int:
         # NOTE: This doesn't change. Ignore duplicates.
-        sql = f"""
-            INSERT IGNORE INTO `{self.table_name}` (`character_uuid`, `type`, `uuid`)
+        SQL = f"""
+            INSERT IGNORE INTO `{self.table_name}` (`character_uuid`, `uuid`, `type`)
             VALUES (%s, %s, %s)
         """
-        return await self._db.execute_many(
-                sql,
-                tuple((
-                        entity.character_uuid.uuid,
-                        entity.type,
-                        entity.uuid)
-                        for entity in entities
-                ),
-                conn
-        )
+        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
 
     async def exists(self, id_: CharacterInfoId, conn: None | Connection = None) -> bool: ...
 
     async def count(self, conn: None | Connection = None) -> float:
-        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
-        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
+        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        result = await self._db.fetch(SQL, connection=conn)
+        return result[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: CharacterInfoId, conn: None | Connection = None) -> None | CharacterInfo: ...
 
@@ -44,7 +36,7 @@ class CharacterInfoRepository(Repository[CharacterInfo, CharacterInfoId]):
     async def delete(self, id_: CharacterInfoId, conn: None | Connection = None) -> int: ...
 
     async def create_table(self, conn: None | Connection = None) -> None:
-        sql = f"""
+        SQL = f"""
             CREATE TABLE IF NOT EXISTS `{self.table_name}` (
                 `character_uuid` binary(16) NOT NULL,
                 `uuid` binary(16) NOT NULL,
@@ -52,7 +44,7 @@ class CharacterInfoRepository(Repository[CharacterInfo, CharacterInfoId]):
                 PRIMARY KEY (`character_uuid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
-        await self._db.execute(sql)
+        await self._db.execute(SQL)
 
     @property
     def table_name(self) -> str:

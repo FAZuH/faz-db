@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import PlayerInfoId
 from .. import DateColumn
@@ -18,6 +18,9 @@ class PlayerInfo(PlayerInfoId):
         super().__init__(uuid)
         self._latest_username = latest_username
         self._first_join = first_join if isinstance(first_join, DateColumn) else DateColumn(first_join)
+
+    def to_tuple(self) -> tuple[Any, ...]:
+        return (self.uuid.uuid, self.latest_username, self.first_join.datetime)
 
     @property
     def latest_username(self) -> str:

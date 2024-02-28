@@ -13,25 +13,17 @@ class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
     _TABLE_NAME: str = "player_info"
 
     async def insert(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int:
-        sql = f"""
-            REPLACE INTO `{self.table_name}` (`first_join`, `latest_username`, `uuid`)
+        SQL = f"""
+            REPLACE INTO `{self.table_name}` (`uuid`, `latest_username`, `first_join`)
             VALUES (%s, %s, %s)
         """
-        return await self._db.execute_many(
-                sql,
-                tuple((
-                        entity.first_join.datetime,
-                        entity.latest_username,
-                        entity.uuid.uuid
-                ) for entity in entities),
-                conn
-        )
+        return await self._db.execute_many(SQL, tuple(entity.to_tuple() for entity in entities), conn)
 
     async def exists(self, id_: PlayerInfoId, conn: None | Connection = None) -> bool: ...
 
     async def count(self, conn: None | Connection = None) -> float:
-        sql = f"SELECT COUNT(*) FROM `{self.table_name}`"
-        return (await self._db.fetch(sql, connection=conn))[0].get("COUNT(*)", 0)
+        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
+        return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
 
     async def find_one(self, id_: PlayerInfoId, conn: None | Connection = None) -> None | PlayerInfo: ...
 
@@ -42,7 +34,7 @@ class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
     async def delete(self, id_: PlayerInfoId, conn: None | Connection = None) -> int: ...
 
     async def create_table(self, conn: None | Connection = None) -> None:
-        sql = f"""
+        SQL = f"""
             CREATE TABLE IF NOT EXISTS `{self.table_name}` (
                 `uuid` binary(16) NOT NULL,
                 `latest_username` varchar(16) NOT NULL,
@@ -50,7 +42,7 @@ class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
                 PRIMARY KEY (`uuid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
-        await self._db.execute(sql)
+        await self._db.execute(SQL)
 
     @property
     def table_name(self) -> str:

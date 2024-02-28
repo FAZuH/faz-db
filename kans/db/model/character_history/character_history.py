@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import CharacterHistoryId
 from .. import GamemodeColumn
@@ -69,6 +69,39 @@ class CharacterHistory(CharacterHistoryId):
         self._dungeon_completions = dungeon_completions
         self._quest_completions = quest_completions
         self._raid_completions = raid_completions
+
+    def to_tuple(self) -> tuple[Any, ...]:
+        """Converts the instance to a tuple.
+        The order of the elements is the same as the order of the class constructor."""
+        return (
+                self.character_uuid.uuid,
+                self.level,
+                self.xp,
+                self.wars,
+                self.playtime,
+                self.mobs_killed,
+                self.chests_found,
+                self.logins,
+                self.deaths,
+                self.discoveries,
+                self.gamemode.gamemode,
+                self.alchemism,
+                self.armouring,
+                self.cooking,
+                self.jeweling,
+                self.scribing,
+                self.tailoring,
+                self.weaponsmithing,
+                self.woodworking,
+                self.mining,
+                self.woodcutting,
+                self.farming,
+                self.fishing,
+                self.dungeon_completions,
+                self.quest_completions,
+                self.raid_completions,
+                self.datetime.datetime,
+        )
 
     @property
     def level(self) -> int:

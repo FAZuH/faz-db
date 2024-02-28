@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import KansUptimeId
+from .. import DateColumn
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
@@ -9,14 +10,17 @@ if TYPE_CHECKING:
 
 class KansUptime(KansUptimeId):
 
-    def __init__(self, start_time: dt, stop_time: dt) -> None:
-        self._start_time = start_time
-        self._stop_time = stop_time
+    def __init__(self, start_time: dt | DateColumn, stop_time: dt | DateColumn) -> None:
+        self._start_time = start_time if isinstance(start_time, DateColumn) else DateColumn(start_time)
+        self._stop_time = stop_time if isinstance(stop_time, DateColumn) else DateColumn(stop_time)
+
+    def to_tuple(self) -> tuple[Any, ...]:
+        return (self.start_time.datetime, self.stop_time.datetime)
 
     @property
-    def start_time(self) -> dt:
+    def start_time(self) -> DateColumn:
         return self._start_time
 
     @property
-    def stop_time(self) -> dt:
+    def stop_time(self) -> DateColumn:
         return self._stop_time

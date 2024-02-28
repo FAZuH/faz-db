@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import PlayerHistoryId
 
@@ -32,6 +32,18 @@ class PlayerHistory(PlayerHistoryId):
         self._guild_name = guild_name
         self._guild_rank = guild_rank
         self._rank = rank
+
+    def to_tuple(self) -> tuple[Any, ...]:
+        return (
+                self.uuid.uuid,
+                self.username,
+                self.support_rank,
+                self.playtime,
+                self.guild_name,
+                self.guild_rank,
+                self.rank,
+                self.datetime.datetime
+        )
 
     @property
     def username(self) -> str:
