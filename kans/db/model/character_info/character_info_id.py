@@ -9,7 +9,7 @@ class CharacterInfoId:
     def __init__(self, character_uuid: bytes | UuidColumn) -> None:
         self._character_uuid: UuidColumn = character_uuid if isinstance(character_uuid, UuidColumn) else UuidColumn(character_uuid)
 
-    def as_dict(self) -> CharacterInfoId.Type:
+    def to_dict(self) -> CharacterInfoId.Type:
         return {
                 "character_uuid": self.character_uuid.uuid
         }

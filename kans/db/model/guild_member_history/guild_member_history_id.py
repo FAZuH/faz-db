@@ -13,7 +13,7 @@ class GuildMemberHistoryId:
         self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
-    def as_dict(self) -> GuildMemberHistoryId.Type:
+    def to_dict(self) -> GuildMemberHistoryId.Type:
         return {
                 "uuid": self.uuid.uuid,
                 "datetime": self.datetime.datetime

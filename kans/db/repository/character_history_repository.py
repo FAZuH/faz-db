@@ -43,7 +43,7 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
 
     async def find_one(self, id_: CharacterHistoryId, conn: None | Connection = None) -> None | CharacterHistory:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s"
-        result = await self._db.fetch(SQL, (id_.character_uuid.uuid, id_.datetime.datetime), connection=conn)
+        result = await self._db.fetch(SQL, id_.to, connection=conn)
         return CharacterHistory(**result[0]) if result else None
 
     async def find_all(self, conn: None | Connection = None) -> None | list[CharacterHistory]:
