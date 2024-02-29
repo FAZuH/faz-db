@@ -39,8 +39,8 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
         return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
-        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
-        return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
+        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}`"
+        return (await self._db.fetch(SQL, connection=conn))[0].get("count", 0)
 
     async def find_one(self, id_: GuildHistoryId, conn: None | Connection = None) -> None | GuildHistory:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `name` = %(name)s AND `datetime` = %(datetime)s"
