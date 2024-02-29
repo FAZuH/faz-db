@@ -1,6 +1,8 @@
 # Kans (IN DEVELOPMENT)
 Python program that fetches stats of online players and guilds with online members, and saves it into a MySQL database.
 
+Code design is inspired by moto-bot!
+
 ## Key Features
 - Asynchronous API and database calls
 - Multithreaded tasks
