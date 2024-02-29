@@ -18,7 +18,7 @@ class TestTaskDbInsert(unittest.TestCase):
         self._task = TaskDbInsert(MagicMock(), self._api, self._db, self._request_list, self._response_list)
 
     def test_setup(self) -> None:
-        # MOCK
+        # PREPARE
         self._db.create_all = AsyncMock()
 
         # ACT
@@ -29,7 +29,7 @@ class TestTaskDbInsert(unittest.TestCase):
         self._request_list.enqueue.assert_called_once_with(0, self._api.player.get_online_uuids())
 
     def test_run(self) -> None:
-        # MOCK
+        # PREPARE
         self._task._run = AsyncMock()
 
         # ACT
@@ -39,7 +39,7 @@ class TestTaskDbInsert(unittest.TestCase):
         self._task._run.assert_called_once()
 
     async def test__run(self) -> None:
-        # MOCK
+        # PREPARE
         self._response_list.get.return_value = None
         self._task._response_handler = Mock(spec_set=TaskDbInsert._ResponseHandler)
         online_players = Mock(spec_set=OnlinePlayersResponse)
@@ -55,7 +55,7 @@ class TestTaskDbInsert(unittest.TestCase):
         self._task._response_handler.handle_player_response.assert_not_called()
         self._task._response_handler.handle_guild_response.assert_not_called()
 
-        # MOCK
+        # PREPARE
         self._response_list.get.return_value = [online_players, player, guild]
 
         # ACT
@@ -78,21 +78,21 @@ class TestTaskDbInsert(unittest.TestCase):
 
     def test__insert_online_players_response(self) -> None:
         # TODO: Implement test
-        # MOCK
+        # PREPARE
         # ACT
         # ASSERT
         pass
 
     def test__insert_player_responses(self) -> None:
         # TODO: Implement test
-        # MOCK
+        # PREPARE
         # ACT
         # ASSERT
         pass
 
     def test__insert_guild_response(self) -> None:
         # TODO: Implement test
-        # MOCK
+        # PREPARE
         # ACT
         # ASSERT
         pass
@@ -107,7 +107,7 @@ class TestResponseHandler(unittest.TestCase):
 
     # OnlinePlayerResponse
     def test_process_new_response(self) -> None:
-        # MOCK
+        # PREPARE
         uuid0 = "0"
         uuid1 = "1"
         uuid2 = "2"
@@ -145,7 +145,7 @@ class TestResponseHandler(unittest.TestCase):
         })
 
     def test_enqueue_player_stats(self) -> None:
-        # MOCK
+        # PREPARE
         uuid0 = "player0"
         self._manager._logged_on_players = {uuid0}
 
@@ -159,7 +159,7 @@ class TestResponseHandler(unittest.TestCase):
         self.__request_list.enqueue.assert_called_once_with(0, self._api.player.get_full_stats())
 
     def test_requeueonline_players(self) -> None:
-        # MOCK
+        # PREPARE
         resp = MagicMock()
         resp.headers.expires.to_datetime().timestamp.return_value = 69
 
@@ -173,7 +173,7 @@ class TestResponseHandler(unittest.TestCase):
 
     # PlayerResponse
     def test_process_player_response(self) -> None:
-        # MOCK
+        # PREPARE
         guild0 = "guild0"
         guild1 = "guild1"
         uuid0 = "0"
@@ -215,7 +215,7 @@ class TestResponseHandler(unittest.TestCase):
                 guild1: {uuid2}
         })
 
-        # MOCK
+        # PREPARE
         mock3.body.online = False
 
         # ACT
@@ -228,7 +228,7 @@ class TestResponseHandler(unittest.TestCase):
         })
 
     def test_enqueue_guild(self) -> None:
-        # MOCK
+        # PREPARE
         guild0 = "guild0"
         self._manager._logged_on_guilds = {guild0}
 
@@ -242,7 +242,7 @@ class TestResponseHandler(unittest.TestCase):
         self.__request_list.enqueue.assert_called_once_with(0, self._api.guild.get())
 
     def test_requeue_player(self) -> None:
-        # MOCK
+        # PREPARE
         resp1 = MagicMock()
         resp2 = MagicMock()  # continued
         resp1.body.online = True
@@ -261,7 +261,7 @@ class TestResponseHandler(unittest.TestCase):
 
     # GuildResponse
     def test_requeue_guild(self) -> None:
-        # MOCK
+        # PREPARE
         guild0 = "guild0"
         resp1 = MagicMock()
         resp2 = MagicMock()  # continued
