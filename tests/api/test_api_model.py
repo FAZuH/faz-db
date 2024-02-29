@@ -8,6 +8,7 @@ from kans.api.wynn.model.field import (
     CharacterTypeField,
     GamemodeField,
     UsernameOrUuidField,
+    UuidField
 )
 from tests.fixtures_api import FixturesApi
 
@@ -26,7 +27,7 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
         for guildstat in self.guilds:
             body = guildstat.body
             self.assertIsInstance(body, Guild)
-            self.assertIsInstance(body.uuid, str)
+            self.assertIsInstance(body.uuid, UuidField)
             self.assertIsInstance(body.name, str)
             self.assertIsInstance(body.prefix, str)
             self.assertGreaterEqual(body.level, 0)
@@ -43,11 +44,16 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
             for rank, usernameoruuid, member_info in body.members.iter_members():
                 self.assertIsInstance(rank, str)
                 self.assertIsInstance(usernameoruuid, UsernameOrUuidField)
-                self.assertIsInstance(usernameoruuid.username_or_uuid, str)
+                self.assertIsInstance(usernameoruuid, UsernameOrUuidField)
+                if usernameoruuid.is_uuid():
+                    usernameoruuid.to_bytes()
+                else:
+                    self.assertIsInstance(usernameoruuid.username, str)
                 # members.memberinfo
                 self.assertIsInstance(member_info, Guild.Members.MemberInfo)
                 if member_info.uuid is not None:
-                    self.assertIsInstance(member_info.uuid, str)
+                    self.assertIsInstance(member_info.uuid, UuidField)
+                    self.assertIsInstance(member_info.uuid.to_bytes(), bytes)
                 else:
                     self.assertIsInstance(member_info.username, str)
                 self.assertIsInstance(member_info.online, bool)
@@ -85,10 +91,10 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
             self.assertIsInstance(body.username, str)
             self.assertIsInstance(body.online, bool)
             self.assertIsInstance(body.server, (NoneType, str))
-            self.assertIsInstance(body.active_character, (NoneType, str))
+            self.assertIsInstance(body.active_character, (NoneType, UuidField))
             if body.active_character is not None:
-                self.assertIsInstance(body.active_character, str)
-            self.assertIsInstance(body.uuid, str)
+                self.assertIsInstance(body.active_character.to_bytes(), bytes)
+            self.assertIsInstance(body.uuid.to_bytes(), bytes)
             self.assertIsInstance(body.rank, str)
             self.assertIsInstance(body.rank_badge, (NoneType, str))
             # legacy_rank_colour
@@ -111,7 +117,7 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
             # guild
             if body.guild is not None:
                 self.assertIsInstance(body.guild, Player.Guild)
-                self.assertIsInstance(body.guild.uuid, str)
+                self.assertIsInstance(body.guild.uuid.to_bytes(), bytes)
                 self.assertIsInstance(body.guild.name, str)
                 self.assertIsInstance(body.guild.prefix, str)
                 self.assertIsInstance(body.guild.rank, str)
@@ -146,7 +152,8 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
 
             # characters
             for ch_uuid, ch in body.iter_characters():
-                self.assertIsInstance(ch_uuid, str)
+                self.assertIsInstance(ch_uuid, UuidField)
+                self.assertIsInstance(ch_uuid.to_bytes(), bytes)
                 self.assertIsInstance(ch, Player.Character)
                 self.assertIsInstance(ch.type, CharacterTypeField)
                 self.assertIn(ch.type.get_kind_str(), ("MAGE", "ARCHER", "WARRIOR", "ASSASSIN", "SHAMAN"))
@@ -254,7 +261,10 @@ class TestApiModel(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(players.body.players, dict)
         for usernameoruuid, server in players.body.iter_players():
             self.assertIsInstance(usernameoruuid, UsernameOrUuidField)
-            self.assertIsInstance(usernameoruuid.username_or_uuid, str)
+            if usernameoruuid.is_uuid():
+                usernameoruuid.to_bytes()
+            else:
+                self.assertIsInstance(usernameoruuid.username, str)
             self.assertIsInstance(server, str)
 
     async def asyncTearDown(self) -> None:

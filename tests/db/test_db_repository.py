@@ -51,10 +51,9 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.db.guild_history_repository._TABLE_NAME = "temp_guild_history"  # type: ignore
         try:
             await self.db.guild_history_repository.create_table()
-            to_test = [
-                    self.adapter.Guild.to_guild_history(stat)
-                    for stat in self.mock_guildstats
-            ]
+            to_test = []
+            for stat in self.mock_guildstats:
+                to_test.append(self.adapter.Guild.to_guild_history(stat))
             affectedrows = await self.db.guild_history_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -64,10 +63,9 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.db.guild_info_repository._TABLE_NAME = "temp_guild_info"  # type: ignore
         try:
             await self.db.guild_info_repository.create_table()
-            to_test = [
-                    self.adapter.Guild.to_guild_info(stat)
-                    for stat in self.mock_guildstats
-            ]
+            to_test = []
+            for stat in self.mock_guildstats:
+                to_test.append(self.adapter.Guild.to_guild_info(stat))
             affectedrows = await self.db.guild_info_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -131,10 +129,9 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.db.player_history_repository._TABLE_NAME = "temp_player_history"  # type: ignore
         try:
             await self.db.player_history_repository.create_table()
-            to_test = [
-                    self.adapter.Player.to_player_history(stat)
-                    for stat in self.mock_playerstats
-            ]
+            to_test = []
+            for stat in self.mock_playerstats:
+                to_test.append(self.adapter.Player.to_player_history(stat))
             affectedrows = await self.db.player_history_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:
@@ -144,10 +141,9 @@ class TestDbRepository(unittest.IsolatedAsyncioTestCase):
         self.db.player_info_repository._TABLE_NAME = "temp_player_info"  # type: ignore
         try:
             await self.db.player_info_repository.create_table()
-            to_test = [
-                    self.adapter.Player.to_player_info(stat)
-                    for stat in self.mock_playerstats
-            ]
+            to_test = []
+            for stat in self.mock_playerstats:
+                to_test.append(self.adapter.Player.to_player_info(stat))
             affectedrows = await self.db.player_info_repository.insert(to_test)
             self.assertGreaterEqual(affectedrows, 0)
         finally:

@@ -7,7 +7,7 @@ from .. import GamemodeColumn
 if TYPE_CHECKING:
     from datetime import datetime as dt
     from decimal import Decimal
-    from .. import DateColumn
+    from .. import DateColumn, UuidColumn
 
 
 class CharacterHistory(CharacterHistoryId):
@@ -15,7 +15,7 @@ class CharacterHistory(CharacterHistoryId):
 
     def __init__(
         self,
-        character_uuid: str,
+        character_uuid: bytes | UuidColumn,
         level: int,
         xp: int,
         wars: int,
@@ -71,7 +71,7 @@ class CharacterHistory(CharacterHistoryId):
         self._raid_completions = raid_completions
 
     class Type(TypedDict, total=False):
-        character_uuid: str
+        character_uuid: bytes
         level: int
         xp: int
         wars: int

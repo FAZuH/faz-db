@@ -6,6 +6,7 @@ from .. import DateColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
+    from .. import UuidColumn
 
 
 class GuildMemberHistory(GuildMemberHistoryId):
@@ -15,7 +16,7 @@ class GuildMemberHistory(GuildMemberHistoryId):
 
     def __init__(
         self,
-        uuid: str,
+        uuid: bytes | UuidColumn,
         contributed: int,
         joined: datetime | DateColumn,
         datetime: datetime | DateColumn
@@ -25,7 +26,7 @@ class GuildMemberHistory(GuildMemberHistoryId):
         self._joined = joined if isinstance(joined, DateColumn) else DateColumn(joined)
 
     class Type(TypedDict):
-        uuid: str
+        uuid: bytes
         contributed: int
         joined: datetime
         datetime: datetime

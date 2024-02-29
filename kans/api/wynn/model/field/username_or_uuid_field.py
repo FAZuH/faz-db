@@ -2,15 +2,12 @@ from uuid import UUID
 
 
 class UsernameOrUuidField:
-    """For API response fields that can be either an username or an uuid."""
 
     def __init__(self, username_or_uuid: str) -> None:
         self._username_or_uuid: str = username_or_uuid
-
+        self._is_uuid: bool = False
         self._username: None | str = None
         self._uuid: None | UUID = None
-
-        self._is_uuid: bool = False
         try:
             self._uuid = UUID(username_or_uuid)
             self._is_uuid = True
@@ -20,11 +17,24 @@ class UsernameOrUuidField:
     def __str__(self) -> str:
         return self._username_or_uuid
 
+    def to_bytes(self) -> bytes:
+        if self._uuid is None:
+            raise ValueError("UUID is None.")
+        return self._uuid.bytes
+
     def is_uuid(self) -> bool:
-        """If the passed field is a valid UUID."""
         return self._is_uuid
 
     @property
+    def username(self) -> None | str:
+        """Returns an username if this object is not an uuid else None."""
+        return self._username
+
+    @property
     def username_or_uuid(self) -> str:
-        """Returns the username or uuid as a string."""
         return self._username_or_uuid
+
+    @property
+    def uuid(self) -> None | UUID:
+        """Returns an uuid if this object is an uuid else None."""
+        return self._uuid

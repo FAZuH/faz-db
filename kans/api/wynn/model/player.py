@@ -7,6 +7,7 @@ from .field import (
     CharacterTypeField,
     GamemodeField,
     Nullable,
+    UuidField
 )
 
 
@@ -17,32 +18,32 @@ class Player:
         self._username = raw["username"]
         self._online = raw["online"]
         self._server = raw["server"]
-        self._active_character = raw["activeCharacter"]
-        self._uuid = raw["uuid"]
+        self._active_character = Nullable(UuidField, raw["activeCharacter"])
+        self._uuid = UuidField(raw["uuid"])
         self._rank = raw["rank"]
         self._rank_badge = raw["rankBadge"]
-        self._legacy_rank_colour = Nullable(self.LegacyRankColour, raw.get("legacyRankColour"))
+        self._legacy_rank_colour = Nullable(self.LegacyRankColour, raw.get("legacyRankColour", None))
         self._shortened_rank = raw["shortenedRank"]
         self._support_rank = raw["supportRank"]
         self._veteran = raw["veteran"] or False
         self._first_join = BodyDateField(raw["firstJoin"])
         self._last_join = BodyDateField(raw["lastJoin"])
         self._playtime = Decimal(raw["playtime"])
-        self._guild = Nullable(self.Guild, raw.get("guild"))
+        self._guild = Nullable(self.Guild, raw.get("guild", None))
         self._global_data = self.GlobalData(raw["globalData"])
         self._forum_link = raw["forumLink"]
         self._ranking = raw["ranking"]
         """`rankingName: nthRank`"""
         self._public_profile = raw["publicProfile"]
         self._characters = {
-            character_uuid: self.Character(character)
+            UuidField(character_uuid): self.Character(character)
             for character_uuid, character in raw["characters"].items()
         }
 
-    def get_character_uuids(self) -> list[str]:
+    def get_character_uuids(self) -> list[UuidField]:
         return list(self.characters.keys())
 
-    def iter_characters(self) -> Generator[tuple[str, Player.Character], Any, None]:
+    def iter_characters(self) -> Generator[tuple[UuidField, Player.Character], Any, None]:
         for character_uuid, character in self._characters.items():
             yield (character_uuid, character)
 
@@ -61,14 +62,14 @@ class Player:
 
     class Guild:
         def __init__(self, node: dict[str, Any]) -> None:
-            self._uuid = node["uuid"]
+            self._uuid = UuidField(node["uuid"])
             self._name = node["name"]
             self._prefix = node["prefix"]
             self._rank = node["rank"]
             self._rank_stars = node["rankStars"]
 
         @property
-        def uuid(self) -> str:
+        def uuid(self) -> UuidField:
             return self._uuid
 
         @property
@@ -416,11 +417,11 @@ class Player:
         return self._server
 
     @property
-    def active_character(self) -> None | str:
+    def active_character(self) -> None | UuidField:
         return self._active_character
 
     @property
-    def uuid(self) -> str:
+    def uuid(self) -> UuidField:
         return self._uuid
 
     @property
@@ -480,5 +481,5 @@ class Player:
         return self._public_profile
 
     @property
-    def characters(self) -> dict[str, Player.Character]:
+    def characters(self) -> dict[UuidField, Player.Character]:
         return self._characters

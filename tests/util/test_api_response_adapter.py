@@ -6,6 +6,7 @@ from kans.db.model import (
     CharacterHistory,
     DateColumn,
     GamemodeColumn,
+    UuidColumn,
 )
 from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
@@ -26,7 +27,7 @@ class TestApiResponseAdapter(unittest.IsolatedAsyncioTestCase):
         for stat in self.mock_playerstats:
             for datum in self.adapter.Player.to_character_history(stat):
                 self.assertIsInstance(datum, CharacterHistory)
-                self.assertIsInstance(datum.character_uuid, str)
+                self.assertIsInstance(datum.character_uuid, UuidColumn)
                 self.assertIsInstance(datum.level, int)
                 self.assertIsInstance(datum.xp, int)
                 self.assertIsInstance(datum.wars, int)
@@ -57,8 +58,8 @@ class TestApiResponseAdapter(unittest.IsolatedAsyncioTestCase):
     async def test_character_info(self) -> None:
         for stat in self.mock_playerstats:
             for datum in self.adapter.Player.to_character_info(stat):
-                self.assertIsInstance(datum.character_uuid, str)
-                self.assertIsInstance(datum.uuid, str)
+                self.assertIsInstance(datum.character_uuid, UuidColumn)
+                self.assertIsInstance(datum.uuid, UuidColumn)
                 self.assertIsInstance(datum.type, str)
 
     async def test_guild_history(self) -> None:
@@ -82,14 +83,14 @@ class TestApiResponseAdapter(unittest.IsolatedAsyncioTestCase):
     async def test_guild_member_history(self) -> None:
         for stat in self.mock_guildstats:
             for datum in self.adapter.Guild.to_guild_member_history(stat):
-                self.assertIsInstance(datum.uuid, str)
+                self.assertIsInstance(datum.uuid, UuidColumn)
                 self.assertIsInstance(datum.contributed, int)
                 self.assertIsInstance(datum.joined, DateColumn)
                 self.assertIsInstance(datum.datetime, DateColumn)
 
     async def test_online_players(self) -> None:
         for datum in self.adapter.OnlinePlayers.to_online_players(self.mock_onlineuuids):
-            self.assertIsInstance(datum.uuid, str)
+            self.assertIsInstance(datum.uuid, UuidColumn)
             self.assertIsInstance(datum.server, str)
 
     @unittest.skip("Needs long and time-consuming process to test.")
@@ -100,7 +101,7 @@ class TestApiResponseAdapter(unittest.IsolatedAsyncioTestCase):
     async def test_player_history(self) -> None:
         for stat in self.mock_playerstats:
             datum = self.adapter.Player.to_player_history(stat)
-            self.assertIsInstance(datum.uuid, str)
+            self.assertIsInstance(datum.uuid, UuidColumn)
             self.assertIsInstance(datum.username, str)
             self.assertIsInstance(datum.support_rank, (NoneType, str))
             self.assertIsInstance(datum.playtime, Decimal)
@@ -112,7 +113,7 @@ class TestApiResponseAdapter(unittest.IsolatedAsyncioTestCase):
     async def test_player_info(self) -> None:
         for stat in self.mock_playerstats:
             datum = self.adapter.Player.to_player_info(stat)
-            self.assertIsInstance(datum.uuid, str)
+            self.assertIsInstance(datum.uuid, UuidColumn)
             self.assertIsInstance(datum.latest_username, str)
             self.assertIsInstance(datum.first_join, DateColumn)
 

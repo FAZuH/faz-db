@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, TypedDict
 from . import PlayerHistoryId
 
 if TYPE_CHECKING:
-    from .. import DateColumn
+    from .. import DateColumn, UuidColumn
     from datetime import datetime
 
 
@@ -16,7 +16,7 @@ class PlayerHistory(PlayerHistoryId):
 
     def __init__(
         self,
-        uuid: str,
+        uuid: bytes | UuidColumn,
         username: str,
         support_rank: None | str,
         playtime: Decimal,
@@ -34,7 +34,7 @@ class PlayerHistory(PlayerHistoryId):
         self._rank = rank
 
     class Type(TypedDict):
-        uuid: str
+        uuid: bytes
         username: str
         support_rank: None | str
         playtime: Decimal

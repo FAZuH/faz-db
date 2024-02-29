@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
-from .. import DateColumn
+from .. import DateColumn, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -9,12 +9,12 @@ if TYPE_CHECKING:
 
 class PlayerActivityHistoryId:
 
-    def __init__(self, uuid: str | str, logon_datetime: datetime | DateColumn) -> None:
-        self._uuid: str = uuid
+    def __init__(self, uuid: str | UuidColumn, logon_datetime: datetime | DateColumn) -> None:
+        self._uuid: UuidColumn = uuid if isinstance(uuid, UuidColumn) else UuidColumn.from_str(uuid)
         self._logon_datetime = logon_datetime if isinstance(logon_datetime, DateColumn) else DateColumn(logon_datetime)
 
     class IdType(TypedDict):
-        uuid: str
+        uuid: bytes
         logon_datetime: datetime
 
     @property
@@ -22,5 +22,5 @@ class PlayerActivityHistoryId:
         return self._logon_datetime
 
     @property
-    def uuid(self) -> str:
+    def uuid(self) -> UuidColumn:
         return self._uuid
