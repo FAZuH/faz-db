@@ -42,10 +42,10 @@ class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
     async def find_one(self, id_: KansUptimeId, conn: None | Connection = None) -> None | KansUptime:
         raise NotImplementedError
 
-    async def find_all(self, conn: None | Connection = None) -> None | list[KansUptime]:
+    async def find_all(self, conn: None | Connection = None) -> list[KansUptime]:
         SQL = f"SELECT * FROM `{self.table_name}`"
         result = await self._db.fetch(SQL, connection=conn)
-        return [KansUptime(**row) for row in result] if result else None
+        return [KansUptime(**row) for row in result] if result else []
 
     async def update(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int:
         SQL = f"""

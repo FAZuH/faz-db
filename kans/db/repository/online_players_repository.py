@@ -47,10 +47,10 @@ class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
         result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
         return OnlinePlayers(**result[0]) if result else None
 
-    async def find_all(self, conn: None | Connection = None) -> None | list[OnlinePlayers]:
+    async def find_all(self, conn: None | Connection = None) -> list[OnlinePlayers]:
         SQL = f"SELECT * FROM `{self.table_name}`"
         result = await self._db.fetch(SQL, connection=conn)
-        return [OnlinePlayers(**row) for row in result] if result else None
+        return [OnlinePlayers(**row) for row in result] if result else []
 
     async def update(self, entities: Iterable[OnlinePlayers], conn: None | Connection = None) -> int:
         SQL = f"""

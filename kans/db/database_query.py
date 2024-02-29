@@ -31,6 +31,8 @@ class DatabaseQuery:
     ) -> list[dict[str, Any]]:
         async with self.get_cursor(connection) as curs:
             await self._execute(curs, sql, params)
+            conn: Connection = curs.connection  # type: ignore
+            await conn.commit()
             return await curs.fetchall()
 
     async def fetch_many(
@@ -41,6 +43,8 @@ class DatabaseQuery:
     ) -> list[dict[str, Any]]:
         async with self.get_cursor(connection) as curs:
             await self._executemany(curs, sql, params)
+            conn: Connection = curs.connection  # type: ignore
+            await conn.commit()
             return await curs.fetchall()
 
     async def execute(
@@ -51,6 +55,8 @@ class DatabaseQuery:
     ) -> int:
         async with self.get_cursor(connection) as curs:
             await self._execute(curs, sql, params)
+            conn: Connection = curs.connection  # type: ignore
+            await conn.commit()
             return curs.rowcount or 0
 
     async def execute_many(
@@ -61,6 +67,8 @@ class DatabaseQuery:
     ) -> int:
         async with self.get_cursor(connection) as curs:
             await self._executemany(curs, sql, params)
+            conn: Connection = curs.connection  # type: ignore
+            await conn.commit()
             return curs.rowcount or 0
 
     @asynccontextmanager
@@ -77,9 +85,7 @@ class DatabaseQuery:
     async def create_connection(self) -> AsyncGenerator[Connection, Any]:
         conn: Connection
         async with connect(user=self.user, password=self.password, db=self.database) as conn:
-            await conn.begin()
             yield conn
-            await conn.commit()
 
     def transaction_group(self) -> DatabaseQuery._TransactionGroupContextManager:
         return DatabaseQuery._TransactionGroupContextManager(self)

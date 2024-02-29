@@ -47,10 +47,10 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
         result = await self._db.fetch(SQL, self._adapt_id(id_), conn)
         return GuildHistory(**result[0]) if result else None
 
-    async def find_all(self, conn: None | Connection = None) -> None | list[GuildHistory]:
+    async def find_all(self, conn: None | Connection = None) -> list[GuildHistory]:
         SQL = f"SELECT * FROM `{self.table_name}`"
         result = await self._db.fetch(SQL, connection=conn)
-        return [GuildHistory(**row) for row in result] if result else None
+        return [GuildHistory(**row) for row in result] if result else []
 
     async def update(self, entities: Iterable[GuildHistory], conn: None | Connection = None) -> int:
         SQL = f"""

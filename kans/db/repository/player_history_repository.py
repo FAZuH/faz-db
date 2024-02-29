@@ -49,10 +49,10 @@ class PlayerHistoryRepository(Repository[PlayerHistory, PlayerHistoryId]):
         result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
         return PlayerHistory(**result[0]) if result else None
 
-    async def find_all(self, conn: None | Connection = None) -> None | list[PlayerHistory]:
+    async def find_all(self, conn: None | Connection = None) -> list[PlayerHistory]:
         SQL = f"SELECT * FROM `{self.table_name}`"
         result = await self._db.fetch(SQL, connection=conn)
-        return [PlayerHistory(**row) for row in result] if result else None
+        return [PlayerHistory(**row) for row in result] if result else []
 
     async def update(self, entities: Iterable[PlayerHistory], conn: None | Connection = None) -> int:
         SQL = f"""

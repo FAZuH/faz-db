@@ -42,7 +42,7 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
         return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def exists(self, id_: CharacterHistoryId, conn: None | Connection = None) -> bool:
-        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `character_uuid` = %(character_uuid)s"
+        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s"
         result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
         return result[0].get("count", 0) > 0
 
