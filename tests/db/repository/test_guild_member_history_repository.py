@@ -1,4 +1,5 @@
 # pyright: reportPrivateUsage=none
+from datetime import datetime
 import unittest
 from uuid import UUID
 
@@ -6,21 +7,21 @@ from loguru import logger
 
 from kans import config
 from kans.db import KansDatabase
-from kans.db.model import CharacterInfo, CharacterInfoId
+from kans.db.model import GuildMemberHistory, GuildMemberHistoryId
 from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
-class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
+class TestGuildMemberHistoryRepository(unittest.IsolatedAsyncioTestCase):
     # self.repo to access repo
     # self.test_data to access test data
 
     async def asyncSetUp(self) -> None:
         self._adapter = ApiResponseAdapter()
         self._db = KansDatabase(config, logger)
-        self._repo = self._db.character_info_repository
+        self._repo = self._db.guild_member_history_repository
 
-        self._repo._TABLE_NAME = "test_character_info"
+        self._repo._TABLE_NAME = "test_guild_member_history"
         await self._repo.create_table()
 
         self._testData = self._get_data()
@@ -44,11 +45,13 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         self.assertEquals(10, n)
 
         # PREPARE
-        toTest1: list[CharacterInfo] = []
+        toTest1: list[GuildMemberHistory] = []
+        testDatetime1 = datetime.fromtimestamp(1709181095)
         testUuid1 = UUID(int=69).bytes
         for e in self._testData:
             as_dict = self._repo._adapt(e)
-            as_dict["character_uuid"] = testUuid1
+            as_dict["uuid"] = testUuid1
+            as_dict["datetime"] = testDatetime1
             toTest1.append(e.__class__(**as_dict))
 
         # ACT
@@ -63,7 +66,10 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         await self._repo.insert(self._testData)
 
         # ACT
-        exists = [await self._repo.exists(CharacterInfoId(e.character_uuid)) for e in self._testData]
+        exists = [
+                await self._repo.exists(GuildMemberHistoryId(e.uuid, e.datetime))
+                for e in self._testData
+        ]
 
         # ASSERT
         # NOTE: Assert if the number of existing entities is the same as the inserted entities
@@ -87,20 +93,20 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         await self._repo.insert(self._testData)
 
         # ACT
-        found: list[CharacterInfo] = []
+        found: list[GuildMemberHistory] = []
         for e in self._testData:
             # Find the inserted e
-            res = await self._repo.find_one(CharacterInfoId(e.character_uuid))
+            res = await self._repo.find_one(GuildMemberHistoryId(e.uuid, e.datetime))
             if res is not None:
                 found.append(res)
 
         # ASSERT
-        found_uuids = {e.character_uuid.uuid for e in found}
-        test_uuids = {e.character_uuid.uuid for e in self._testData}
+        found_uuid = {e.uuid.uuid for e in found}
+        test_uuid = {e.uuid.uuid for e in self._testData}
         # NOTE: Assert if the number of found entities is the same as the inserted entities
         self.assertEquals(len(self._testData), len(found))
         # NOTE: Assert if the found entities are the same as the inserted entities
-        self.assertSetEqual(found_uuids, test_uuids)
+        self.assertSetEqual(found_uuid, test_uuid)
 
     async def test_find_all(self) -> None:
         # PREPARE
@@ -110,22 +116,19 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         found = await self._repo.find_all()
 
         # ASSERT
-        found_uuids = {e.character_uuid.uuid for e in found}
-        test_uuids = {e.character_uuid.uuid for e in self._testData}
+        found_uuid = {e.uuid.uuid for e in found}
+        test_uuid = {e.uuid.uuid for e in self._testData}
         # NOTE: Assert if the number of found entities is the same as the inserted entities
         self.assertEquals(len(self._testData), len(found))
         # NOTE: Assert if the found entities are the same as the inserted entities
-        self.assertSetEqual(found_uuids, test_uuids)
+        self.assertSetEqual(found_uuid, test_uuid)
 
     async def test_update(self) -> None:
         # PREPARE
-        testType2 = "MAGE"
-        for e in self._testData:
-            e._type = testType2
+        testContributed1 = 10_000_000
         await self._repo.insert(self._testData)
-        testType1 = "WARRIOR"
         for e in self._testData:
-            e._type = testType1
+            e._contributed = testContributed1
 
         # ACT
         n = await self._repo.update(self._testData)
@@ -135,14 +138,14 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         self.assertEquals(len(self._testData), n)
         for e in (await self._repo.find_all()):
             # NOTE: Assert if the updated e is the same as the updated values
-            self.assertEquals(testType1, e.type)
+            self.assertEquals(testContributed1, e.contributed)
 
     async def test_delete(self) -> None:
         # PREPARE
         await self._repo.insert(self._testData)
 
         # ACT
-        n = await self._repo.delete(CharacterInfoId(self._testData[0].character_uuid))
+        n = await self._repo.delete(GuildMemberHistoryId(self._testData[0].uuid, self._testData[0].datetime))
 
         # PREPARE
         found = await self._repo.find_all()
@@ -159,19 +162,21 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         return
 
 
-    def _get_data(self) -> list[CharacterInfo]:
+    def _get_data(self) -> list[GuildMemberHistory]:
         fixtures = FixturesApi()
         raw_test_data = [
-                e
-                for datum in fixtures.get_players()[:10]
-                for e in self._adapter.Player.to_character_info(datum)
+                entity
+                for datum in fixtures.get_guilds()[:10]
+                for entity in self._adapter.Guild.to_guild_member_history(datum)
         ]
         raw_test_data = raw_test_data[:10]  # Get 10
         self.assertEquals(10, len(raw_test_data))
 
-        testData: list[CharacterInfo] = []
+        testDatetime: datetime = datetime.fromtimestamp(1709181095)
+        testData: list[GuildMemberHistory] = []
         for i, e in enumerate(raw_test_data):  # Modify the e id
             as_dict = self._repo._adapt(e)
-            as_dict["character_uuid"] = UUID(int=i).bytes
+            as_dict["uuid"] = UUID(int=i).bytes
+            as_dict["datetime"] = testDatetime
             testData.append(e.__class__(**as_dict))
         return testData

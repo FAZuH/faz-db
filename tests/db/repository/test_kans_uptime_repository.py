@@ -1,26 +1,25 @@
 # pyright: reportPrivateUsage=none
+from datetime import datetime, timedelta
 import unittest
-from uuid import UUID
 
 from loguru import logger
 
 from kans import config
 from kans.db import KansDatabase
-from kans.db.model import CharacterInfo, CharacterInfoId
+from kans.db.model import KansUptime, KansUptimeId
 from kans.util import ApiResponseAdapter
-from tests.fixtures_api import FixturesApi
 
 
-class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
+class TestKansUptimeRepository(unittest.IsolatedAsyncioTestCase):
     # self.repo to access repo
     # self.test_data to access test data
 
     async def asyncSetUp(self) -> None:
         self._adapter = ApiResponseAdapter()
         self._db = KansDatabase(config, logger)
-        self._repo = self._db.character_info_repository
+        self._repo = self._db.kans_uptime_repository
 
-        self._repo._TABLE_NAME = "test_character_info"
+        self._repo._TABLE_NAME = "test_kans_uptime"
         await self._repo.create_table()
 
         self._testData = self._get_data()
@@ -37,33 +36,22 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
 
     async def test_insert(self) -> None:
         # ACT
-        n = await self._repo.insert(self._testData)
+        await self._repo.insert(self._testData)
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is correct
-        self.assertEquals(10, n)
-
-        # PREPARE
-        toTest1: list[CharacterInfo] = []
-        testUuid1 = UUID(int=69).bytes
-        for e in self._testData:
-            as_dict = self._repo._adapt(e)
-            as_dict["character_uuid"] = testUuid1
-            toTest1.append(e.__class__(**as_dict))
-
-        # ACT
-        n = await self._repo.insert(toTest1)
-
-        # ASSERT
-        # NOTE: Assert unique constraints of character_uuid
-        self.assertEquals(1, n)
+        res = await self._db.query.fetch(f"SELECT * FROM {self._repo.table_name}")
+        self.assertEquals(2, len(res))
 
     async def test_exists(self) -> None:
         # PREPARE
         await self._repo.insert(self._testData)
 
         # ACT
-        exists = [await self._repo.exists(CharacterInfoId(e.character_uuid)) for e in self._testData]
+        exists = [
+                await self._repo.exists(KansUptimeId(e.start_time))
+                for e in self._testData
+        ]
 
         # ASSERT
         # NOTE: Assert if the number of existing entities is the same as the inserted entities
@@ -80,27 +68,27 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is the same as the count
-        self.assertEquals(len(self._testData), count)
+        self.assertEquals(2, count)
 
     async def test_find_one(self) -> None:
         # PREPARE
         await self._repo.insert(self._testData)
 
         # ACT
-        found: list[CharacterInfo] = []
+        found: list[KansUptime] = []
         for e in self._testData:
             # Find the inserted e
-            res = await self._repo.find_one(CharacterInfoId(e.character_uuid))
+            res = await self._repo.find_one(KansUptimeId(e.start_time))
             if res is not None:
                 found.append(res)
 
         # ASSERT
-        found_uuids = {e.character_uuid.uuid for e in found}
-        test_uuids = {e.character_uuid.uuid for e in self._testData}
+        found_time = {e.start_time.datetime for e in found}
+        test_time = {e.start_time.datetime for e in self._testData}
         # NOTE: Assert if the number of found entities is the same as the inserted entities
         self.assertEquals(len(self._testData), len(found))
         # NOTE: Assert if the found entities are the same as the inserted entities
-        self.assertSetEqual(found_uuids, test_uuids)
+        self.assertSetEqual(found_time, test_time)
 
     async def test_find_all(self) -> None:
         # PREPARE
@@ -110,39 +98,37 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         found = await self._repo.find_all()
 
         # ASSERT
-        found_uuids = {e.character_uuid.uuid for e in found}
-        test_uuids = {e.character_uuid.uuid for e in self._testData}
+        found_time = {e.start_time.datetime for e in found}
+        test_time = {e.start_time.datetime for e in self._testData}
         # NOTE: Assert if the number of found entities is the same as the inserted entities
-        self.assertEquals(len(self._testData), len(found))
+        self.assertEquals(2, len(found))
         # NOTE: Assert if the found entities are the same as the inserted entities
-        self.assertSetEqual(found_uuids, test_uuids)
+        self.assertSetEqual(found_time, test_time)
 
     async def test_update(self) -> None:
         # PREPARE
-        testType2 = "MAGE"
-        for e in self._testData:
-            e._type = testType2
+        temp = self._testData[0]
+        testDatetime1 = temp.start_time.datetime + timedelta(days=1)
+        testDatum = KansUptime(temp.start_time, testDatetime1)
         await self._repo.insert(self._testData)
-        testType1 = "WARRIOR"
-        for e in self._testData:
-            e._type = testType1
 
         # ACT
-        n = await self._repo.update(self._testData)
+        n = await self._repo.update((testDatum,))
 
         # ASSERT
         # NOTE: Assert if the number of updated entities is correct
-        self.assertEquals(len(self._testData), n)
-        for e in (await self._repo.find_all()):
-            # NOTE: Assert if the updated e is the same as the updated values
-            self.assertEquals(testType1, e.type)
+        self.assertEquals(1, n)
+        res = await self._repo.find_one(KansUptimeId(temp.start_time))
+        self.assertIsNotNone(res)
+        # NOTE: Assert if the updated e is the same as the updated values
+        self.assertEquals(testDatetime1, res.stop_time.datetime)  # type: ignore
 
     async def test_delete(self) -> None:
         # PREPARE
         await self._repo.insert(self._testData)
 
         # ACT
-        n = await self._repo.delete(CharacterInfoId(self._testData[0].character_uuid))
+        n = await self._repo.delete(KansUptimeId(self._testData[0].start_time))
 
         # PREPARE
         found = await self._repo.find_all()
@@ -151,7 +137,7 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         # NOTE: Assert if the number of deleted entities is correct
         self.assertEquals(1, n)
         # NOTE: Assert if the number of found entities is correct
-        self.assertEquals(len(self._testData) - 1, len(found))
+        self.assertEquals(1, len(found))
 
 
     async def asyncTearDown(self) -> None:
@@ -159,19 +145,20 @@ class TestCharacterInfoRepository(unittest.IsolatedAsyncioTestCase):
         return
 
 
-    def _get_data(self) -> list[CharacterInfo]:
-        fixtures = FixturesApi()
-        raw_test_data = [
-                e
-                for datum in fixtures.get_players()[:10]
-                for e in self._adapter.Player.to_character_info(datum)
+    def _get_data(self) -> list[KansUptime]:
+        testTimestamp1 = 1709181095
+        testData: list[KansUptime] = [
+                KansUptime(
+                        start_time=datetime.fromtimestamp(testTimestamp1),
+                        stop_time=datetime.fromtimestamp(testTimestamp1 + i)
+                )
+                for i in range(5)
         ]
-        raw_test_data = raw_test_data[:10]  # Get 10
-        self.assertEquals(10, len(raw_test_data))
-
-        testData: list[CharacterInfo] = []
-        for i, e in enumerate(raw_test_data):  # Modify the e id
-            as_dict = self._repo._adapt(e)
-            as_dict["character_uuid"] = UUID(int=i).bytes
-            testData.append(e.__class__(**as_dict))
+        testData.extend(
+                KansUptime(
+                        start_time=datetime.fromtimestamp(testTimestamp1 + 10),
+                        stop_time=datetime.fromtimestamp(testTimestamp1 + i)
+                )
+                for i in range(5)
+        )
         return testData

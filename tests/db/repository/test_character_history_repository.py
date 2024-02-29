@@ -21,9 +21,11 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
         self._adapter = ApiResponseAdapter()
         self._db = KansDatabase(config, logger)
         self._repo = self._db.character_history_repository
+
         self._repo._TABLE_NAME = "test_character_history"
         await self._repo.create_table()
-        self._test_data = self._get_data()
+
+        self._testData = self._get_data()
 
 
     async def test_create_table(self) -> None:
@@ -37,47 +39,63 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
     async def test_insert(self) -> None:
         # ACT
-        n = await self._repo.insert(self._test_data)
+        n = await self._repo.insert(self._testData)
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is correct
         self.assertEquals(10, n)
 
-    async def test_exists(self) -> None:
         # PREPARE
-        await self._repo.insert(self._test_data)
+        toTest1: list[CharacterHistory] = []
+        testDatetime1 = datetime.fromtimestamp(1709181095)
+        testUuid1 = UUID(int=69).bytes
+        for e in self._testData:
+            as_dict = self._repo._adapt(e)
+            as_dict["character_uuid"] = testUuid1
+            as_dict["datetime"] = testDatetime1
+            toTest1.append(e.__class__(**as_dict))
 
         # ACT
-        exists = []
-        for e in self._test_data:
-            # Check if the e exists
-            res = await self._repo.exists(CharacterHistoryId(e.character_uuid, e.datetime))
-            exists.append(res)
+        n = await self._repo.insert(toTest1)
+
+        # ASSERT
+        # NOTE: Assert unique constraints of character_uuid and datetime
+        self.assertEquals(1, n)
+
+    async def test_exists(self) -> None:
+        # PREPARE
+        await self._repo.insert(self._testData)
+
+        # ACT
+        exists = [
+                await self._repo.exists(CharacterHistoryId(e.character_uuid, e.datetime))
+                for e in self._testData
+        ]
 
         # ASSERT
         # NOTE: Assert if the number of existing entities is the same as the inserted entities
-        self.assertEquals(len(self._test_data), len(exists))
+        self.assertEquals(len(self._testData), len(exists))
         # NOTE: Assert if all the entities exist
         self.assertTrue(all(exists))
 
     async def test_count(self) -> None:
         # PREPARE
-        await self._repo.insert(self._test_data)
+        await self._repo.insert(self._testData)
 
         # ACT
         count = await self._repo.count()
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is the same as the count
-        self.assertEquals(len(self._test_data), count)
+        self.assertEquals(len(self._testData), count)
 
     async def test_find_one(self) -> None:
         # PREPARE
-        await self._repo.insert(self._test_data)
+        await self._repo.insert(self._testData)
 
         # ACT
         found: list[CharacterHistory] = []
-        for e in self._test_data:
+        for e in self._testData:
             # Find the inserted e
             res = await self._repo.find_one(CharacterHistoryId(e.character_uuid, e.datetime))
             if res is not None:
@@ -85,62 +103,56 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         found_uuids = {e.character_uuid.uuid for e in found}
-        test_uuids = {e.character_uuid.uuid for e in self._test_data}
+        test_uuids = {e.character_uuid.uuid for e in self._testData}
         # NOTE: Assert if the number of found entities is the same as the inserted entities
-        self.assertEquals(len(self._test_data), len(found))
+        self.assertEquals(len(self._testData), len(found))
         # NOTE: Assert if the found entities are the same as the inserted entities
         self.assertSetEqual(found_uuids, test_uuids)
 
     async def test_find_all(self) -> None:
         # PREPARE
-        await self._repo.insert(self._test_data)
+        await self._repo.insert(self._testData)
 
         # ACT
         found = await self._repo.find_all()
 
         # ASSERT
         found_uuids = {e.character_uuid.uuid for e in found}
-        test_uuids = {e.character_uuid.uuid for e in self._test_data}
+        test_uuids = {e.character_uuid.uuid for e in self._testData}
         # NOTE: Assert if the number of found entities is the same as the inserted entities
-        self.assertEquals(len(self._test_data), len(found))
+        self.assertEquals(len(self._testData), len(found))
         # NOTE: Assert if the found entities are the same as the inserted entities
         self.assertSetEqual(found_uuids, test_uuids)
 
     async def test_update(self) -> None:
         # PREPARE
-        decimal = Decimal("100")
-        await self._repo.insert(self._test_data)
-        for e in self._test_data:
-            e._alchemism = decimal
+        testAlchemism = Decimal("100")
+        await self._repo.insert(self._testData)
+        for e in self._testData:
+            e._alchemism = testAlchemism
 
         # ACT
-        n = await self._repo.update(self._test_data)
-
-        # PREPARE
-        found = await self._repo.find_all()
+        n = await self._repo.update(self._testData)
 
         # ASSERT
         # NOTE: Assert if the number of updated entities is correct
-        self.assertEquals(len(self._test_data), n)
-        for e in found:
+        self.assertEquals(len(self._testData), n)
+        for e in (await self._repo.find_all()):
             # NOTE: Assert if the updated e is the same as the updated values
-            self.assertEquals(decimal, e.alchemism)
+            self.assertEquals(testAlchemism, e.alchemism)
 
     async def test_delete(self) -> None:
         # PREPARE
-        await self._repo.insert(self._test_data)
+        await self._repo.insert(self._testData)
 
         # ACT
-        n = await self._repo.delete(CharacterHistoryId(self._test_data[0].character_uuid, self._test_data[0].datetime))
-
-        # PREPARE
-        found = await self._repo.find_all()
+        n = await self._repo.delete(CharacterHistoryId(self._testData[0].character_uuid, self._testData[0].datetime))
 
         # ASSERT
         # NOTE: Assert if the number of deleted entities is correct
         self.assertEquals(1, n)
         # NOTE: Assert if the number of found entities is correct
-        self.assertEquals(len(self._test_data) - 1, len(found))
+        self.assertEquals(len(self._testData) - 1, len(await self._repo.find_all()))
 
 
     async def asyncTearDown(self) -> None:
@@ -157,11 +169,11 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
         raw_test_data = raw_test_data[:10]  # Get 10
         self.assertEquals(10, len(raw_test_data))
 
-        now = datetime.fromtimestamp(1709181095)
-        test_data: list[CharacterHistory] = []
+        testDatetime = datetime.fromtimestamp(1709181095)
+        testData: list[CharacterHistory] = []
         for i, e in enumerate(raw_test_data):  # Modify the e id
             as_dict = self._repo._adapt(e)
             as_dict["character_uuid"] = UUID(int=i).bytes
-            as_dict["datetime"] = now
-            test_data.append(e.__class__(**as_dict))
-        return test_data
+            as_dict["datetime"] = testDatetime
+            testData.append(e.__class__(**as_dict))
+        return testData
