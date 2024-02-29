@@ -5,7 +5,7 @@ from loguru import logger
 from kans.api import Api, WynnApi
 
 
-class TestApiEndpoint(unittest.IsolatedAsyncioTestCase):
+class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self._api: Api = WynnApi(logger)

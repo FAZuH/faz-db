@@ -13,7 +13,7 @@ from kans.api.wynn.model.field import (
 from tests.fixtures_api import FixturesApi
 
 
-class TestApiModel(unittest.IsolatedAsyncioTestCase):
+class TestApiModelFromfixture(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         # self.wynnapi = self.mockwynnapi.wynnapi
         # await self.wynnapi.start()

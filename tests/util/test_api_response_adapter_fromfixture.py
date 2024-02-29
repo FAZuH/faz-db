@@ -12,7 +12,7 @@ from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
-class TestApiResponseAdapter(unittest.IsolatedAsyncioTestCase):
+class TestApiResponseAdapterFromfixture(unittest.IsolatedAsyncioTestCase):
     """Tests if db.models is properly storing data."""
 
     async def asyncSetUp(self) -> None:
