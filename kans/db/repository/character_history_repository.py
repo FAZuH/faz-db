@@ -81,7 +81,7 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
-            CREATE TABLE `{self.table_name}` (
+            CREATE TABLE IF NOT EXISTS `{self.table_name}` (
                 `character_uuid` binary(16) NOT NULL,
                 `level` tinyint unsigned NOT NULL,
                 `xp` bigint unsigned NOT NULL,
