@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+
 
 if TYPE_CHECKING:
     from kans.db.model import (
@@ -53,8 +54,10 @@ class DbModelIdDictAdapter:
         }
 
     @staticmethod
-    def from_kans_uptime(entity: KansUptimeId) -> Any:
-        raise NotImplementedError
+    def from_kans_uptime(entity: KansUptimeId) -> KansUptimeId.TypeId:
+        return {
+                "start_time": entity.start_time.datetime
+        }
 
     @staticmethod
     def from_online_players(entity: OnlinePlayersId) -> OnlinePlayersId.IdType:
