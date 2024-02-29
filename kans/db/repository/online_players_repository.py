@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
 
-    _TABLE_NAME = "online_players"
+    _TABLE_NAME: str = "online_players"
 
     def __init__(
         self,
@@ -28,10 +28,11 @@ class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
         async with self._db.transaction_group() as tg:
             tg.add(f"DELETE FROM `{self.table_name}` WHERE `uuid` IS NOT NULL")
             tg.add(
-                    f"INSERT INTO `{self.table_name}` (`uuid`, `server`) VALUES (%(uuid)s, %(server)s)",
+                    f"REPLACE INTO `{self.table_name}` (`uuid`, `server`) VALUES (%(uuid)s, %(server)s)",
                     tuple(self._adapt(entity) for entity in entities)
             )
-        return 0
+            affected_rows = tg.get_future_affectedrows()
+        return affected_rows.result()
 
     async def exists(self, id_: OnlinePlayersId, conn: None | Connection = None) -> bool:
         SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
@@ -39,8 +40,8 @@ class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
         return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
-        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
-        return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
+        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}`"
+        return (await self._db.fetch(SQL, connection=conn))[0].get("count", 0)
 
     async def find_one(self, id_: OnlinePlayersId, conn: None | Connection = None) -> None | OnlinePlayers:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
@@ -60,13 +61,16 @@ class OnlinePlayersRepository(Repository[OnlinePlayers, OnlinePlayersId]):
         """
         return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
-    async def delete(self, id_: OnlinePlayersId, conn: None | Connection = None) -> int: ...
+    async def delete(self, id_: OnlinePlayersId, conn: None | Connection = None) -> int:
+        SQL = f"DELETE FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
+        return await self._db.execute(SQL, self._adapt_id(id_), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
             CREATE TABLE IF NOT EXISTS `{self.table_name}` (
                 `uuid` binary(16) NOT NULL,
-                `server` varchar(10) NOT NULL
+                `server` varchar(10) NOT NULL,
+                PRIMARY KEY (`uuid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(SQL)

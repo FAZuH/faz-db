@@ -1,4 +1,5 @@
 from __future__ import annotations
+from asyncio import Future
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Iterable, Mapping
 from warnings import filterwarnings
@@ -88,7 +89,7 @@ class DatabaseQuery:
             yield conn
 
     def transaction_group(self) -> DatabaseQuery._TransactionGroupContextManager:
-        return DatabaseQuery._TransactionGroupContextManager(self)
+        return self._TransactionGroupContextManager(self)
 
     async def _execute(self, cursor: DictCursor, sql: str, params: None | tuple[Any, ...] | dict[str, Any] | Mapping[str, Any]= None) -> None:
         decorated = self._retry_decorator(cursor.execute)
@@ -121,6 +122,8 @@ class DatabaseQuery:
             self._parent: DatabaseQuery = parent
             self._sql: list[tuple[str, None | tuple[Any, ...] | dict[Any, Any]]] = []
 
+            self._affectedrows: Future[int] = Future()
+
         async def __aenter__(self) -> DatabaseQuery._TransactionGroupContextManager:
             return self
 
@@ -131,6 +134,12 @@ class DatabaseQuery:
                         await self._parent._executemany(curs, q, p)
                     else:
                         await self._parent._execute(curs, q)
+                conn: Connection = curs.connection  # type: ignore
+                await conn.commit()
+                self._affectedrows.set_result(curs.rowcount or 0)
 
         def add(self, sql: str, params: None | tuple[Any, ...] | dict[Any, Any] = None) -> None:
             self._sql.append((sql, params))
+
+        def get_future_affectedrows(self) -> Future[int]:
+            return self._affectedrows

@@ -54,8 +54,12 @@ class CharacterInfoRepository(Repository[CharacterInfo, CharacterInfoId]):
         return [CharacterInfo(**row) for row in result] if result else []
 
     async def update(self, entities: Iterable[CharacterInfo], conn: None | Connection = None) -> int:
-        """Update method is not implemented in CharacterInfoRepository. No columns to update."""
-        raise NotImplementedError(f"Update method is not implemented in {self.__class__.__name__}")
+        SQL = f"""
+            UPDATE `{self.table_name}`
+            SET `type` = %(type)s
+            WHERE `character_uuid` = %(character_uuid)s
+        """
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def delete(self, id_: CharacterInfoId, conn: None | Connection = None) -> int:
         SQL = f"DELETE FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s"

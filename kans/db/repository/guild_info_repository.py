@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
 
-    _TABLE_NAME = "guild_info"
+    _TABLE_NAME: str = "guild_info"
 
     def __init__(
         self,

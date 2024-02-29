@@ -75,7 +75,8 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
                 `member_total` tinyint unsigned NOT NULL,
                 `online_members` tinyint unsigned NOT NULL,
                 `datetime` datetime NOT NULL,
-                KEY `guildmain_fk_guildmaininfo_idx` (`name`)
+                UNIQUE KEY `guildHistory_uq_NameDt` (`name`,`datetime`),
+                KEY `guildHistory_idx_NameDt` (`name`,`datetime`) /*!80000 INVISIBLE */
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(SQL)

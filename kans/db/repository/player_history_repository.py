@@ -78,7 +78,8 @@ class PlayerHistoryRepository(Repository[PlayerHistory, PlayerHistoryId]):
                 `guild_rank` enum('OWNER','CHIEF','STRATEGIST','CAPTAIN','RECRUITER','RECRUIT') DEFAULT NULL,
                 `rank` varchar(30) DEFAULT NULL,
                 `datetime` datetime NOT NULL,
-                KEY `player_main_idx_ts` (`datetime` DESC)
+                UNIQUE KEY `playerHistory_uq_UuidDt` (`uuid`,`datetime`),
+                KEY `playerHistory_idx_UuidDt` (`uuid`,`datetime`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(SQL)

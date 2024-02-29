@@ -69,7 +69,9 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
                 `uuid` binary(16) NOT NULL,
                 `contributed` bigint unsigned NOT NULL,
                 `joined` datetime NOT NULL,
-                `datetime` datetime NOT NULL
+                `datetime` datetime NOT NULL,
+                UNIQUE KEY `guildMemberHistory_uq_UuidDt` (`uuid`,`datetime`),
+                KEY `guildMemberHistory_idx_UuidDt` (`uuid`,`datetime`) /*!80000 INVISIBLE */
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(SQL)
