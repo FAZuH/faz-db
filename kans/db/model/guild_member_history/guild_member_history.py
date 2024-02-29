@@ -25,14 +25,6 @@ class GuildMemberHistory(GuildMemberHistoryId):
         self._contributed = contributed
         self._joined = joined if isinstance(joined, DateColumn) else DateColumn(joined)
 
-    def to_dict(self) -> GuildMemberHistory.Type:
-        return {
-                "uuid": self.uuid.uuid,
-                "contributed": self.contributed,
-                "joined": self.joined.datetime,
-                "datetime": self.datetime.datetime
-        }
-
     class Type(TypedDict):
         uuid: bytes
         contributed: int

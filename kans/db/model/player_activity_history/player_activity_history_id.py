@@ -13,13 +13,7 @@ class PlayerActivityHistoryId:
         self._uuid: UuidColumn = uuid if isinstance(uuid, UuidColumn) else UuidColumn.from_str(uuid)
         self._logon_datetime = logon_datetime if isinstance(logon_datetime, DateColumn) else DateColumn(logon_datetime)
 
-    def to_dict(self) -> PlayerActivityHistoryId.Type:
-        return {
-                "uuid": self.uuid.uuid,
-                "logon_datetime": self.logon_datetime.datetime
-        }
-
-    class Type(TypedDict):
+    class IdType(TypedDict):
         uuid: bytes
         logon_datetime: datetime
 

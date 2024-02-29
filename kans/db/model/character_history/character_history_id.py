@@ -13,13 +13,7 @@ class CharacterHistoryId:
         self._character_uuid = character_uuid if isinstance(character_uuid, UuidColumn) else UuidColumn(character_uuid)
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
-    def to_dict(self) -> CharacterHistoryId.Type:
-        return {
-                "character_uuid": self.character_uuid.uuid,
-                "datetime": self.datetime.datetime
-        }
-
-    class Type(TypedDict):
+    class IdType(TypedDict):
         character_uuid: bytes
         datetime: datetime
 

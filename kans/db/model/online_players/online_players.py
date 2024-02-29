@@ -16,12 +16,6 @@ class OnlinePlayers(OnlinePlayersId):
         super().__init__(uuid)
         self._server = server
 
-    def to_dict(self) -> OnlinePlayers.Type:
-        return {
-                "uuid": self.uuid.uuid,
-                "server": self.server
-        }
-
     class Type(TypedDict):
         uuid: bytes
         server: str

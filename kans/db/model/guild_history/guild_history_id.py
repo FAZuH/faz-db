@@ -13,13 +13,7 @@ class GuildHistoryId:
         self._name = name
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
-    def to_dict(self) -> GuildHistoryId.Type:
-        return {
-                "name": self.name,
-                "datetime": self.datetime.datetime
-        }
-
-    class Type(TypedDict):
+    class IdType(TypedDict):
         name: str
         datetime: datetime
 

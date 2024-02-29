@@ -24,13 +24,6 @@ class PlayerActivityHistory(PlayerActivityHistoryId):
         super().__init__(uuid, logon_datetime)
         self._logoff_datetime = logoff_datetime if isinstance(logoff_datetime, DateColumn) else DateColumn(logoff_datetime)
 
-    def to_dict(self) -> PlayerActivityHistory.Type:
-        return {
-                "uuid": self.uuid.uuid,
-                "logon_datetime": self.logon_datetime.datetime,
-                "logoff_datetime": self.logoff_datetime.datetime
-        }
-
     class Type(TypedDict):
         uuid: bytes
         logon_datetime: datetime

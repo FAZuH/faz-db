@@ -15,15 +15,6 @@ class CharacterInfo(CharacterInfoId):
         self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._type = type
 
-    def to_dict(self) -> CharacterInfo.Type:
-        """Converts the instance to a tuple.
-        The order of the elements is the same as the order of the class constructor."""
-        return {
-                "character_uuid": self.character_uuid.uuid,
-                "uuid": self.uuid.uuid,
-                "type": self.type
-        }
-
     class Type(TypedDict):
         character_uuid: bytes
         uuid: bytes

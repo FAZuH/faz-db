@@ -1,18 +1,28 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
-from aiomysql import Connection
-
 from . import Repository
 from ..model import CharacterHistory, CharacterHistoryId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
+    from kans.db import DatabaseQuery
+    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
 
 
 class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId]):
 
     _TABLE_NAME: str = "character_history"
+
+    def __init__(
+        self,
+        db: DatabaseQuery,
+        db_model_dict_adapter: DbModelDictAdapter,
+        db_model_id_dict_adapter: DbModelIdDictAdapter
+    ) -> None:
+        super().__init__(db)
+        self._adapt = db_model_dict_adapter.from_character_history
+        self._adapt_id = db_model_id_dict_adapter.from_character_history
 
     async def insert(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int:
         SQL = f"""
@@ -29,11 +39,11 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
                 %(dungeon_completions)s, %(quest_completions)s, %(raid_completions)s, %(datetime)s
             )
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def exists(self, id_: CharacterHistoryId, conn: None | Connection = None) -> bool:
         SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `character_uuid` = %(character_uuid)s"
-        result = await self._db.fetch(SQL, (id_.character_uuid.uuid, id_.datetime.datetime), connection=conn)
+        result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
         return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
@@ -43,13 +53,13 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
 
     async def find_one(self, id_: CharacterHistoryId, conn: None | Connection = None) -> None | CharacterHistory:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s"
-        result = await self._db.fetch(SQL, id_.to, connection=conn)
+        result = await self._db.fetch(SQL, self._adapt_id(id_), conn)
         return CharacterHistory(**result[0]) if result else None
 
-    async def find_all(self, conn: None | Connection = None) -> None | list[CharacterHistory]:
+    async def find_all(self, conn: None | Connection = None) -> list[CharacterHistory]:
         SQL = f"SELECT * FROM `{self.table_name}`"
         result = await self._db.fetch(SQL, connection=conn)
-        return [CharacterHistory(**row) for row in result] if result else None
+        return [CharacterHistory(**row) for row in result] if result else []
 
     async def update(self, entities: Iterable[CharacterHistory], conn: None | Connection = None) -> int:
         SQL = f"""
@@ -63,11 +73,11 @@ class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId
                 `quest_completions` = %(quest_completions)s, `raid_completions` = %(raid_completions)s, `gamemode` = %(gamemode)s
             WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def delete(self, id_: CharacterHistoryId, conn: None | Connection = None) -> int:
         SQL = f"DELETE FROM `{self.table_name}` WHERE `character_uuid` = %(character_uuid)s AND `datetime` = %(datetime)s"
-        return await self._db.execute(SQL, (id_.character_uuid.uuid, id_.datetime.datetime), conn)
+        return await self._db.execute(SQL, self._adapt_id(id_), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""

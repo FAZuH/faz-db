@@ -12,13 +12,7 @@ class PlayerHistoryId:
         self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
-    def to_dict(self) -> PlayerHistoryId.Type:
-        return {
-                "uuid": self.uuid.uuid,
-                "datetime": self.datetime.datetime
-        }
-
-    class Type(TypedDict):
+    class IdType(TypedDict):
         uuid: bytes
         datetime: dt
 

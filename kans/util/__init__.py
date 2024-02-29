@@ -1,4 +1,6 @@
 # type: ignore
+from .db_model_dict_adapter import DbModelDictAdapter
+from .db_model_id_dict_adapter import DbModelIdDictAdapter
 from .error_handler import ErrorHandler
 from .ratelimit import Ratelimit
 from .response_set import ResponseSet

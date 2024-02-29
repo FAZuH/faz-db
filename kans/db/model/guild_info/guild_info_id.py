@@ -7,12 +7,7 @@ class GuildInfoId:
     def __init__(self, name: str) -> None:
         self._name = name
 
-    def to_dict(self) -> GuildInfoId.Type:
-        return {
-                "name": self.name
-        }
-
-    class Type(TypedDict):
+    class IdType(TypedDict):
         name: str
 
     @property

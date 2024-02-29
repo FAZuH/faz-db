@@ -70,37 +70,6 @@ class CharacterHistory(CharacterHistoryId):
         self._quest_completions = quest_completions
         self._raid_completions = raid_completions
 
-    def to_dict(self) -> CharacterHistory.Type:
-        return {
-                "character_uuid": self.character_uuid.uuid,
-                "level": self.level,
-                "xp": self.xp,
-                "wars": self.wars,
-                "playtime": self.playtime,
-                "mobs_killed": self.mobs_killed,
-                "chests_found": self.chests_found,
-                "logins": self.logins,
-                "deaths": self.deaths,
-                "discoveries": self.discoveries,
-                "gamemode": self.gamemode.gamemode,
-                "alchemism": self.alchemism,
-                "armouring": self.armouring,
-                "cooking": self.cooking,
-                "jeweling": self.jeweling,
-                "scribing": self.scribing,
-                "tailoring": self.tailoring,
-                "weaponsmithing": self.weaponsmithing,
-                "woodworking": self.woodworking,
-                "mining": self.mining,
-                "woodcutting": self.woodcutting,
-                "farming": self.farming,
-                "fishing": self.fishing,
-                "dungeon_completions": self.dungeon_completions,
-                "quest_completions": self.quest_completions,
-                "raid_completions": self.raid_completions,
-                "datetime": self.datetime.datetime,
-        }
-
     class Type(TypedDict, total=False):
         character_uuid: bytes
         level: int

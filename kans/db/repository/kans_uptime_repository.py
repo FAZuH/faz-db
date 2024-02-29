@@ -6,18 +6,31 @@ from ..model import KansUptime, KansUptimeId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
+    from kans.db import DatabaseQuery
+    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
+
 
 
 class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
 
     _TABLE_NAME = "kans_uptime"
 
+    def __init__(
+        self,
+        db: DatabaseQuery,
+        db_model_dict_adapter: DbModelDictAdapter,
+        db_model_id_dict_adapter: DbModelIdDictAdapter
+    ) -> None:
+        super().__init__(db)
+        self._adapt = db_model_dict_adapter.from_kans_uptime
+        self._adapt_id = db_model_id_dict_adapter.from_kans_uptime
+
     async def insert(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int:
         SQL = f"""
             REPLACE INTO `{self.table_name}` (`start_time`, `stop_time`)
             VALUES (%(start_time)s, %(stop_time)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def exists(self, id_: KansUptimeId, conn: None | Connection = None) -> bool:
         raise NotImplementedError
@@ -40,7 +53,7 @@ class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
             SET `stop_time` = %(stop_time)s
             WHERE `start_time` = %(start_time)s
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def delete(self, id_: KansUptimeId, conn: None | Connection = None) -> int:
         raise NotImplementedError

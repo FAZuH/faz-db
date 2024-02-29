@@ -23,13 +23,6 @@ class GuildInfo(GuildInfoId):
         self._prefix = prefix
         self._created = created if isinstance(created, DateColumn) else DateColumn(created)
 
-    def to_dict(self) -> GuildInfo.Type:
-        return {
-                "name": self.name,
-                "prefix": self.prefix,
-                "created": self.created.datetime
-        }
-
     class Type(TypedDict):
         name: str
         prefix: str

@@ -6,22 +6,34 @@ from ..model import PlayerInfo, PlayerInfoId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
+    from kans.db import DatabaseQuery
+    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
 
 
 class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
 
     _TABLE_NAME: str = "player_info"
 
+    def __init__(
+        self,
+        db: DatabaseQuery,
+        db_model_dict_adapter: DbModelDictAdapter,
+        db_model_id_dict_adapter: DbModelIdDictAdapter
+    ) -> None:
+        super().__init__(db)
+        self._adapt = db_model_dict_adapter.from_player_info
+        self._adapt_id = db_model_id_dict_adapter.from_player_info
+
     async def insert(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int:
         SQL = f"""
             REPLACE INTO `{self.table_name}` (`uuid`, `latest_username`, `first_join`)
             VALUES (%(uuid)s, %(latest_username)s, %(first_join)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def exists(self, id_: PlayerInfoId, conn: None | Connection = None) -> bool:
         SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        result = await self._db.fetch(SQL, {"uuid": id_.uuid.uuid}, connection=conn)
+        result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
         return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
@@ -30,7 +42,7 @@ class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
 
     async def find_one(self, id_: PlayerInfoId, conn: None | Connection = None) -> None | PlayerInfo:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        result = await self._db.fetch(SQL, {"uuid": id_.uuid.uuid}, connection=conn)
+        result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
         return PlayerInfo(**result[0]) if result else None
 
     async def find_all(self, conn: None | Connection = None) -> None | list[PlayerInfo]:
@@ -44,11 +56,11 @@ class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
             SET `latest_username` = %(latest_username)s, `first_join` = %(first_join)s
             WHERE `uuid` = %(uuid)s
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def delete(self, id_: PlayerInfoId, conn: None | Connection = None) -> int:
         SQL = f"DELETE FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        return await self._db.execute(SQL, {"uuid": id_.uuid.uuid}, conn)
+        return await self._db.execute(SQL, self._adapt_id(id_), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""

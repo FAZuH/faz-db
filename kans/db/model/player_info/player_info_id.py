@@ -9,12 +9,7 @@ class PlayerInfoId:
     def __init__(self, uuid: bytes | UuidColumn) -> None:
         self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
 
-    def to_dict(self) -> PlayerInfoId.Type:
-        return {
-                "uuid": self.uuid.uuid
-        }
-
-    class Type(TypedDict):
+    class IdType(TypedDict):
         uuid: bytes
 
     @property

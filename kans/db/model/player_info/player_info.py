@@ -19,13 +19,6 @@ class PlayerInfo(PlayerInfoId):
         self._latest_username = latest_username
         self._first_join = first_join if isinstance(first_join, DateColumn) else DateColumn(first_join)
 
-    def to_dict(self) -> PlayerInfo.Type:
-        return {
-                "uuid": self.uuid.uuid,
-                "latest_username": self.latest_username,
-                "first_join": self.first_join.datetime
-        }
-
     class Type(TypedDict):
         uuid: bytes
         latest_username: str

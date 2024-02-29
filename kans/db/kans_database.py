@@ -16,6 +16,7 @@ from .repository import (
     PlayerHistoryRepository,
     Repository,
 )
+from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
 
 if TYPE_CHECKING:
     from loguru import Logger
@@ -25,31 +26,35 @@ if TYPE_CHECKING:
 class KansDatabase(Database):
 
     def __init__(self, config: ConfigT, logger: Logger) -> None:
-        self._wynndb: DatabaseQuery = DatabaseQuery(
-            config["DB_USERNAME"], config["DB_PASSWORD"], config["SCHEMA_NAME"], 2
+        self._dbquery: DatabaseQuery = DatabaseQuery(
+                config["DB_USERNAME"],
+                config["DB_PASSWORD"],
+                config["SCHEMA_NAME"],
+                2
         )
-        self._character_history_repository = CharacterHistoryRepository(self.query)
-        self._character_info_repository = CharacterInfoRepository(self.query)
-        self._guild_history_repository = GuildHistoryRepository(self.query)
-        self._guild_info_repository = GuildInfoRepository(self.query)
-        self._guild_member_history_repository = GuildMemberHistoryRepository(self.query)
-        self._kans_uptime_repository = KansUptimeRepository(self.query)
-        self._online_players_repository = OnlinePlayersRepository(self.query)
-        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query)
-        self._player_history_repository = PlayerHistoryRepository(self.query)
-        self._player_info_repository = PlayerInfoRepository(self.query)
-
+        adapter = DbModelDictAdapter()
+        id_adapter = DbModelIdDictAdapter()
+        self._character_history_repository = CharacterHistoryRepository(self.query, adapter, id_adapter)
+        self._character_info_repository = CharacterInfoRepository(self.query, adapter, id_adapter)
+        self._guild_history_repository = GuildHistoryRepository(self.query, adapter, id_adapter)
+        self._guild_info_repository = GuildInfoRepository(self.query, adapter, id_adapter)
+        self._guild_member_history_repository = GuildMemberHistoryRepository(self.query, adapter, id_adapter)
+        self._kans_uptime_repository = KansUptimeRepository(self.query, adapter, id_adapter)
+        self._online_players_repository = OnlinePlayersRepository(self.query, adapter, id_adapter)
+        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query, adapter, id_adapter)
+        self._player_history_repository = PlayerHistoryRepository(self.query, adapter, id_adapter)
+        self._player_info_repository = PlayerInfoRepository(self.query, adapter, id_adapter)
         self._all_repositories: list[Repository[Any, Any]] = [
-            self._character_history_repository,
-            self._character_info_repository,
-            self._guild_history_repository,
-            self._guild_info_repository,
-            self._guild_member_history_repository,
-            self._kans_uptime_repository,
-            self._online_players_repository,
-            self._player_activity_history_repository,
-            self._player_history_repository,
-            self._player_info_repository,
+                self._character_history_repository,
+                self._character_info_repository,
+                self._guild_history_repository,
+                self._guild_info_repository,
+                self._guild_member_history_repository,
+                self._kans_uptime_repository,
+                self._online_players_repository,
+                self._player_activity_history_repository,
+                self._player_history_repository,
+                self._player_info_repository,
         ]
 
     async def create_all(self) -> None:
@@ -104,4 +109,4 @@ class KansDatabase(Database):
 
     @property
     def query(self) -> DatabaseQuery:
-        return self._wynndb
+        return self._dbquery

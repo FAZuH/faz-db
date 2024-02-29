@@ -33,18 +33,6 @@ class PlayerHistory(PlayerHistoryId):
         self._guild_rank = guild_rank
         self._rank = rank
 
-    def to_dict(self) -> PlayerHistory.Type:
-        return {
-                "uuid": self.uuid.uuid,
-                "username": self.username,
-                "support_rank": self.support_rank,
-                "playtime": self.playtime,
-                "guild_name": self.guild_name,
-                "guild_rank": self.guild_rank,
-                "rank": self.rank,
-                "datetime": self.datetime.datetime
-        }
-
     class Type(TypedDict):
         uuid: bytes
         username: str

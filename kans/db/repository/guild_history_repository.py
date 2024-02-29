@@ -6,11 +6,24 @@ from ..model import GuildHistory, GuildHistoryId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
+    from kans.db import DatabaseQuery
+    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
+
 
 
 class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
 
     _TABLE_NAME: str = "guild_history"
+
+    def __init__(
+        self,
+        db: DatabaseQuery,
+        db_model_dict_adapter: DbModelDictAdapter,
+        db_model_id_dict_adapter: DbModelIdDictAdapter
+    ) -> None:
+        super().__init__(db)
+        self._adapt = db_model_dict_adapter.from_guild_history
+        self._adapt_id = db_model_id_dict_adapter.from_guild_history
 
     async def insert(self, entities: Iterable[GuildHistory], conn: None | Connection = None) -> int:
         SQL = f"""
@@ -18,11 +31,11 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
                 (`name`, `level`, `territories`, `wars`, `member_total`, `online_members`, `datetime`)
             VALUES (%(name)s, %(level)s, %(territories)s, %(wars)s, %(member_total)s, %(online_members)s, %(datetime)s)
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def exists(self, id_: GuildHistoryId, conn: None | Connection = None) -> bool:
         SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `name` = %(name)s AND `datetime` = %(datetime)s"
-        result = await self._db.fetch(SQL, (id_.name, id_.datetime.datetime), conn)
+        result = await self._db.fetch(SQL, self._adapt_id(id_), conn)
         return result[0].get("count", 0) > 0
 
     async def count(self, conn: None | Connection = None) -> float:
@@ -31,7 +44,7 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
 
     async def find_one(self, id_: GuildHistoryId, conn: None | Connection = None) -> None | GuildHistory:
         SQL = f"SELECT * FROM `{self.table_name}` WHERE `name` = %(name)s AND `datetime` = %(datetime)s"
-        result = await self._db.fetch(SQL, (id_.name, id_.datetime.datetime), conn)
+        result = await self._db.fetch(SQL, self._adapt_id(id_), conn)
         return GuildHistory(**result[0]) if result else None
 
     async def find_all(self, conn: None | Connection = None) -> None | list[GuildHistory]:
@@ -46,11 +59,11 @@ class GuildHistoryRepository(Repository[GuildHistory, GuildHistoryId]):
                 `online_members` = %(online_members)s
             WHERE `name` = %(name)s AND `datetime` = %(datetime)s
         """
-        return await self._db.execute_many(SQL, tuple(entity.to_dict() for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
 
     async def delete(self, id_: GuildHistoryId, conn: None | Connection = None) -> int:
         SQL = f"DELETE FROM `{self.table_name}` WHERE `name` = %(name)s AND `datetime` = %(datetime)s"
-        return await self._db.execute(SQL, (id_.name, id_.datetime.datetime), conn)
+        return await self._db.execute(SQL, self._adapt_id(id_), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
