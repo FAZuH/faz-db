@@ -1,2 +1,2 @@
 # type: ignore
-from .test_api_to_db_converter import TestApiResponseAdapter
+from .test_api_response_adapter import TestApiResponseAdapter
