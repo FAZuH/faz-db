@@ -1,3 +1,7 @@
+"""For database operations to work, a complete db model is required.
+Therefore, fixture will be used in these tests to fill the required attributes.
+The fixture data will be modified accordingly to test specific cases."""
+
 import json
 import os
 
@@ -6,7 +10,6 @@ from kans.api.wynn.response import (
     PlayerResponse,
     OnlinePlayersResponse,
 )
-
 
 
 
@@ -26,7 +29,7 @@ class FixturesApi:
                 self._online_uuids = OnlinePlayersResponse(*(json.load(f)["0"]))
 
         if self._online_uuids is None:
-            raise Exception("No online players fixture found")
+            raise ValueError("No online players fixture found")
         return self._online_uuids
 
     def get_players(self) -> list[PlayerResponse]:
@@ -36,7 +39,7 @@ class FixturesApi:
                 self._player_stats = [PlayerResponse(*resp) for resp in json.load(f).values()]
 
         if self._player_stats is None:
-             raise Exception("No player stats fixture found")
+             raise ValueError("No player stats fixture found")
         return self._player_stats
 
     def get_guilds(self) -> list[GuildResponse]:
@@ -46,7 +49,7 @@ class FixturesApi:
                 self._guild_stats = [GuildResponse(*resp) for resp in json.load(f).values()]
 
         if self._guild_stats is None:
-             raise Exception("No guild stats fixture found")
+             raise ValueError("No guild stats fixture found")
         return self._guild_stats
 
     # async def response_to_mock(self) -> None:
