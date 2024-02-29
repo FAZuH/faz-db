@@ -6,7 +6,6 @@ from .. import DateColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
-    from .. import UuidColumn
 
 
 class PlayerInfo(PlayerInfoId):
@@ -14,13 +13,13 @@ class PlayerInfo(PlayerInfoId):
 
     id: `uuid`"""
 
-    def __init__(self, uuid: bytes | UuidColumn, latest_username: str, first_join: datetime | DateColumn) -> None:
+    def __init__(self, uuid: str, latest_username: str, first_join: datetime | DateColumn) -> None:
         super().__init__(uuid)
         self._latest_username = latest_username
         self._first_join = first_join if isinstance(first_join, DateColumn) else DateColumn(first_join)
 
     class Type(TypedDict):
-        uuid: bytes
+        uuid: str
         latest_username: str
         first_join: datetime
 

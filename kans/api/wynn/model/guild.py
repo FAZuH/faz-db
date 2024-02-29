@@ -2,14 +2,14 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Generator
 
-from .field import BodyDateField, Nullable, UsernameOrUuidField, UuidField
+from .field import BodyDateField, Nullable, UsernameOrUuidField
 
 
 class Guild:
 
     def __init__(self, raw: dict[str, Any]) -> None:
         self._raw = raw
-        self._uuid = UuidField(raw["uuid"])
+        self._uuid = raw["uuid"]
         self._name = raw["name"]
         self._prefix = raw["prefix"]
         self._level = Decimal(raw["level"])
@@ -19,15 +19,14 @@ class Guild:
         self._created = BodyDateField(raw["created"])
         self._members = Guild.Members(raw["members"])
         self._online = raw["online"]
-        self._banner = Nullable(Guild.Banner, raw.get("banner", None))
+        self._banner = Nullable(Guild.Banner, raw.get("banner",))
         self._season_ranks = {
             season: Guild.SeasonRankInfo(season_rank_info)
             for season, season_rank_info in raw["seasonRanks"].items()
         }
 
     def iter_seasonranks(self) -> Generator[tuple[str, Guild.SeasonRankInfo], Any, None]:
-        for rank, season_rank_info in self.season_ranks.items():
-            yield rank, season_rank_info
+        yield from self.season_ranks.items()
 
     class Members:
         def __init__(self, node: dict[str, Any]) -> None:
@@ -68,8 +67,8 @@ class Guild:
 
         class MemberInfo:
             def __init__(self, node: dict[str, Any]) -> None:
-                self._uuid = Nullable(UuidField, node.get("uuid", None))
-                self._username = node.get("username" , None)
+                self._uuid: Any | None = node.get("uuid")
+                self._username = node.get("username")
                 self._online = node["online"]
                 self._server = node["server"]
                 self._contributed = node["contributed"]
@@ -77,7 +76,7 @@ class Guild:
                 self._joined = BodyDateField(node["joined"])
 
             @property
-            def uuid(self) -> None | UuidField:
+            def uuid(self) -> None | str:
                 return self._uuid
 
             @property
@@ -136,7 +135,7 @@ class Guild:
         def __init__(self, node: dict[str, Any]) -> None:
             self._base = node["base"]
             self._tier = node["tier"]
-            self._structure = node.get("structure", None)
+            self._structure = node.get("structure")
             self._layers = [
                 Guild.Banner.LayerInfo(layer)
                 for layer in node["layers"]
@@ -189,7 +188,7 @@ class Guild:
         return self._raw
 
     @property
-    def uuid(self) -> UuidField:
+    def uuid(self) -> str:
         return self._uuid
 
     @property

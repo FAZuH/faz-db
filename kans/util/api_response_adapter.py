@@ -28,7 +28,7 @@ class ApiResponseAdapter:
         @staticmethod
         def to_character_history(resp: PlayerResponse) -> Generator[CharacterHistory, None, None]:
             return (CharacterHistory(
-                    character_uuid=ch_uuid.to_bytes(),
+                    character_uuid=ch_uuid,
                     level=ch.level,
                     xp=ch.xp,
                     wars=ch.wars,
@@ -60,15 +60,15 @@ class ApiResponseAdapter:
         @staticmethod
         def to_character_info(resp: PlayerResponse) -> Generator[CharacterInfo, None, None]:
             return (CharacterInfo(
-                    character_uuid=character_uuid.to_bytes(),
-                    uuid=resp.body.uuid.to_bytes(),
+                    character_uuid=character_uuid,
+                    uuid=resp.body.uuid,
                     type=character.type.get_kind_str()
             ) for character_uuid, character in resp.body.iter_characters())
 
         @staticmethod
         def to_player_history(resp: PlayerResponse) -> PlayerHistory:
             return PlayerHistory(
-                    uuid=resp.body.uuid.to_bytes(),
+                    uuid=resp.body.uuid,
                     username=resp.body.username,
                     support_rank=resp.body.support_rank,
                     playtime=resp.body.playtime,
@@ -81,7 +81,7 @@ class ApiResponseAdapter:
         @staticmethod
         def to_player_info(resp: PlayerResponse) -> PlayerInfo:
             return PlayerInfo(
-                    uuid=resp.body.uuid.to_bytes(),
+                    uuid=resp.body.uuid,
                     latest_username=resp.body.username,
                     first_join=resp.body.first_join.to_datetime()
             )
@@ -111,7 +111,7 @@ class ApiResponseAdapter:
         @staticmethod
         def to_guild_member_history(resp: GuildResponse) -> Generator[GuildMemberHistory, None, None]:
             return (GuildMemberHistory(
-                    uuid=uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes(),  # type: ignore
+                    uuid=uuid.uuid if uuid.is_uuid() else memberinfo.uuid,  # type: ignore
                     contributed=memberinfo.contributed,
                     joined=memberinfo.joined.to_datetime(),
                     datetime=resp.headers.to_datetime()
@@ -121,7 +121,7 @@ class ApiResponseAdapter:
 
         @staticmethod
         def to_online_players(resp: OnlinePlayersResponse) -> Generator[OnlinePlayers, None, None]:
-            return (OnlinePlayers(uuid=uuid.to_bytes(), server=server) for uuid, server in resp.body.iter_players())
+            return (OnlinePlayers(uuid=uuid.username_or_uuid, server=server) for uuid, server in resp.body.iter_players())
 
         @staticmethod
         def to_player_activity_history(

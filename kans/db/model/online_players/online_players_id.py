@@ -1,17 +1,15 @@
 from __future__ import annotations
 from typing import TypedDict
 
-from .. import UuidColumn
-
 
 class OnlinePlayersId:
 
-    def __init__(self, uuid: bytes | UuidColumn) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
+    def __init__(self, uuid: str | str) -> None:
+        self._uuid = uuid
 
     class IdType(TypedDict):
-        uuid: bytes
+        uuid: str
 
     @property
-    def uuid(self) -> UuidColumn:
+    def uuid(self) -> str:
         return self._uuid

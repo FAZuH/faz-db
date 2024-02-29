@@ -22,7 +22,7 @@ class DbModelDictAdapter:
     @staticmethod
     def from_character_history(entity: CharacterHistory) -> CharacterHistory.Type:
         return {
-                "character_uuid": entity.character_uuid.uuid,
+                "character_uuid": entity.character_uuid,
                 "level": entity.level,
                 "xp": entity.xp,
                 "wars": entity.wars,
@@ -54,8 +54,8 @@ class DbModelDictAdapter:
     @staticmethod
     def from_character_info(entity: CharacterInfo) -> CharacterInfo.Type:
         return {
-                "character_uuid": entity.character_uuid.uuid,
-                "uuid": entity.uuid.uuid,
+                "character_uuid": entity.character_uuid,
+                "uuid": entity.uuid,
                 "type": entity.type
         }
 
@@ -82,7 +82,7 @@ class DbModelDictAdapter:
     @staticmethod
     def from_guild_member_history(entity: GuildMemberHistory) -> GuildMemberHistory.Type:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "contributed": entity.contributed,
                 "joined": entity.joined.datetime,
                 "datetime": entity.datetime.datetime
@@ -98,14 +98,14 @@ class DbModelDictAdapter:
     @staticmethod
     def from_online_players(entity: OnlinePlayers) -> OnlinePlayers.Type:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "server": entity.server
         }
 
     @staticmethod
     def from_player_activity_history(entity: PlayerActivityHistory) -> PlayerActivityHistory.Type:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "logon_datetime": entity.logon_datetime.datetime,
                 "logoff_datetime": entity.logoff_datetime.datetime
         }
@@ -113,7 +113,7 @@ class DbModelDictAdapter:
     @staticmethod
     def from_player_history(entity: PlayerHistory) -> PlayerHistory.Type:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "username": entity.username,
                 "support_rank": entity.support_rank,
                 "playtime": entity.playtime,
@@ -126,7 +126,7 @@ class DbModelDictAdapter:
     @staticmethod
     def from_player_info(entity: PlayerInfo) -> PlayerInfo.Type:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "latest_username": entity.latest_username,
                 "first_join": entity.first_join.datetime
         }

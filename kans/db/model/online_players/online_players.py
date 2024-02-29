@@ -1,10 +1,7 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict
 
 from . import OnlinePlayersId
-
-if TYPE_CHECKING:
-    from .. import UuidColumn
 
 
 class OnlinePlayers(OnlinePlayersId):
@@ -12,12 +9,12 @@ class OnlinePlayers(OnlinePlayersId):
 
     id: `uuid`"""
 
-    def __init__(self, uuid: bytes | UuidColumn, server: str) -> None:
+    def __init__(self, uuid: str | str, server: str) -> None:
         super().__init__(uuid)
         self._server = server
 
     class Type(TypedDict):
-        uuid: bytes
+        uuid: str
         server: str
 
     @property

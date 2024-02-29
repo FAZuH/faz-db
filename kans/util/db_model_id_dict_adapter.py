@@ -22,14 +22,14 @@ class DbModelIdDictAdapter:
     @staticmethod
     def from_character_history(entity: CharacterHistoryId) -> CharacterHistoryId.IdType:
         return {
-                "character_uuid": entity.character_uuid.uuid,
+                "character_uuid": entity.character_uuid,
                 "datetime": entity.datetime.datetime
         }
 
     @staticmethod
     def from_character_info(entity: CharacterInfoId) -> CharacterInfoId.IdType:
         return {
-                "character_uuid": entity.character_uuid.uuid
+                "character_uuid": entity.character_uuid
         }
 
     @staticmethod
@@ -48,7 +48,7 @@ class DbModelIdDictAdapter:
     @staticmethod
     def from_guild_member_history(entity: GuildMemberHistoryId) -> GuildMemberHistoryId.IdType:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "datetime": entity.datetime.datetime
         }
 
@@ -59,25 +59,25 @@ class DbModelIdDictAdapter:
     @staticmethod
     def from_online_players(entity: OnlinePlayersId) -> OnlinePlayersId.IdType:
         return {
-                "uuid": entity.uuid.uuid
+                "uuid": entity.uuid
         }
 
     @staticmethod
     def from_player_activity_history(entity: PlayerActivityHistoryId) -> PlayerActivityHistoryId.IdType:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "logon_datetime": entity.logon_datetime.datetime
         }
 
     @staticmethod
     def from_player_history(entity: PlayerHistoryId) -> PlayerHistoryId.IdType:
         return {
-                "uuid": entity.uuid.uuid,
+                "uuid": entity.uuid,
                 "datetime": entity.datetime.datetime
         }
 
     @staticmethod
     def from_player_info(entity: PlayerInfoId) -> PlayerInfoId.IdType:
         return {
-                "uuid": entity.uuid.uuid
+                "uuid": entity.uuid
         }
