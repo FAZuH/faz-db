@@ -22,14 +22,14 @@ class Player:
         self._uuid = UuidField(raw["uuid"])
         self._rank = raw["rank"]
         self._rank_badge = raw["rankBadge"]
-        self._legacy_rank_colour = Nullable(self.LegacyRankColour, raw.get("legacyRankColour", None))
+        self._legacy_rank_colour = Nullable(self.LegacyRankColour, raw.get("legacyRankColour"))
         self._shortened_rank = raw["shortenedRank"]
         self._support_rank = raw["supportRank"]
         self._veteran = raw["veteran"] or False
         self._first_join = BodyDateField(raw["firstJoin"])
         self._last_join = BodyDateField(raw["lastJoin"])
         self._playtime = Decimal(raw["playtime"])
-        self._guild = Nullable(self.Guild, raw.get("guild", None))
+        self._guild = Nullable(self.Guild, raw.get("guild"))
         self._global_data = self.GlobalData(raw["globalData"])
         self._forum_link = raw["forumLink"]
         self._ranking = raw["ranking"]

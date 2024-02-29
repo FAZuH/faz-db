@@ -19,7 +19,7 @@ class Guild:
         self._created = BodyDateField(raw["created"])
         self._members = Guild.Members(raw["members"])
         self._online = raw["online"]
-        self._banner = Nullable(Guild.Banner, raw.get("banner", None))
+        self._banner = Nullable(Guild.Banner, raw.get("banner"))
         self._season_ranks = {
             season: Guild.SeasonRankInfo(season_rank_info)
             for season, season_rank_info in raw["seasonRanks"].items()
@@ -68,8 +68,8 @@ class Guild:
 
         class MemberInfo:
             def __init__(self, node: dict[str, Any]) -> None:
-                self._uuid = Nullable(UuidField, node.get("uuid", None))
-                self._username = node.get("username" , None)
+                self._uuid = Nullable(UuidField, node.get("uuid"))
+                self._username = node.get("username" )
                 self._online = node["online"]
                 self._server = node["server"]
                 self._contributed = node["contributed"]
@@ -136,7 +136,7 @@ class Guild:
         def __init__(self, node: dict[str, Any]) -> None:
             self._base = node["base"]
             self._tier = node["tier"]
-            self._structure = node.get("structure", None)
+            self._structure = node.get("structure")
             self._layers = [
                 Guild.Banner.LayerInfo(layer)
                 for layer in node["layers"]

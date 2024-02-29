@@ -14,8 +14,7 @@ class OnlinePlayers:
         }
 
     def iter_players(self) -> Generator[tuple[UsernameOrUuidField, str], Any, None]:
-        for usernameoruuid, server in self._players.items():
-            yield usernameoruuid, server
+        yield from self._players.items()
 
     @property
     def raw(self) -> dict[str, Any]:

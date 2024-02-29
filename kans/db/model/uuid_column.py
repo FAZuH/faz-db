@@ -12,9 +12,7 @@ class UuidColumn:
         return cls(UUID(uuid).bytes)
 
     def to_str(self, hypen: bool = True) -> str:
-        if hypen:
-            return str(UUID(bytes=self._uuid))
-        return UUID(bytes=self._uuid).hex
+        return str(UUID(bytes=self._uuid)) if hypen else UUID(bytes=self._uuid).hex
 
     @property
     def uuid(self) -> bytes:
