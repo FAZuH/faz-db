@@ -11,6 +11,8 @@ Python program that fetches stats of online players and guilds with online membe
 - Add tests for database integrity
 
 ## Todo
+- Remove uuid to bytes conversion
+- Use BIN_TO_UUID() and UUID_TO_BIN() MySQL functions to convert uuid between string and binary
 - Add documentation to the whole code
 - Add more magic methods to db and api models
 - Add missing db.repository methods
