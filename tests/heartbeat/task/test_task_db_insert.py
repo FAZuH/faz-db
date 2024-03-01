@@ -26,7 +26,7 @@ class TestTaskDbInsert(unittest.TestCase):
 
         # ASSERT
         self._db.create_all.assert_called_once()
-        self._request_list.enqueue.assert_called_once_with(0, self._api.player.get_online_uuids())
+        self._request_list.enqueue.assert_called_once_with(0, self._api.player.get_online_uuids(), priority=500)
 
     def test_run(self) -> None:
         # PREPARE
@@ -168,7 +168,7 @@ class TestResponseHandler(unittest.TestCase):
 
         # ASSERT
         # NOTE: Assert that enqueue is called with the correct arguments.
-        self.__request_list.enqueue.assert_called_once_with(69, self._api.player.get_online_uuids(), priority=0)
+        self.__request_list.enqueue.assert_called_once_with(69, self._api.player.get_online_uuids(), priority=500)
 
 
     # PlayerResponse
@@ -262,19 +262,19 @@ class TestResponseHandler(unittest.TestCase):
     # GuildResponse
     def test_requeue_guild(self) -> None:
         # PREPARE
-        guild0 = "guild0"
-        resp1 = MagicMock()
-        resp2 = MagicMock()  # continued
-        resp1.body.name = guild0
-        resp1.body.members.get_online_members.return_value = 1
-        resp1.headers.expires.to_datetime().timestamp.return_value = 69
-        resp2.body.members.get_online_members.return_value = 0
+        testGuildUuid1 = "guild0"
+        testResp1 = MagicMock()
+        testResp2 = MagicMock()  # continued
+        testResp1.body.uuid.uuid = testGuildUuid1
+        testResp1.body.members.get_online_members.return_value = 1
+        testResp1.headers.expires.to_datetime().timestamp.return_value = 69
+        testResp2.body.members.get_online_members.return_value = 0
 
         # ACT
-        self._manager._requeue_guild([resp1, resp2])
+        self._manager._requeue_guild([testResp1, testResp2])
 
         # ASSERT
         # NOTE: Assert that self._api.guild.get() is called with the correct arguments
-        self._api.guild.get.assert_called_once_with(guild0)
+        self._api.guild.get.assert_called_once_with(testGuildUuid1)
         # NOTE: Assert that enqueue is called with the correct arguments.
         self.__request_list.enqueue.assert_called_once_with(69, self._api.guild.get())

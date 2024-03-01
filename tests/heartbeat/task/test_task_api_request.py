@@ -14,7 +14,7 @@ class TestTaskApiRequest(unittest.TestCase):
         self.response_list = MagicMock()
         self.task = TaskApiRequest(self.logger, self.api, self.request_list, self.response_list)
 
-    def test_setup(self):
+    async def test_setup(self):
         self.task.setup()
         self.api.start.assert_called_once()
 
