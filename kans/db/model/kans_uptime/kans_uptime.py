@@ -16,6 +16,7 @@ class KansUptime(KansUptimeId):
         self._stop_time = stop_time if isinstance(stop_time, DateColumn) else DateColumn(stop_time)
 
     class Type(TypedDict):
+        start_time: datetime
         stop_time: datetime
 
     @property
