@@ -1,9 +1,8 @@
+# pyright: reportPrivateUsage=none
 import unittest
 from datetime import datetime as dt
-from typing import Coroutine
-from unittest.mock import MagicMock
 
-from kans.heartbeat.task.request_list import RequestList
+from kans.heartbeat.task import RequestList
 
 
 class TestRequestList(unittest.TestCase):
@@ -14,79 +13,120 @@ class TestRequestList(unittest.TestCase):
     async def mock_coro(self, arg: str) -> str:
         return arg
 
-    def test_put_and_get(self) -> None:
-        coro = self.mock_coro('foo')
-        request_ts = dt.now().timestamp() - 100
-        self.request_list.enqueue(request_ts, coro)
+    def test_enqueue_and_dequeue(self) -> None:
+        # sourcery skip: class-extract-method
+        # PREPARE
+        testCoro1 = self.mock_coro('foo')
+        testRequestTs1 = dt.now().timestamp() - 100
 
+        # ACT
+        self.request_list.enqueue(testRequestTs1, testCoro1)
+
+        # ASSERT
+        # NOTE: Assert that the request is enqueued properly
+        self.assertEqual(len(self.request_list._list), 1)
+        self.assertEqual(self.request_list._list[0].coro, testCoro1)
+        self.assertEqual(self.request_list._list[0]._req_ts, testRequestTs1)
+
+        # ACT
         result = self.request_list.dequeue(1)
 
+        # ASSERT
+        # NOTE: Assert that the correct request is dequeued
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], coro)
+        self.assertEqual(result[0], testCoro1)
 
-    def test_put_with_priority(self) -> None:
-        coro1 = self.mock_coro('foo')
-        coro2 = self.mock_coro('bar')
-        request_ts = dt.now().timestamp() - 100
+    def test_dequeue_with_request_ts(self) -> None:
+        # PREPARE
+        testCoro1 = self.mock_coro('foo')
+        testCoro2 = self.mock_coro('bar')
+        testRequestTs1 = dt.now().timestamp() - 100
+        testRequestTs2 = dt.now().timestamp() - 200  # earlier timestamp
 
-        self.request_list.enqueue(request_ts, coro1, priority=100)
-        self.request_list.enqueue(request_ts, coro2, priority=200)  # higher priority
+        self.request_list.enqueue(testRequestTs1, testCoro1)
+        self.request_list.enqueue(testRequestTs2, testCoro2)
 
+        # ACT
         result = self.request_list.dequeue(1)
 
+        # ASSERT
+        # NOTE: Assert that the request with the earliest timestamp is dequeued first
         self.assertEqual(len(result), 1)
-        self.assertEqual(result.pop(), coro2)
+        self.assertEqual(result[0], testCoro2)
+        remaining_item = self.request_list._list.pop()
+        # NOTE: Assert that the remaining item is the one with the later timestamp
+        self.assertEqual(remaining_item.coro, testCoro1)
+        self.assertEqual(remaining_item._req_ts, testRequestTs1)
 
-    def test_get_with_empty_list(self) -> None:
+    def test_dequeue_with_priority(self) -> None:
+        # PREPARE
+        testCoro1 = self.mock_coro('foo')
+        testCoro2 = self.mock_coro('bar')
+        testRequestTs1 = dt.now().timestamp() - 100
+        self.request_list.enqueue(testRequestTs1, testCoro1, priority=100)
+        self.request_list.enqueue(testRequestTs1, testCoro2, priority=200)  # higher priority
+
+        # ACT
         result = self.request_list.dequeue(1)
 
-        self.assertEqual(len(result), 0)
+        # ASSERT
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result.pop(), testCoro2)
 
     def test_iter(self) -> None:
+        # PREPARE
         coro1 = self.mock_coro("foo")
         coro2 = self.mock_coro("bar")
         request_ts = dt.now().timestamp()
-
         self.request_list.enqueue(request_ts, coro1)
         self.request_list.enqueue(request_ts, coro2)
 
+        # ACT
         result = list(self.request_list.iter())
 
+        # ASSERT
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0].coro, coro1)
         self.assertEqual(result[1].coro, coro2)
 
-    def test_request_item_is_elligible(self) -> None:
-        coro = self.mock_coro("foo")
-        request_ts = dt.now().timestamp() - 1
-        request_item = RequestList.RequestItem(coro, 100, request_ts)
+    def test_request_item_is_eligible(self) -> None:
+        # PREPARE
+        testCoro1 = self.mock_coro("foo")
+        testRequestTs1 = dt.now().timestamp() - 1 # Past timestamp
+        request_item = RequestList.RequestItem(testCoro1, 100, testRequestTs1)
 
-        self.assertTrue(request_item.is_elligible())
+        # ASSERT
+        self.assertTrue(request_item.is_eligible())
 
-    def test_request_item_is_not_elligible(self) -> None:
-        coro = MagicMock(spec=Coroutine)
-        request_ts = dt.now().timestamp() + 10  # Future timestamp
-        request_item = RequestList.RequestItem(coro, 100, request_ts)
+    def test_request_item_is_not_eligible(self) -> None:
+        # PREPARE
+        testCoro1 = self.mock_coro("foo")
+        testRequestTs1 = dt.now().timestamp() + 1000  # Future timestamp
+        request_item = RequestList.RequestItem(testCoro1, 100, testRequestTs1)
 
-        self.assertFalse(request_item.is_elligible())
+        # ASSERT
+        # NOTE: Assert that request item is not eligible
+        self.assertFalse(request_item.is_eligible())
 
     def test_request_item_comparison(self) -> None:
-        coro1 = self.mock_coro("foo")
-        coro2 = self.mock_coro("bar")
+        # PREPARE
+        testCoro1 = self.mock_coro("foo")
+        testCoro2 = self.mock_coro("bar")
+        request_item1 = RequestList.RequestItem(testCoro1, 100, 0)
+        request_item2 = RequestList.RequestItem(testCoro2, 200, 0)
 
-        request_item1 = RequestList.RequestItem(coro1, 100, 0)
-        request_item2 = RequestList.RequestItem(coro2, 200, 0)
-
+        # ASSERT
         self.assertLess(request_item2, request_item1)
 
     def test_request_item_equality(self) -> None:
-        coro1 = self.mock_coro("foo")
-        coro2 = self.mock_coro("foo")
+        # PREPARE
+        testCoro1 = self.mock_coro("foo")
+        testCoro2 = self.mock_coro("foo")
         request_ts = dt.now().timestamp()
+        request_item1 = RequestList.RequestItem(testCoro1, 100, request_ts)
+        request_item2 = RequestList.RequestItem(testCoro2, 100, request_ts)
 
-        request_item1 = RequestList.RequestItem(coro1, 100, request_ts)
-        request_item2 = RequestList.RequestItem(coro2, 100, request_ts)
-
+        # ASSERT
         self.assertEqual(request_item1, request_item2)
 
     def tearDown(self) -> None:
