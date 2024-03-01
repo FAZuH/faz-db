@@ -20,8 +20,7 @@ if TYPE_CHECKING:
 
 
 class ApiResponseAdapter:
-    """Converts wynncraft API responses to DB models.
-    Implements the Adapter pattern."""
+    """Adapter for converting wynncraft API responses to DB models."""
 
     class Player:
 
@@ -126,14 +125,14 @@ class ApiResponseAdapter:
         @staticmethod
         def to_player_activity_history(
             resp: OnlinePlayersResponse,
-            logged_on: set[str],
             logon_timestamps: dict[str, datetime]
         ) -> Generator[PlayerActivityHistory, None, None]:
-            return (PlayerActivityHistory(
-                            uuid.username_or_uuid,
-                            logon_timestamps[uuid.username_or_uuid],
-                            resp.headers.to_datetime()
+            return (
+                    PlayerActivityHistory(
+                            uuid.to_bytes(),  # the user's uuid
+                            logon_timestamps[uuid.username_or_uuid],  # when did the user logged on
+                            resp.headers.to_datetime()  # the response timestamp
                     )
                     for uuid in resp.body.players
-                    if (uuid.is_uuid() and uuid.username_or_uuid in logged_on)
+                    if uuid.is_uuid() is True
             )
