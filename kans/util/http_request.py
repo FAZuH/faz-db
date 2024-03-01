@@ -99,7 +99,7 @@ class HttpRequest:
         except HTTPError as e:
             if retry_on_exc:
                 if retries <= 0:
-                    raise TooManyRetries(url_param) from e
+                    raise TooManyRetries(url_param + f" ({e})")
                 return await self.get(url_param, retries - 1, retry_on_exc)
             raise
 
