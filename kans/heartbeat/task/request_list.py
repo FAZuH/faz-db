@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime as dt
+from datetime import datetime
 from threading import Lock
 from typing import TYPE_CHECKING, Any, Coroutine, Generator
 
@@ -16,7 +16,7 @@ class RequestList:
         self._lock: Lock = Lock()
 
     def dequeue(self, amount: int) -> list[Coroutine[AbstractWynnResponse[Any], Any, Any]]:
-        now: float = dt.now().timestamp()
+        now = datetime.now().timestamp()
 
         ret = []
         with self._lock:
@@ -25,7 +25,7 @@ class RequestList:
                     break
 
                 item: RequestList.RequestItem = min(self._list)
-                if item.is_elligible(now):
+                if item.is_eligible(now):
                     self._list.remove(item)
                     ret.append(item.coro)
                 else:
@@ -46,8 +46,7 @@ class RequestList:
 
     def iter(self) -> Generator[RequestItem, Any, None]:
         with self._lock:
-            for item in self._list:
-                yield item
+            yield from self._list
 
 
     class RequestItem:
@@ -62,15 +61,15 @@ class RequestList:
             self._coro = coro
             self._priority = priority
 
-        def is_elligible(self, timestamp: None | float = None) -> bool:
-            timestamp = timestamp or dt.now().timestamp()
+        def is_eligible(self, timestamp: None | float = None) -> bool:
+            timestamp = timestamp or datetime.now().timestamp()
             return self.req_ts < timestamp
 
         def __eq__(self, other: object | RequestList.RequestItem) -> bool:
             if isinstance(other, RequestList.RequestItem):
                 return (
-                    (self.coro.cr_frame.f_locals == other.coro.cr_frame.f_locals) and
-                    (self.coro.__qualname__ == other.coro.__qualname__)
+                        (self.coro.cr_frame.f_locals == other.coro.cr_frame.f_locals) and
+                        (self.coro.__qualname__ == other.coro.__qualname__)
                 )
             return False
 
