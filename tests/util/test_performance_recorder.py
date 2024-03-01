@@ -23,29 +23,12 @@ class TestPerformanceRecorder(unittest.TestCase):
         result = await wrapped_method()
         self.assertEqual(result, 42)
 
-    def test_get_data(self) -> None:
-        # PREPARE
-        testData1 = {
-            datetime(2022, 1, 1): timedelta(seconds=1),
-            datetime(2022, 1, 2): timedelta(seconds=2),
-        }
-        self.recorder._data["test_name"] = testData1
-
-        # ACT
-        data = self.recorder.get_data("test_name")
-
-        # ASSERT
-        self.assertEqual(data, {
-            datetime(2022, 1, 1): timedelta(seconds=1),
-            datetime(2022, 1, 2): timedelta(seconds=2),
-        })
-
     def test_get_average(self) -> None:
         # PREPARE
-        testData1 = {
-            datetime(2022, 1, 1): timedelta(seconds=1),
-            datetime(2022, 1, 2): timedelta(seconds=2),
-        }
+        testData1 = [
+            (datetime(2022, 1, 1), timedelta(seconds=1)),
+            (datetime(2022, 1, 2), timedelta(seconds=2)),
+        ]
         self.recorder._data["test_name"] = testData1
 
         # ACT
@@ -57,11 +40,11 @@ class TestPerformanceRecorder(unittest.TestCase):
 
     def test_get_recent(self) -> None:
         # PREPARE
-        testData1 = {
-            (datetime.now() - timedelta(days=3)): timedelta(seconds=10),
-            datetime.now(): timedelta(seconds=1),
-            datetime.now(): timedelta(seconds=1),
-        }
+        testData1 = [
+            ((datetime.now() - timedelta(days=3)), timedelta(seconds=10)),
+            (datetime.now(), timedelta(seconds=1)),
+            (datetime.now(), timedelta(seconds=1)),
+        ]
         self.recorder._data["test_name"] = testData1
 
         # ACT

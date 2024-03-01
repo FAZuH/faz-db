@@ -11,8 +11,8 @@ T = TypeVar('T')
 class PerformanceRecorder:
 
     def __init__(self) -> None:
-        self._data: dict[str, dict[datetime, timedelta]] = {}
-        """{name: {callDatetime: dallDuration}}"""
+        self._data: dict[str, list[tuple[datetime, timedelta]]] = {}
+        """{name: [(callDatetime: dallDuration)]}"""
         self._lock = Lock()
 
         self._MAX_CACHE = 1_000
@@ -20,31 +20,28 @@ class PerformanceRecorder:
 
     def listen_async(self, method: Callable[P, Awaitable[T]], name: str) -> Callable[P, Coroutine[Any, Any, T]]:
         """Decorator to record the duration of an async method. The duration will be recorded in `timedelta`."""
-        self._data[name] = {}
+        self._data[name] = []
         @wraps(method)
         async def wrapped(*args: P.args, **kwargs: P.kwargs) -> T:
             t1 = perf_counter()
             res = await method(*args, **kwargs)
+            td = timedelta(seconds=perf_counter() - t1)
+            now = datetime.now()
             with self._lock:
-                self._data[name][datetime.now()] = timedelta(seconds=perf_counter() - t1)
-                if len(self._data[name]) > self._MAX_CACHE:
-                    # KeyError won't happen here
-                    self._data[name].pop(min(self._data[name]))
+                list_ = self._data[name]  # get reference
+                list_.append((now, td))
+                if len(list_) > self._MAX_CACHE:
+                    # NOTE: List is ordered by oldest to newest. list.pop(0) removes the oldest data
+                    list_.pop(0)
             return res
         return wrapped
-
-    def get_data(self, name: str) -> dict[datetime, timedelta]:
-        with self._lock:
-            if name in self._data:
-                return self._data[name].copy()
-            else:
-                return {}
 
     def get_average(self, name: str) -> float:
         """Get average duration of calls in seconds. If no data, return 0."""
         with self._lock:
             if name in self._data and len(self._data[name]) > 0:
-                return sum((e.seconds for e in self._data[name].values())) / len(self._data[name])
+                sum_duration_s = sum(item[1].total_seconds() for item in self._data[name])
+                return sum_duration_s / len(self._data[name])
             else:
                 return 0
 
@@ -53,6 +50,6 @@ class PerformanceRecorder:
         with self._lock:
             if name in self._data:
                 now = datetime.now()
-                return [call_duration for call_dt, call_duration in self._data[name].items() if (now - call_dt) < timedelta]
+                return [item[1] for item in self._data[name] if (now - item[0]) < timedelta]
             else:
                 return []
