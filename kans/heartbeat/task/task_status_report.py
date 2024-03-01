@@ -86,34 +86,26 @@ class TaskStatusReport(Task):
             "```yaml"\
             "\n."\
             "\n├── Kans Stats/"\
-            "\n│   ├── Runtime: {}"\
-            "\n│   └── RAM: {}"\
+            "\n│   ├── Runtime : {}"\
+            "\n│   └── RAM     : {}"\
             "\n├── Tasks/"\
-            "\n│   ├── ApiRequest Latest: {}"\
-            "\n│   ├── DbInsert Latest: {}"\
-            "\n│   ├── StatusReport Latest: {}"\
+            "\n│   ├── ApiRequest Latest   : {}"\
+            "\n│   ├── DbInsert Latest     : {}"\
+            "\n│   ├── StatusReport Latest : {}"\
             "\n│   └── RequestList/"\
-            "\n│       ├── Queued/"\
-            "\n│       │   ├── PlayerStat: {}"\
-            "\n│       │   ├── OnlinePlayers: {}"\
-            "\n│       │   └── GuildStat: {}"\
-            "\n│       ├── Eligible/"\
-            "\n│       │   ├── PlayerStat: {}"\
-            "\n│       │   ├── OnlinePlayers: {}"\
-            "\n│       │   └── GuildStat: {}"\
-            "\n│       └── Running/"\
-            "\n│           ├── PlayerStat: {}"\
-            "\n│           ├── OnlinePlayers: {}"\
-            "\n│           └── GuildStat: {}"\
+            "\n│       └── [Queued | Eligible | Running]/"\
+            "\n│           ├── PlayerStat    : [ {:<4} | {:<4} | {:<4} ]"\
+            "\n│           ├── OnlinePlayers : [ {:<4} | {:<4} | {:<4} ]"\
+            "\n│           └── GuildStat     : [ {:<4} | {:<4} | {:<4} ]"\
             "\n├── Db Stats/"\
-            "\n│   └── Size: {}"\
+            "\n│   └── Size : {}"\
             "\n├── Api Stats/"\
-            "\n│   ├── Ratelimit: {}"\
-            "\n│   ├── Online Player: {}"\
-            "\n│   └── Online Guild: {}"\
+            "\n│   ├── Ratelimit     : {}"\
+            "\n│   ├── Online Player : {}"\
+            "\n│   └── Online Guild  : {}"\
             "\n└── System Stats/"\
-            "\n    ├── OS: {}"\
-            "\n    └── Uptime: {}"\
+            "\n    ├── OS     : {}"\
+            "\n    └── Uptime : {}"\
             "\n```"
 
     # TODO: unique count of request types on RequestList
@@ -145,22 +137,25 @@ class TaskStatusReport(Task):
             index = match_qualname.get(coro.__qualname__, 3)
             unique_request_list["running"][index] += 1
 
+        DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
         msg = self._DEFAULT_MSG.format(
                 now - self._start_time,  # runtime
-                self.Util.get_memory_usage() / self.Util.MB_TO_BYTE,  # ram
+                f"{self.Util.get_memory_usage() / self.Util.MB_TO_BYTE} MB",  # ram
 
-                self._api_request.latest_run,  # api request latest
-                self._db_insert.latest_run,  # db insert latest
-                self._latest_run,  # status report latest
+                self._api_request.latest_run.strftime(DATETIME_FORMAT),  # api request latest
+                self._db_insert.latest_run.strftime(DATETIME_FORMAT),  # db insert latest
+                self._latest_run.strftime(DATETIME_FORMAT),  # status report latest
 
                 unique_request_list["queued"][0],  # queued player stat
-                unique_request_list["queued"][1],  # queued online players
-                unique_request_list["queued"][2],  # queued guild stat
                 unique_request_list["eligible"][0],  # eligible player stat
-                unique_request_list["eligible"][1],  # eligible online players
-                unique_request_list["eligible"][2],  # eligible guild stat
                 unique_request_list["running"][0],  # running player stat
+
+                unique_request_list["queued"][1],  # queued online players
+                unique_request_list["eligible"][1],  # eligible online players
                 unique_request_list["running"][1],  # running online players
+
+                unique_request_list["queued"][2],  # queued guild stat
+                unique_request_list["eligible"][2],  # eligible guild stat
                 unique_request_list["running"][2],  # running guild stat
 
                 f"{await self._db.total_size() / self.Util.MB_TO_BYTE} MB",  # db size
