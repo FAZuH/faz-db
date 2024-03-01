@@ -228,7 +228,7 @@ class TaskDbInsert(Task):
                     continue
 
                 self._request_list.enqueue(
-                        resp.headers.expires.to_datetime().timestamp() + 480,  # due to ratelimit
+                        resp.headers.expires.to_datetime().timestamp(),  # due to ratelimit
                         self._api.player.get_full_stats(resp.body.uuid.uuid)
                 )
 
