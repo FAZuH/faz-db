@@ -108,7 +108,6 @@ class TaskStatusReport(Task):
             "\n│   ├── Avg Guild Req Duration         : {:.2f}"
             "\n│   ├── Avg OnlinePlayers Req Duration : {:.2f}"
             "\n│   ├── Avg Player Req Duration        : {:.2f}"
-            "\n│   ├── Avg All Req Duration          : {:.2f}"
             "\n│   ├── Guild Reqs Within 5m         : {}"
             "\n│   ├── OnlinePlayers Reqs Within 5m : {}"
             "\n│   ├── Player Reqs Within 5m        : {}"
@@ -154,7 +153,6 @@ class TaskStatusReport(Task):
         avg_guild_req_duration = self._api.performance_recorder.get_average("guild.get")
         avg_onlineplayers_req_duration = self._api.performance_recorder.get_average("player.get_online_uuids")
         avg_player_req_duration = self._api.performance_recorder.get_average("player.get_full_stats")
-        avg_req_duration = (avg_guild_req_duration + avg_onlineplayers_req_duration + avg_player_req_duration) / 3
 
         recent_guild_reqs = len(self._api.performance_recorder.get_recent(timedelta(minutes=5), "guild.get"))
         recent_onlineplayers_reqs = len(self._api.performance_recorder.get_recent(timedelta(minutes=5), "player.get_online_uuids"))
@@ -190,7 +188,6 @@ class TaskStatusReport(Task):
                 avg_guild_req_duration,  # avg guild req duration
                 avg_onlineplayers_req_duration,  # avg onlineplayers req duration
                 avg_player_req_duration,  # avg player req duration
-                avg_req_duration,  # avg req duration
 
                 recent_guild_reqs,  # n amount of recent guild reqs
                 recent_onlineplayers_reqs,  # n amount of recent onlineplayers reqs
