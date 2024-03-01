@@ -239,7 +239,7 @@ class TaskDbInsert(Task):
 
                 self._request_list.enqueue(
                         resp.headers.expires.to_datetime().timestamp(),
-                        self._api.guild.get(resp.body.uuid.uuid)
+                        self._api.guild.get(resp.body.name)
                 )
 
         @property
