@@ -108,6 +108,7 @@ class TaskStatusReport(Task):
             "\n│   ├── Avg Guild Req Duration         : {:.2f}"
             "\n│   ├── Avg OnlinePlayers Req Duration : {:.2f}"
             "\n│   ├── Avg Player Req Duration        : {:.2f}"
+            "\n│   ├── Avg All Req Duration          : {:.2f}"
             "\n│   ├── Guild Reqs Within 5m         : {}"
             "\n│   ├── OnlinePlayers Reqs Within 5m : {}"
             "\n│   ├── Player Reqs Within 5m        : {}"
