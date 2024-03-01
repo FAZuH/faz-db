@@ -262,10 +262,10 @@ class TestResponseHandler(unittest.TestCase):
     # GuildResponse
     def test_requeue_guild(self) -> None:
         # PREPARE
-        testGuildUuid1 = "guild0"
+        testName1 = "guild0"
         testResp1 = MagicMock()
         testResp2 = MagicMock()  # continued
-        testResp1.body.uuid.uuid = testGuildUuid1
+        testResp1.body.name = testName1
         testResp1.body.members.get_online_members.return_value = 1
         testResp1.headers.expires.to_datetime().timestamp.return_value = 69
         testResp2.body.members.get_online_members.return_value = 0
@@ -275,6 +275,6 @@ class TestResponseHandler(unittest.TestCase):
 
         # ASSERT
         # NOTE: Assert that self._api.guild.get() is called with the correct arguments
-        self._api.guild.get.assert_called_once_with(testGuildUuid1)
+        self._api.guild.get.assert_called_once_with(testName1)
         # NOTE: Assert that enqueue is called with the correct arguments.
         self.__request_list.enqueue.assert_called_once_with(69, self._api.guild.get())
