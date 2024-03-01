@@ -40,7 +40,7 @@ class TaskDbInsert(Task):
 
     def setup(self) -> None:
         self._event_loop.run_until_complete(self._db.create_all())
-        self._request_list.enqueue(0, self._api.player.get_online_uuids())
+        self._request_list.enqueue(0, self._api.player.get_online_uuids(), priority=500)
 
     def teardown(self) -> None: ...
 
@@ -154,6 +154,7 @@ class TaskDbInsert(Task):
             self._enqueue_player()
 
         def handle_player_response(self, resps: Iterable[PlayerResponse]) -> None:
+            self._process_player_response(resps)
             self._requeue_player(resps)
             self._enqueue_guild()
 
@@ -182,7 +183,7 @@ class TaskDbInsert(Task):
             self._request_list.enqueue(
                     resp.headers.expires.to_datetime().timestamp(),
                     self._api.player.get_online_uuids(),
-                    priority=0
+                    priority=500
             )
 
         # PlayerResponse
@@ -239,7 +240,7 @@ class TaskDbInsert(Task):
 
                 self._request_list.enqueue(
                         resp.headers.expires.to_datetime().timestamp(),
-                        self._api.guild.get(resp.body.name)
+                        self._api.guild.get(resp.body.uuid.uuid)
                 )
 
         @property
