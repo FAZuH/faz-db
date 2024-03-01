@@ -1,6 +1,6 @@
 from __future__ import annotations
 import asyncio
-from datetime import datetime as dt
+from datetime import datetime
 import platform
 import psutil
 from typing import TYPE_CHECKING
@@ -38,7 +38,7 @@ class TaskStatusReport(Task):
         self._request_list = request_list
 
         self._event_loop = asyncio.new_event_loop()
-        self._latest_run = self._start_time = dt.now()
+        self._latest_run = self._start_time = datetime.now()
         self._message_id: None | int = None
         self._url = config["STATUS_REPORT_WEBHOOK"]
 
@@ -49,7 +49,7 @@ class TaskStatusReport(Task):
 
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
-        self._latest_run = dt.now()
+        self._latest_run = datetime.now()
 
     async def async_setup(self):
         async with ClientSession() as s:
@@ -112,7 +112,7 @@ class TaskStatusReport(Task):
     # TODO: average requests per minute
     # TODO: clean code
     async def _get_report(self) -> str:
-        now = dt.now()
+        now = datetime.now()
         now_ts = now.timestamp()
 
         unique_request_list = {
@@ -190,8 +190,8 @@ class TaskStatusReport(Task):
         @staticmethod
         def get_os_uptime() -> timedelta:
             uptime_seconds = psutil.boot_time()
-            uptime_datetime = dt.fromtimestamp(uptime_seconds)
-            return dt.now() - uptime_datetime
+            uptime_datetime = datetime.fromtimestamp(uptime_seconds)
+            return datetime.now() - uptime_datetime
 
     @property
     def first_delay(self) -> float:
@@ -202,7 +202,7 @@ class TaskStatusReport(Task):
         return 5.0
 
     @property
-    def latest_run(self) -> dt:
+    def latest_run(self) -> datetime:
         return self._latest_run
 
     @property

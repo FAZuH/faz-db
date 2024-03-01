@@ -1,4 +1,4 @@
-from datetime import datetime as dt
+from datetime import datetime
 
 
 class DateField:
@@ -10,8 +10,8 @@ class DateField:
     def __str__(self) -> str:
         return self.datestr
 
-    def to_datetime(self) -> dt:
-        return dt.strptime(self.datestr, self.datefmt)
+    def to_datetime(self) -> datetime:
+        return datetime.strptime(self.datestr, self.datefmt)
 
     @property
     def datestr(self) -> str:

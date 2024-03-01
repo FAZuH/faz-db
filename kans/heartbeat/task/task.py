@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
+    from datetime import datetime
 
 
 class Task(Protocol):
@@ -15,6 +15,6 @@ class Task(Protocol):
     @property
     def interval(self) -> float: ...
     @property
-    def latest_run(self) -> dt: ...
+    def latest_run(self) -> datetime: ...
     @property
     def name(self) -> str: ...

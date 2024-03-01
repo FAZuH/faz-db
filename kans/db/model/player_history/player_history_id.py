@@ -4,17 +4,17 @@ from typing import TYPE_CHECKING, TypedDict
 from .. import DateColumn, UuidColumn
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
+    from datetime import datetime
 
 class PlayerHistoryId:
 
-    def __init__(self, uuid: bytes | UuidColumn, datetime: dt | DateColumn) -> None:
+    def __init__(self, uuid: bytes | UuidColumn, datetime: datetime | DateColumn) -> None:
         self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
 
     class IdType(TypedDict):
         uuid: bytes
-        datetime: dt
+        datetime: datetime
 
     @property
     def uuid(self) -> UuidColumn:

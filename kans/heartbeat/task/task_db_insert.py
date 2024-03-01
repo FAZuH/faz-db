@@ -1,6 +1,6 @@
 from __future__ import annotations
 import asyncio
-from datetime import datetime as dt
+from datetime import datetime
 from typing import TYPE_CHECKING, Iterable
 
 from .task import Task
@@ -9,7 +9,6 @@ from kans.db.model import KansUptime
 from kans.util import ApiResponseAdapter
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from loguru import Logger
     from . import RequestList, ResponseList
     from kans import Api, Database
@@ -31,10 +30,10 @@ class TaskDbInsert(Task):
         self._db = db
         self._request_list = request_list
         self._response_list = response_list
-        self._start_time = dt.now()
+        self._start_time = datetime.now()
 
         self._event_loop = asyncio.new_event_loop()
-        self._latest_run = dt.now()
+        self._latest_run = datetime.now()
         self._response_adapter = ApiResponseAdapter()
         self._response_handler = self._ResponseHandler(self._api, self._request_list)
 
@@ -46,10 +45,10 @@ class TaskDbInsert(Task):
 
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
-        self._latest_run = dt.now()
+        self._latest_run = datetime.now()
 
     async def _run(self) -> None:
-        await self._db.kans_uptime_repository.insert((KansUptime(self._start_time, dt.now()),))
+        await self._db.kans_uptime_repository.insert((KansUptime(self._start_time, datetime.now()),))
 
         online_players_resp: None | OnlinePlayersResponse = None
         player_resps: list[PlayerResponse] = []
@@ -126,7 +125,7 @@ class TaskDbInsert(Task):
         return 5.0
 
     @property
-    def latest_run(self) -> dt:
+    def latest_run(self) -> datetime:
         return self._latest_run
 
     @property
@@ -142,7 +141,7 @@ class TaskDbInsert(Task):
             self._request_list = request_list
 
             self._online_guilds: dict[str, set[str]] = {}
-            self._online_players: dict[str, dt] = {}
+            self._online_players: dict[str, datetime] = {}
             self._logged_on_guilds: set[str] = set()
             self._logged_on_players: set[str] = set()
 
@@ -254,7 +253,7 @@ class TaskDbInsert(Task):
             return self._logged_on_players
 
         @property
-        def online_players(self) -> dict[str, dt]:
+        def online_players(self) -> dict[str, datetime]:
             """Dict of online players' uuids, paired with their logged on timestamp."""
             return self._online_players
 

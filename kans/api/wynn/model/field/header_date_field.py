@@ -1,4 +1,4 @@
-from datetime import datetime as dt
+from datetime import datetime
 from dateutil import parser
 
 from . import DateField
@@ -11,5 +11,5 @@ class HeaderDateField(DateField):
     def __init__(self, datestr: str) -> None:
         super().__init__(datestr, self.HEADERS_DATEFMT)
 
-    def to_datetime(self) -> dt:
+    def to_datetime(self) -> datetime:
         return parser.parse(self.datestr)

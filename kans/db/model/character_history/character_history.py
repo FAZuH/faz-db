@@ -5,7 +5,7 @@ from . import CharacterHistoryId
 from .. import GamemodeColumn
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
+    from datetime import datetime
     from decimal import Decimal
     from .. import DateColumn, UuidColumn
 
@@ -41,7 +41,7 @@ class CharacterHistory(CharacterHistoryId):
         dungeon_completions: int,
         quest_completions: int,
         raid_completions: int,
-        datetime: dt | DateColumn,
+        datetime: datetime | DateColumn,
     ) -> None:
         super().__init__(character_uuid, datetime)
         self._level = level
@@ -97,7 +97,7 @@ class CharacterHistory(CharacterHistoryId):
         dungeon_completions: int
         quest_completions: int
         raid_completions: int
-        datetime: dt
+        datetime: datetime
 
     @property
     def level(self) -> int:

@@ -1,5 +1,5 @@
-from datetime import datetime as dt
-from datetime import timedelta as td
+from datetime import datetime
+from datetime import timedelta
 from typing import Any
 
 from .field import HeaderDateField
@@ -16,15 +16,15 @@ class Headers:
         self._ratelimit_remaining: str = raw["RateLimit-Remaining"]
         self._ratelimit_reset: str = raw["RateLimit-Reset"]
 
-    def to_datetime(self) -> dt:
+    def to_datetime(self) -> datetime:
         """
         Get the timestamp of the response.
 
         Returns:
-            dt: The timestamp of the response.
+            datetime: The timestamp of the response.
         """
-        expiry_date: dt = self.expires.to_datetime()
-        cache_control: td = td(seconds=int(self.cache_control.split("=")[1]))
+        expiry_date: datetime = self.expires.to_datetime()
+        cache_control: timedelta = timedelta(seconds=int(self.cache_control.split("=")[1]))
         return expiry_date - cache_control
 
     @property

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import asyncio
-from datetime import datetime as dt
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from . import Task
@@ -24,7 +24,7 @@ class TaskApiRequest(Task):
         self._response_list = response_list
 
         self._event_loop = asyncio.new_event_loop()
-        self._latest_run = dt.now()
+        self._latest_run = datetime.now()
         self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
 
     def setup(self) -> None:
@@ -37,7 +37,7 @@ class TaskApiRequest(Task):
 
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
-        self._latest_run = dt.now()
+        self._latest_run = datetime.now()
 
     async def _run(self) -> None:
         await self._check_api_session()
@@ -95,7 +95,7 @@ class TaskApiRequest(Task):
         return 5.0
 
     @property
-    def latest_run(self) -> dt:
+    def latest_run(self) -> datetime:
         return self._latest_run
 
     @property

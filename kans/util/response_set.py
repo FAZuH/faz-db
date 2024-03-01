@@ -1,6 +1,6 @@
 from typing import Generic, TypeVar
 
-from datetime import datetime as dt
+from datetime import datetime
 
 B = TypeVar('B')
 H = TypeVar('H')
@@ -12,14 +12,14 @@ class ResponseSet(Generic[B, H]):
     def __init__(self, body: B, headers: H) -> None:
         self._body: B = body
         self._headers: H = headers
-        self._creation_datetime: dt = dt.now()
+        self._creation_datetime: datetime = datetime.now()
 
     @property
     def body(self) -> B:
         return self._body
 
     @property
-    def creation_datetime(self) -> dt:
+    def creation_datetime(self) -> datetime:
         return self._creation_datetime
 
     @property
