@@ -83,7 +83,7 @@ class RequestList:
             # NOTE: If the priority value is different, the item with the higher priority is chosen.
             # Else, the item with the lower request timestamp is chosen.
             if self.priority != other.priority:
-                return self.priority < other.priority
+                return self.priority > other.priority
             else:
                 return self.req_ts < other.req_ts
 
