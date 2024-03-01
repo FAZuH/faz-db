@@ -256,7 +256,7 @@ class TestResponseHandler(unittest.TestCase):
         # NOTE: Assert that self._api.player.get_online_uuids() is called with the correct arguments
         self._api.player.get_full_stats.assert_called_once()
         # NOTE: Assert that enqueue is called with the correct arguments.
-        self.__request_list.enqueue.assert_called_once_with(69 + 480, self._api.player.get_full_stats())
+        self.__request_list.enqueue.assert_called_once_with(69, self._api.player.get_full_stats())
 
 
     # GuildResponse
