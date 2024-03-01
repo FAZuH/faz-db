@@ -26,8 +26,7 @@ class Guild:
         }
 
     def iter_seasonranks(self) -> Generator[tuple[str, Guild.SeasonRankInfo], Any, None]:
-        for rank, season_rank_info in self.season_ranks.items():
-            yield rank, season_rank_info
+        yield from self.season_ranks.items()
 
     class Members:
         def __init__(self, node: dict[str, Any]) -> None:

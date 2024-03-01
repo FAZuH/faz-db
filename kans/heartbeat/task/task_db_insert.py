@@ -54,8 +54,6 @@ class TaskDbInsert(Task):
         online_players_resp: None | OnlinePlayersResponse = None
         player_resps: list[PlayerResponse] = []
         guild_resps: list[GuildResponse] = []
-        # NOTE: make sure player response is handled after onlineplayers response.
-        # _OnlineGuildManager needs _OnlinePlayersManager.prev_online_uuids to be updated first.
         for resp in self._response_list.get():
             if isinstance(resp, PlayerResponse):
                 player_resps.append(resp)
@@ -64,23 +62,27 @@ class TaskDbInsert(Task):
             elif isinstance(resp, GuildResponse):
                 guild_resps.append(resp)
 
+        # NOTE: Make sure responses are handled first before inserting.
+        # NOTE: Insert online players requires the most recent response_handler.online_players data.
+        self._response_handler.handle_onlineplayers_response(online_players_resp)
+        self._response_handler.handle_player_response(player_resps)
+        self._response_handler.handle_guild_response(guild_resps)
+
         if online_players_resp is not None:
-            self._response_handler.handle_onlineplayers_response(online_players_resp)
             await self._insert_online_players_response(online_players_resp)
         if player_resps:
-            self._response_handler.handle_player_response(player_resps)
             await self._insert_player_responses(player_resps)
         if guild_resps:
-            self._response_handler.handle_guild_response(guild_resps)
             await self._insert_guild_response(guild_resps)
 
     async def _insert_online_players_response(self, resp: OnlinePlayersResponse) -> None:
         await self._db.online_players_repository.insert(self._response_adapter.OnlinePlayers.to_online_players(resp))
-        await self._db.player_activity_history_repository.insert(self._response_adapter.OnlinePlayers.to_player_activity_history(
-                resp,
-                self._response_handler.logged_on_players,
-                self._response_handler.online_players
-        ))
+        await self._db.player_activity_history_repository.insert(
+                self._response_adapter.OnlinePlayers.to_player_activity_history(
+                        resp,
+                        self._response_handler.online_players
+                )
+        )
 
     async def _insert_player_responses(self, resps: list[PlayerResponse]) -> None:
         character_history = []
@@ -133,6 +135,7 @@ class TaskDbInsert(Task):
 
 
     class _ResponseHandler:
+        """Handles Wynncraft response processing, queueing, and requeuing."""
 
         def __init__(self, api: Api, request_list: RequestList) -> None:
             self._api = api
@@ -143,7 +146,9 @@ class TaskDbInsert(Task):
             self._logged_on_guilds: set[str] = set()
             self._logged_on_players: set[str] = set()
 
-        def handle_onlineplayers_response(self, resp: OnlinePlayersResponse) -> None:
+        def handle_onlineplayers_response(self, resp: None | OnlinePlayersResponse) -> None:
+            if resp is None:
+                return
             self._process_onlineplayers_response(resp)
             self._enqueue_player()
             self._requeue_onlineplayers(resp)
