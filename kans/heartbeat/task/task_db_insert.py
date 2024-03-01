@@ -150,8 +150,8 @@ class TaskDbInsert(Task):
             if resp is None:
                 return
             self._process_onlineplayers_response(resp)
-            self._enqueue_player()
             self._requeue_onlineplayers(resp)
+            self._enqueue_player()
 
         def handle_player_response(self, resps: Iterable[PlayerResponse]) -> None:
             self._requeue_player(resps)
