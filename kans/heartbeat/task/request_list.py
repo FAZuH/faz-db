@@ -76,7 +76,7 @@ class RequestList:
         def __lt__(self, other: RequestList.RequestItem) -> bool:
             """For min() function."""
             # NOTE: priority check is used to prioritize online uuids request
-            return (self.priority > other.priority) or (self.req_ts < other.req_ts)
+            return (self.priority > other.priority) if self.priority != other.priority else (self.req_ts < other.req_ts)
 
         @property
         def req_ts(self) -> float:
