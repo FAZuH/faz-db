@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from aiohttp import ClientSession, ClientTimeout
 
+from . import ResponseSet
 from kans import (
     BadRequest,
     Forbidden,
@@ -15,11 +16,10 @@ from kans import (
     Unauthorized,
     KansError
 )
-from kans.util import ResponseSet
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
-    from kans.util import Ratelimit
+    from . import RatelimitHandler
 
 
 class HttpRequest:
@@ -29,14 +29,14 @@ class HttpRequest:
         base_url: str,
         api_key: None | str = None,
         headers: dict[str, Any] = {},
-        ratelimit: None | Ratelimit = None,
+        ratelimit: None | RatelimitHandler = None,
         timeout: int = 120
     ) -> None:
-        self._api_key: None | str = api_key
-        self._base_url: str = base_url
-        self._ratelimit: None | Ratelimit = ratelimit
-        self._headers: dict[str, str] = headers
-        self._timeout: int = timeout
+        self._api_key = api_key
+        self._base_url = base_url
+        self._ratelimit = ratelimit
+        self._headers = headers
+        self._timeout = timeout
 
         if self._api_key is not None:
             self._headers["apikey"] = self._api_key

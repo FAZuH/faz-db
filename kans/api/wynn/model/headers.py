@@ -12,9 +12,9 @@ class Headers:
         self._cache_control: str = raw["Cache-Control"]
         self._date: HeaderDateField = HeaderDateField(raw["Date"])
         self._expires: HeaderDateField = HeaderDateField(raw["Expires"])
-        self._ratelimit_limit: str = raw["RateLimit-Limit"]
-        self._ratelimit_remaining: str = raw["RateLimit-Remaining"]
-        self._ratelimit_reset: str = raw["RateLimit-Reset"]
+        self._ratelimit_limit: int = raw["RateLimit-Limit"]
+        self._ratelimit_remaining: int = raw["RateLimit-Remaining"]
+        self._ratelimit_reset: int = raw["RateLimit-Reset"]
 
     def to_datetime(self) -> datetime:
         """
@@ -44,13 +44,13 @@ class Headers:
         return self._expires
 
     @property
-    def ratelimit_limit(self) -> str:
+    def ratelimit_limit(self) -> int:
         return self._ratelimit_limit
 
     @property
-    def ratelimit_remaining(self) -> str:
+    def ratelimit_remaining(self) -> int:
         return self._ratelimit_remaining
 
     @property
-    def ratelimit_reset(self) -> str:
+    def ratelimit_reset(self) -> int:
         return self._ratelimit_reset

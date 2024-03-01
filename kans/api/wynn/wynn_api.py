@@ -1,20 +1,21 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
-from . import Api
+from . import Api, WynnRatelimitHandler
 from .endpoint import GuildEndpoint, PlayerEndpoint
 from kans import __version__
-from kans.util import HttpRequest, PerformanceRecorder, Ratelimit
+from kans.util import HttpRequest, PerformanceRecorder
 
 if TYPE_CHECKING:
     from loguru import Logger
+    from kans.util import RatelimitHandler
 
 
 class WynnApi(Api):
 
     def __init__(self, logger: Logger) -> None:
         self._perf = PerformanceRecorder()
-        self._ratelimit = Ratelimit(180, 60, logger)
+        self._ratelimit = WynnRatelimitHandler(5, 180, logger)
         self._request: HttpRequest = HttpRequest(
                 "https://api.wynncraft.com",
                 ratelimit=self._ratelimit,
@@ -49,7 +50,7 @@ class WynnApi(Api):
         return self._perf
 
     @property
-    def ratelimit(self) -> Ratelimit:
+    def ratelimit(self) -> RatelimitHandler:
         return self._ratelimit
 
     @property
