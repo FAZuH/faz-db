@@ -9,8 +9,8 @@ if TYPE_CHECKING:
 
 class PlayerActivityHistoryId:
 
-    def __init__(self, uuid: str | UuidColumn, logon_datetime: datetime | DateColumn) -> None:
-        self._uuid: UuidColumn = uuid if isinstance(uuid, UuidColumn) else UuidColumn.from_str(uuid)
+    def __init__(self, uuid: bytes | UuidColumn, logon_datetime: datetime | DateColumn) -> None:
+        self._uuid: UuidColumn = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._logon_datetime = logon_datetime if isinstance(logon_datetime, DateColumn) else DateColumn(logon_datetime)
 
     class IdType(TypedDict):

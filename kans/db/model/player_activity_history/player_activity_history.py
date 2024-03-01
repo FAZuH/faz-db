@@ -17,7 +17,7 @@ class PlayerActivityHistory(PlayerActivityHistoryId):
 
     def __init__(
         self,
-        uuid: str | UuidColumn,
+        uuid: bytes | UuidColumn,
         logon_datetime: datetime | DateColumn,
         logoff_datetime: datetime | DateColumn
     ) -> None:
