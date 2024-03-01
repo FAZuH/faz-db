@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class TaskApiRequest(Task):
     """implements `TaskBase`"""
 
-    _CONCURRENT_REQUESTS = 50
+    _CONCURRENT_REQUESTS = 15
 
     def __init__(self, logger: Logger, api: Api, request_list: RequestList, response_list: ResponseList) -> None:
         self._logger = logger
@@ -34,6 +34,8 @@ class TaskApiRequest(Task):
     def teardown(self) -> None:
         self._logger.debug(f"Tearing down {self.name}")
         self._event_loop.run_until_complete(self._api.close())
+        for req in self._running_requests:
+            req.cancel()
 
     def run(self) -> None:
         self._event_loop.run_until_complete(self._run())
@@ -41,7 +43,7 @@ class TaskApiRequest(Task):
 
     async def _run(self) -> None:
         await self._check_api_session()
-        await self._start_requests()
+        self._start_requests()
         self._check_responses()
 
     async def _check_api_session(self) -> None:
@@ -49,14 +51,15 @@ class TaskApiRequest(Task):
             self._logger.warning("HTTP session is closed. Reopening...")
             await self._api.start()
 
-    async def _start_requests(self) -> None:
+    def _start_requests(self) -> None:
         # NOTE: This prevents being ratelimited,
-        # since self._running_request won't be decreasing
-        running_req_len = len(self._running_requests)
-        if running_req_len < self._CONCURRENT_REQUESTS:
+        # since requests won't be finishing when the client is ratelimited
+        running_req_amount = len(self._running_requests)
+        if running_req_amount < self._CONCURRENT_REQUESTS:
             self._running_requests.extend(
                     self._event_loop.create_task(req)
-                    for req in self._request_list.dequeue(self._CONCURRENT_REQUESTS - running_req_len)
+                    # fill the event loop with eligible requests once there's slots open
+                    for req in self._request_list.dequeue(self._CONCURRENT_REQUESTS - running_req_amount)
             )
 
     def _check_responses(self) -> None:
@@ -79,8 +82,9 @@ class TaskApiRequest(Task):
         for task in tasks_to_remove:
             self._running_requests.remove(task)
 
-        self._logger.debug(f"{len(ok_results)} responses from API")
-        self._response_list.put(ok_results)
+        if len(ok_results) > 0:
+            self._logger.debug(f"{len(ok_results)} responses from API")
+            self._response_list.put(ok_results)
 
     @property
     def running_requests(self) -> list[asyncio.Task[AbstractWynnResponse[Any]]]:
@@ -92,7 +96,7 @@ class TaskApiRequest(Task):
 
     @property
     def interval(self) -> float:
-        return 5.0
+        return 1.0
 
     @property
     def latest_run(self) -> datetime:
