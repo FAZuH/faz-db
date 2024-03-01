@@ -137,7 +137,7 @@ class TaskStatusReport(Task):
         for req in self._request_list.iter():
             index = match_qualname.get(req.coro.__qualname__, 3)
             unique_request_list["queued"][index] += 1
-            if req.is_elligible(now_ts):
+            if req.is_eligible(now_ts):
                 unique_request_list["eligible"][index] += 1
 
         for req in self._api_request.running_requests.copy():

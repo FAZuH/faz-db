@@ -42,7 +42,7 @@ class HttpRequest:
             self._headers["apikey"] = self._api_key
         self._session: None | ClientSession = None
 
-    def start(self) -> None:
+    async def start(self) -> None:
         self._session = ClientSession(self._base_url, headers=self._headers, timeout=ClientTimeout(self._timeout))
 
     async def close(self) -> None:
@@ -55,9 +55,8 @@ class HttpRequest:
             retries: int = -69,
             retry_on_exc: bool = False
         ) -> ResponseSet[Any, Any]:
-        if retry_on_exc:
-            if retries == -69:
-                raise ValueError("Retries must be set if retry_on_exc is True")
+        if retry_on_exc and retries == -69:
+            raise ValueError("Retries must be set if retry_on_exc is True")
 
         if self._session is None or self._session.closed:
             raise KansError("Session is not open")
@@ -97,10 +96,10 @@ class HttpRequest:
                 await asyncio.sleep(60)
             return await self.get(url_param, retries, retry_on_exc)
 
-        except HTTPError:
-            if retry_on_exc is True:
+        except HTTPError as e:
+            if retry_on_exc:
                 if retries <= 0:
-                    raise TooManyRetries(url_param)
+                    raise TooManyRetries(url_param) from e
                 return await self.get(url_param, retries - 1, retry_on_exc)
             raise
 
@@ -108,7 +107,7 @@ class HttpRequest:
         return self._session is not None and not self._session.closed
 
     async def __aenter__(self) -> HttpRequest:
-        self.start()
+        await self.start()
         return self
 
     async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
