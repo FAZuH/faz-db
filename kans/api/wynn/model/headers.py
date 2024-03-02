@@ -8,13 +8,13 @@ from .field import HeaderDateField
 class Headers:
 
     def __init__(self, raw: dict[str, Any]) -> None:
-        self._raw: dict[str, Any] = raw
-        self._cache_control: str = raw["Cache-Control"]
-        self._date: HeaderDateField = HeaderDateField(raw["Date"])
-        self._expires: HeaderDateField = HeaderDateField(raw["Expires"])
-        self._ratelimit_limit: int = raw["RateLimit-Limit"]
-        self._ratelimit_remaining: int = raw["RateLimit-Remaining"]
-        self._ratelimit_reset: int = raw["RateLimit-Reset"]
+        self._raw = raw
+        self._cache_control = raw["Cache-Control"]
+        self._date = HeaderDateField(raw["Date"])
+        self._expires = HeaderDateField(raw["Expires"])
+        self._ratelimit_limit = int(raw["RateLimit-Limit"])
+        self._ratelimit_remaining = int(raw["RateLimit-Remaining"])
+        self._ratelimit_reset = int(raw["RateLimit-Reset"])
 
     def to_datetime(self) -> datetime:
         """
