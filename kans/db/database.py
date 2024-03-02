@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from loguru import Logger
     from . import DatabaseQuery
     from .repository import (
         CharacterInfoRepository,
@@ -17,6 +16,7 @@ if TYPE_CHECKING:
         PlayerInfoRepository,
         PlayerHistoryRepository,
     )
+    from kans import Logger
 
 
 class Database(Protocol):

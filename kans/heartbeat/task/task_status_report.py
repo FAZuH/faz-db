@@ -11,9 +11,8 @@ import discord
 from . import Task
 
 if TYPE_CHECKING:
-    from loguru import Logger
     from . import RequestList, TaskApiRequest, TaskDbInsert
-    from kans import Api, ConfigT, Database
+    from kans import Api, ConfigT, Database, Logger
 
 
 class TaskStatusReport(Task):
@@ -75,7 +74,7 @@ class TaskStatusReport(Task):
                 try:
                     message = await hook.fetch_message(self._message_id)
                 except discord.DiscordException:
-                    self._logger.exception("Failed to fetch message.")
+                    self._logger.console.exception("Failed to fetch message.")
                     self._message_id = None
                     return
 
@@ -150,13 +149,13 @@ class TaskStatusReport(Task):
         DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
         # TODO: hacky way to do these. change later
-        avg_guild_req_duration = self._api.performance_recorder.get_average("guild.get")
-        avg_onlineplayers_req_duration = self._api.performance_recorder.get_average("player.get_online_uuids")
-        avg_player_req_duration = self._api.performance_recorder.get_average("player.get_full_stats")
+        avg_guild_req_duration = self._logger.performance.get_average("guild.get")
+        avg_onlineplayers_req_duration = self._logger.performance.get_average("player.get_online_uuids")
+        avg_player_req_duration = self._logger.performance.get_average("player.get_full_stats")
 
-        recent_guild_reqs = len(self._api.performance_recorder.get_recent(timedelta(minutes=5), "guild.get"))
-        recent_onlineplayers_reqs = len(self._api.performance_recorder.get_recent(timedelta(minutes=5), "player.get_online_uuids"))
-        recent_player_reqs = len(self._api.performance_recorder.get_recent(timedelta(minutes=5), "player.get_full_stats"))
+        recent_guild_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "guild.get"))
+        recent_onlineplayers_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "player.get_online_uuids"))
+        recent_player_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "player.get_full_stats"))
         recent_all_reqs = recent_guild_reqs + recent_onlineplayers_reqs + recent_player_reqs
 
         msg = self._DEFAULT_MSG.format(

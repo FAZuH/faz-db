@@ -9,9 +9,8 @@ from kans.db.model import KansUptime
 from kans.util import ApiResponseAdapter
 
 if TYPE_CHECKING:
-    from loguru import Logger
     from . import RequestList, ResponseList
-    from kans import Api, Database
+    from kans import Api, Database, Logger
 
 
 class TaskDbInsert(Task):
@@ -19,32 +18,36 @@ class TaskDbInsert(Task):
 
     def __init__(
         self,
-        logger: Logger,
         api: Api,
         db: Database,
+        logger: Logger,
         request_list: RequestList,
         response_list: ResponseList,
     ) -> None:
-        self._logger = logger
         self._api = api
         self._db = db
+        self._logger = logger
         self._request_list = request_list
         self._response_list = response_list
-        self._start_time = datetime.now()
 
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = datetime.now()
         self._response_adapter = ApiResponseAdapter()
         self._response_handler = self._ResponseHandler(self._api, self._request_list)
+        self._start_time = datetime.now()
 
     def setup(self) -> None:
         self._event_loop.run_until_complete(self._db.create_all())
+        # NOTE: Initial request. Results in a chain reaction of requests.
         self._request_list.enqueue(0, self._api.player.get_online_uuids(), priority=500)
 
     def teardown(self) -> None: ...
 
     def run(self) -> None:
-        self._event_loop.run_until_complete(self._run())
+        try:
+            self._event_loop.run_until_complete(self._run())
+        except Exception as e:
+            self._event_loop.create_task(self._logger.discord.exception(f"Error inserting to database {e}"))
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:

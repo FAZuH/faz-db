@@ -12,9 +12,8 @@ from .task import (
 )
 
 if TYPE_CHECKING:
-    from loguru import Logger
-    from kans import Api, ConfigT, Database
     from .task import Task
+    from kans import Api, ConfigT, Database, Logger
 
 
 class SimpleHeartbeat(Thread, Heartbeat):
@@ -28,8 +27,8 @@ class SimpleHeartbeat(Thread, Heartbeat):
         request_list = RequestList()
         response_list = ResponseList()
 
-        api_request = TaskApiRequest(logger, api, request_list, response_list)
-        db_insert = TaskDbInsert(logger, api, db, request_list, response_list)
+        api_request = TaskApiRequest(api, logger, request_list, response_list)
+        db_insert = TaskDbInsert(api, db, logger, request_list, response_list)
         status_report = TaskStatusReport(config, logger, api, api_request, db, db_insert, request_list)
 
         self._add_task(api_request)

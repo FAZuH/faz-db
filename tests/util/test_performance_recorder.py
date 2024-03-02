@@ -3,12 +3,12 @@ import asyncio
 import unittest
 from datetime import datetime, timedelta
 
-from kans.util import PerformanceRecorder
+from kans.logger import PerformanceLogger
 
 
 class TestPerformanceRecorder(unittest.TestCase):
     def setUp(self) -> None:
-        self.recorder = PerformanceRecorder()
+        self.recorder = PerformanceLogger()
 
     async def test_listen_async(self) -> None:
         # PREPARE

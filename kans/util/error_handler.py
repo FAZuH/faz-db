@@ -4,8 +4,8 @@ from typing import Awaitable, Callable, ParamSpec, TypeVar, Iterable
 
 from loguru import logger
 
-T = TypeVar("T")
-P = ParamSpec("P")
+T = TypeVar('T')
+P = ParamSpec('P')
 
 
 class ErrorHandler:

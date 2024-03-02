@@ -6,9 +6,8 @@ from typing import TYPE_CHECKING, Any
 from . import Task
 
 if TYPE_CHECKING:
-    from loguru import Logger
     from . import RequestList, ResponseList
-    from kans import Api
+    from kans import Api, Logger
     from kans.api.wynn.response import AbstractWynnResponse
 
 
@@ -17,9 +16,9 @@ class TaskApiRequest(Task):
 
     _CONCURRENT_REQUESTS = 15
 
-    def __init__(self, logger: Logger, api: Api, request_list: RequestList, response_list: ResponseList) -> None:
+    def __init__(self, api: Api, logger: Logger, request_list: RequestList, response_list: ResponseList) -> None:
+        self._api = api
         self._logger = logger
-        self._api: Api = api
         self._request_list = request_list
         self._response_list = response_list
 
@@ -28,11 +27,11 @@ class TaskApiRequest(Task):
         self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
 
     def setup(self) -> None:
-        self._logger.debug(f"Setting up {self.name}")
+        self._logger.console.debug(f"Setting up {self.name}")
         self._event_loop.run_until_complete(self._api.start())
 
     def teardown(self) -> None:
-        self._logger.debug(f"Tearing down {self.name}")
+        self._logger.console.debug(f"Tearing down {self.name}")
         self._event_loop.run_until_complete(self._api.close())
         for req in self._running_requests:
             req.cancel()
@@ -48,7 +47,7 @@ class TaskApiRequest(Task):
 
     async def _check_api_session(self) -> None:
         if not self._api.request.is_open():
-            self._logger.warning("HTTP session is closed. Reopening...")
+            self._logger.console.warning("HTTP session is closed. Reopening...")
             await self._api.start()
 
     def _start_requests(self) -> None:
@@ -71,7 +70,7 @@ class TaskApiRequest(Task):
 
             tasks_to_remove.append(task)
             if task.exception():
-                self._logger.error(f"Error fetching from Wynn API: {task.exception()}")
+                self._event_loop.create_task(self._logger.discord.exception(f"Error fetching from Wynn API: {task.exception()}"))
                 # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
                 if task.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
                     self._request_list.enqueue(0, self._api.player.get_online_uuids())
@@ -83,7 +82,7 @@ class TaskApiRequest(Task):
             self._running_requests.remove(task)
 
         if len(ok_results) > 0:
-            self._logger.debug(f"{len(ok_results)} responses from API")
+            self._logger.console.debug(f"{len(ok_results)} responses from API")
             self._response_list.put(ok_results)
 
     @property

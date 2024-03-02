@@ -8,7 +8,7 @@ P = ParamSpec('P')
 T = TypeVar('T')
 
 
-class PerformanceRecorder:
+class PerformanceLogger:
 
     def __init__(self) -> None:
         self._data: dict[str, list[tuple[datetime, timedelta]]] = {}
@@ -18,15 +18,20 @@ class PerformanceRecorder:
         self._MAX_CACHE = 1_000
         """Max amount of cache for each name. If exceeded, the oldest data will be removed."""
 
-    def listen_async(self, method: Callable[P, Awaitable[T]], name: str) -> Callable[P, Coroutine[Any, Any, T]]:
+    def bind_async(self, callable: Callable[P, Awaitable[T]], name: None | str = None) -> Callable[P, Coroutine[Any, Any, T]]:
         """Decorator to record the duration of an async method. The duration will be recorded in `timedelta`."""
+        if name is None:
+            name = callable.__qualname__
+
         self._data[name] = []
-        @wraps(method)
+
+        @wraps(callable)
         async def wrapped(*args: P.args, **kwargs: P.kwargs) -> T:
             t1 = perf_counter()
-            res = await method(*args, **kwargs)
+            res = await callable(*args, **kwargs)
             td = timedelta(seconds=perf_counter() - t1)
             now = datetime.now()
+
             with self._lock:
                 list_ = self._data[name]  # get reference
                 list_.append((now, td))
@@ -34,6 +39,31 @@ class PerformanceRecorder:
                     # NOTE: List is ordered by oldest to newest. list.pop(0) removes the oldest data
                     list_.pop(0)
             return res
+
+        return wrapped
+
+    def bind_sync(self, callable: Callable[P, T], name: None | str = None) -> Callable[P, T]:
+        """Decorator to record the duration of an async method. The duration will be recorded in `timedelta`."""
+        if name is None:
+            name = callable.__qualname__
+
+        self._data[name] = []
+
+        @wraps(callable)
+        def wrapped(*args: P.args, **kwargs: P.kwargs) -> T:
+            t1 = perf_counter()
+            res = callable(*args, **kwargs)
+            td = timedelta(seconds=perf_counter() - t1)
+            now = datetime.now()
+
+            with self._lock:
+                list_ = self._data[name]  # get reference
+                list_.append((now, td))
+                if len(list_) > self._MAX_CACHE:
+                    # NOTE: List is ordered by oldest to newest. list.pop(0) removes the oldest data
+                    list_.pop(0)
+            return res
+
         return wrapped
 
     def get_average(self, name: str) -> float:

@@ -4,7 +4,6 @@ from .db_model_id_dict_adapter import DbModelIdDictAdapter
 from .error_handler import ErrorHandler
 from .ratelimit_handler import RatelimitHandler
 from .response_set import ResponseSet
-from .performance_recorder import PerformanceRecorder
 
 from .http_request import HttpRequest  # ResponseSet
 

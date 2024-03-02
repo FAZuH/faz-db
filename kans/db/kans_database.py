@@ -19,8 +19,7 @@ from .repository import (
 from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
 
 if TYPE_CHECKING:
-    from loguru import Logger
-    from kans import ConfigT
+    from kans import ConfigT, Logger
 
 
 class KansDatabase(Database):

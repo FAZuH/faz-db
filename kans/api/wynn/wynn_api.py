@@ -4,19 +4,19 @@ from typing import TYPE_CHECKING, Any
 from . import Api, WynnRatelimitHandler
 from .endpoint import GuildEndpoint, PlayerEndpoint
 from kans import __version__
-from kans.util import HttpRequest, PerformanceRecorder
+from kans.util import HttpRequest
 
 if TYPE_CHECKING:
-    from loguru import Logger
+    from kans import Logger
     from kans.util import RatelimitHandler
 
 
 class WynnApi(Api):
 
     def __init__(self, logger: Logger) -> None:
-        self._perf = PerformanceRecorder()
-        self._ratelimit = WynnRatelimitHandler(5, 180, logger)
-        self._request: HttpRequest = HttpRequest(
+        self._logger = logger
+        self._ratelimit = WynnRatelimitHandler(5, 180, self._logger)
+        self._request = HttpRequest(
                 "https://api.wynncraft.com",
                 ratelimit=self._ratelimit,
                 headers={"User-Agent": f"Kans/{__version__}", "Content-Type": "application/json"
@@ -25,11 +25,12 @@ class WynnApi(Api):
         self._guild_endpoint = GuildEndpoint(self._request, 3, True)
         self._player_endpoint = PlayerEndpoint(self._request, 3, True)
 
-        # HACK: this is a hacky way to do this, but it works for now
-        self._guild_endpoint.get = self._perf.listen_async(self._guild_endpoint.get, "guild.get")
-        self._guild_endpoint.get_from_prefix = self._perf.listen_async(self._guild_endpoint.get_from_prefix, "guild.get_from_prefix")
-        self._player_endpoint.get_full_stats = self._perf.listen_async(self._player_endpoint.get_full_stats, "player.get_full_stats")
-        self._player_endpoint.get_online_uuids = self._perf.listen_async(self._player_endpoint.get_online_uuids, "player.get_online_uuids")
+    def _setup_performance_logger(self) -> None:
+        perf = self._logger.performance
+        self.guild.get = perf.bind_async(self.guild.get)
+        self.guild.get_from_prefix = perf.bind_async(self.guild.get_from_prefix)
+        self.player.get_full_stats = perf.bind_async(self.player.get_full_stats)
+        self.player.get_online_uuids = perf.bind_async(self.player.get_online_uuids)
 
     async def start(self) -> None:
         await self._request.start()
@@ -44,10 +45,6 @@ class WynnApi(Api):
     @property
     def player(self) -> PlayerEndpoint:
         return self._player_endpoint
-
-    @property
-    def performance_recorder(self) -> PerformanceRecorder:
-        return self._perf
 
     @property
     def ratelimit(self) -> RatelimitHandler:

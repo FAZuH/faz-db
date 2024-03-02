@@ -7,7 +7,8 @@ ConfigT = TypedDict("ConfigT", {
     "DB_PASSWORD": str,
     "SCHEMA_NAME": str,
 
-    "ERROR_WEBHOOK": str,
+    "ISSUES_WEBHOOK": str,
+    "ERROR_LOG_FILE": str,
     "STATUS_REPORT_WEBHOOK": str,
 })
 

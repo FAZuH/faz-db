@@ -1,39 +1,49 @@
 from __future__ import annotations
+import asyncio
 from typing import TYPE_CHECKING
 
 from dotenv import dotenv_values
-from loguru import logger  # TODO: implement own logger method
 
 from .app import App
 from kans.api import WynnApi
 from kans.db import KansDatabase
 from kans.heartbeat import SimpleHeartbeat
+from kans.logger import KansLogger
 
 if TYPE_CHECKING:
-    from loguru import Logger
-    from kans import Api, ConfigT, Database, Heartbeat
+    from kans import Api, ConfigT, Database, Heartbeat, Logger
 
 
 class Kans(App):
 
     def __init__(self) -> None:
         self._config: ConfigT = dotenv_values(".env")  # type: ignore
-        self._logger: Logger = logger
-        self._api: Api = WynnApi(self.logger)
-        self._db: Database = KansDatabase(self.config, self.logger)
-        self._heartbeat: Heartbeat = SimpleHeartbeat(self.config, self.logger, self.api, self.db)
+        self._logger = KansLogger(self.config)
+        self._api = WynnApi(self.logger)
+        self._db = KansDatabase(self.config, self.logger)
+        self._heartbeat = SimpleHeartbeat(self.config, self.logger, self.api, self.db)
 
     def start(self) -> None:
-        self.logger.info("Starting Heartbeat")
+        self.logger.console.info("Starting Kans Heartbeat...")
         self.heartbeat.start()
+        asyncio.get_event_loop().create_task(self.logger.discord.success("Started Kans Heartbeat."))
 
     def stop(self) -> None:
-        self.logger.info("Stopping Heartbeat")
+        self.logger.console.info("Stopping Heartbeat...")
         self.heartbeat.stop()
+        asyncio.get_event_loop().run_until_complete(self.logger.discord.success("Stopped Kans Heartbeat."))
+
+    @property
+    def api(self) -> Api:
+        return self._api
 
     @property
     def config(self) -> ConfigT:
         return self._config
+
+    @property
+    def db(self) -> Database:
+        return self._db
 
     @property
     def heartbeat(self) -> Heartbeat:
@@ -42,11 +52,3 @@ class Kans(App):
     @property
     def logger(self) -> Logger:
         return self._logger
-
-    @property
-    def api(self) -> Api:
-        return self._api
-
-    @property
-    def db(self) -> Database:
-        return self._db

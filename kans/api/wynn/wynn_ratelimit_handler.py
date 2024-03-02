@@ -6,7 +6,7 @@ from .model.headers import Headers
 from kans.util import RatelimitHandler
 
 if TYPE_CHECKING:
-    from loguru import Logger
+    from kans import Logger
 
 
 class WynnRatelimitHandler(RatelimitHandler):
@@ -24,7 +24,7 @@ class WynnRatelimitHandler(RatelimitHandler):
             await self.ratelimited()
 
     async def ratelimited(self) -> None:
-        self._logger.warning(f"Ratelimited, waiting for {self.reset}")
+        self._logger.console.warning(f"Ratelimited, waiting for {self.reset}")
         await asyncio.sleep(self.reset)
 
     def update(self, headers: dict[str, Any]) -> None:
