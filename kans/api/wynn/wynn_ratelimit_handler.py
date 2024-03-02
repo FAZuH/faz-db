@@ -20,7 +20,7 @@ class WynnRatelimitHandler(RatelimitHandler):
         self._reset: float = 0.0
 
     async def limit(self) -> None:
-        if self.min_limit <= 1:
+        if self._remaining <= self.min_limit:
             await self.ratelimited()
 
     async def ratelimited(self) -> None:
