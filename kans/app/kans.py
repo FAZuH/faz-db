@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import TYPE_CHECKING
 
 from dotenv import dotenv_values
@@ -26,12 +25,10 @@ class Kans(App):
     def start(self) -> None:
         self.logger.console.info("Starting Kans Heartbeat...")
         self.heartbeat.start()
-        asyncio.get_event_loop().create_task(self.logger.discord.success("Started Kans Heartbeat."))
 
     def stop(self) -> None:
         self.logger.console.info("Stopping Heartbeat...")
         self.heartbeat.stop()
-        asyncio.get_event_loop().run_until_complete(self.logger.discord.success("Stopped Kans Heartbeat."))
 
     @property
     def api(self) -> Api:
