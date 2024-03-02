@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 from . import Task
 
 if TYPE_CHECKING:
-    from . import RequestList, ResponseList
+    from . import RequestQueue, ResponseQueue
     from kans import Api, Logger
     from kans.api.wynn.response import AbstractWynnResponse
 
@@ -16,7 +16,7 @@ class TaskApiRequest(Task):
 
     _CONCURRENT_REQUESTS = 15
 
-    def __init__(self, api: Api, logger: Logger, request_list: RequestList, response_list: ResponseList) -> None:
+    def __init__(self, api: Api, logger: Logger, request_list: RequestQueue, response_list: ResponseQueue) -> None:
         self._api = api
         self._logger = logger
         self._request_list = request_list

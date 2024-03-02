@@ -11,7 +11,7 @@ import discord
 from . import Task
 
 if TYPE_CHECKING:
-    from . import RequestList, TaskApiRequest, TaskDbInsert
+    from . import RequestQueue, TaskApiRequest, TaskDbInsert
     from kans import Api, ConfigT, Database, Logger
 
 
@@ -26,7 +26,7 @@ class TaskStatusReport(Task):
         api_request: TaskApiRequest,
         db: Database,
         db_insert: TaskDbInsert,
-        request_list: RequestList
+        request_list: RequestQueue
     ) -> None:
         self._logger = logger
         self._api = api

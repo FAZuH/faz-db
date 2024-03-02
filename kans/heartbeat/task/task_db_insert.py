@@ -9,7 +9,7 @@ from kans.db.model import KansUptime
 from kans.util import ApiResponseAdapter
 
 if TYPE_CHECKING:
-    from . import RequestList, ResponseList
+    from . import RequestQueue, ResponseQueue
     from kans import Api, Database, Logger
 
 
@@ -21,8 +21,8 @@ class TaskDbInsert(Task):
         api: Api,
         db: Database,
         logger: Logger,
-        request_list: RequestList,
-        response_list: ResponseList,
+        request_list: RequestQueue,
+        response_list: ResponseQueue,
     ) -> None:
         self._api = api
         self._db = db
@@ -139,7 +139,7 @@ class TaskDbInsert(Task):
     class _ResponseHandler:
         """Handles Wynncraft response processing, queueing, and requeuing."""
 
-        def __init__(self, api: Api, request_list: RequestList) -> None:
+        def __init__(self, api: Api, request_list: RequestQueue) -> None:
             self._api = api
             self._request_list = request_list
 

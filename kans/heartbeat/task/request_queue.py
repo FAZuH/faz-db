@@ -8,29 +8,24 @@ if TYPE_CHECKING:
     from kans.api.wynn.response import AbstractWynnResponse
 
 
-class RequestList:
+class RequestQueue:
 
     def __init__(self) -> None:
         self._api: Api  # TODO: inject dependency into constructor
-        self._list: list[RequestList.RequestItem] = []
+        self._list: list[RequestQueue.RequestItem] = []
         self._lock: Lock = Lock()
 
     def dequeue(self, amount: int) -> list[Coroutine[AbstractWynnResponse[Any], Any, Any]]:
         now = datetime.now().timestamp()
 
-        ret = []
+        ret: list[Coroutine[AbstractWynnResponse[Any], Any, Any]] = []
         with self._lock:
             for _ in range(amount):
-                if len(self._list) < 1:
-                    break
-
-                item = min(self._list)
-                if item.is_eligible(now):
-                    self._list.remove(item)
-                    ret.append(item.coro)
-                else:
+                item = self._dequeue_one(now)
+                if item is None:
                     # Stop yielding because the rest of the list is not eligible
                     break
+                ret.append(item.coro)
         return ret
 
     def enqueue(
@@ -47,6 +42,15 @@ class RequestList:
     def iter(self) -> Generator[RequestItem, Any, None]:
         with self._lock:
             yield from self._list
+
+    def _dequeue_one(self, ts: None | float) -> None | RequestQueue.RequestItem:
+        if len(self._list) < 1:
+            return None
+
+        item = min(self._list)
+        if item.is_eligible(ts):
+            self._list.remove(item)
+            return item
 
 
     class RequestItem:
@@ -65,30 +69,31 @@ class RequestList:
             timestamp = timestamp or datetime.now().timestamp()
             return self.req_ts < timestamp
 
-        def __eq__(self, other: object | RequestList.RequestItem) -> bool:
-            if isinstance(other, RequestList.RequestItem):
+        def __eq__(self, other: object | RequestQueue.RequestItem) -> bool:
+            if isinstance(other, RequestQueue.RequestItem):
                 return (
                         (self.coro.cr_frame.f_locals == other.coro.cr_frame.f_locals) and
                         (self.coro.__qualname__ == other.coro.__qualname__)
                 )
             return False
 
-        def __lt__(self, other: RequestList.RequestItem) -> bool:
-            """For min() function."""
-            # NOTE: priority check is used to prioritize online uuids request
+        def __lt__(self, other: RequestQueue.RequestItem) -> bool:
+            """For min() function.
+            Return true to get favored more in min() function."""
             if self.is_eligible() is False:
-                # NOTE: items not eligible obviously shouldn't be included in the min() result
-                return True
+                # items not eligible (expired endpoint) obviously shouldn't be favored in min()
+                return False
 
-            # NOTE: If the priority value is different, the item with the higher priority is chosen.
-            # Else, the item with the lower request timestamp is chosen.
             if self.priority != other.priority:
+                # Higher priority is favored
                 return self.priority > other.priority
             else:
+                # Favor requests that has expired longer
                 return self.req_ts < other.req_ts
 
         @property
         def req_ts(self) -> float:
+            """Timestamp for when the cache of the resource will expire."""
             return self._req_ts
 
         @property

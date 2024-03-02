@@ -2,13 +2,13 @@
 import unittest
 from datetime import datetime as dt
 
-from kans.heartbeat.task import RequestList
+from kans.heartbeat.task import RequestQueue
 
 
 class TestRequestList(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.request_list = RequestList()
+        self.request_list = RequestQueue()
 
     async def mock_coro(self, arg: str) -> str:
         return arg
@@ -74,6 +74,21 @@ class TestRequestList(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result.pop(), testCoro2)
 
+    def test_dequeue_equal_all(self) -> None:
+        # PREPARE
+        testCoros = [self.mock_coro(str(i)) for i in range(100)]
+        testRequestTs = 0
+        for coro in testCoros:
+            self.request_list.enqueue(testRequestTs, coro)
+
+        # ACT
+        result = self.request_list.dequeue(15)
+
+        # ASSERT
+        self.assertEqual(len(result), 15)
+        for coro in result:
+            self.assertTrue(coro in testCoros)
+
     def test_iter(self) -> None:
         # PREPARE
         coro1 = self.mock_coro("foo")
@@ -94,7 +109,7 @@ class TestRequestList(unittest.TestCase):
         # PREPARE
         testCoro1 = self.mock_coro("foo")
         testRequestTs1 = dt.now().timestamp() - 1 # Past timestamp
-        request_item = RequestList.RequestItem(testCoro1, 100, testRequestTs1)
+        request_item = RequestQueue.RequestItem(testCoro1, 100, testRequestTs1)
 
         # ASSERT
         self.assertTrue(request_item.is_eligible())
@@ -103,7 +118,7 @@ class TestRequestList(unittest.TestCase):
         # PREPARE
         testCoro1 = self.mock_coro("foo")
         testRequestTs1 = dt.now().timestamp() + 1000  # Future timestamp
-        request_item = RequestList.RequestItem(testCoro1, 100, testRequestTs1)
+        request_item = RequestQueue.RequestItem(testCoro1, 100, testRequestTs1)
 
         # ASSERT
         # NOTE: Assert that request item is not eligible
@@ -113,8 +128,8 @@ class TestRequestList(unittest.TestCase):
         # PREPARE
         testCoro1 = self.mock_coro("foo")
         testCoro2 = self.mock_coro("bar")
-        request_item1 = RequestList.RequestItem(testCoro1, 100, 0)
-        request_item2 = RequestList.RequestItem(testCoro2, 200, 0)
+        request_item1 = RequestQueue.RequestItem(testCoro1, 100, 0)
+        request_item2 = RequestQueue.RequestItem(testCoro2, 200, 0)
 
         # ASSERT
         self.assertLess(request_item2, request_item1)
@@ -124,8 +139,8 @@ class TestRequestList(unittest.TestCase):
         testCoro1 = self.mock_coro("foo")
         testCoro2 = self.mock_coro("foo")
         request_ts = dt.now().timestamp()
-        request_item1 = RequestList.RequestItem(testCoro1, 100, request_ts)
-        request_item2 = RequestList.RequestItem(testCoro2, 100, request_ts)
+        request_item1 = RequestQueue.RequestItem(testCoro1, 100, request_ts)
+        request_item2 = RequestQueue.RequestItem(testCoro2, 100, request_ts)
 
         # ASSERT
         self.assertEqual(request_item1, request_item2)

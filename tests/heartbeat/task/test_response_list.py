@@ -1,13 +1,13 @@
 import unittest
 from unittest.mock import MagicMock
 
-from kans.heartbeat.task.response_list import ResponseList
+from kans.heartbeat.task.response_queue import ResponseQueue
 
 
 class TestResponseList(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.response_list = ResponseList()
+        self.response_list = ResponseQueue()
 
     def test_put_and_get(self) -> None:
         response1 = MagicMock()

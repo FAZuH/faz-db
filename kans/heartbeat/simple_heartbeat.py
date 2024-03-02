@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from . import Heartbeat,HeartbeatTask
 from .task import (
-    RequestList,
-    ResponseList,
+    RequestQueue,
+    ResponseQueue,
     TaskApiRequest,
     TaskDbInsert,
     TaskStatusReport,
@@ -24,8 +24,8 @@ class SimpleHeartbeat(Thread, Heartbeat):
 
         self._tasks: list[HeartbeatTask] = []
 
-        request_list = RequestList()
-        response_list = ResponseList()
+        request_list = RequestQueue()
+        response_list = ResponseQueue()
 
         api_request = TaskApiRequest(api, logger, request_list, response_list)
         db_insert = TaskDbInsert(api, db, logger, request_list, response_list)

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from kans.api.wynn.response import AbstractWynnResponse
 
 
-class ResponseList:
+class ResponseQueue:
 
     def __init__(self):
         self._list: list[AbstractWynnResponse[Any]] = []

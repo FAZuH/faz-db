@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 from kans.api import WynnApi
 from kans.api.wynn.response import OnlinePlayersResponse, PlayerResponse, GuildResponse
 from kans.db import KansDatabase
-from kans.heartbeat.task import RequestList, ResponseList, TaskDbInsert
+from kans.heartbeat.task import RequestQueue, ResponseQueue, TaskDbInsert
 
 
 class TestTaskDbInsert(unittest.TestCase):
@@ -14,8 +14,8 @@ class TestTaskDbInsert(unittest.TestCase):
     def setUp(self) -> None:
         self._api = Mock(spec=WynnApi)
         self._db = Mock(spec=KansDatabase)
-        self._request_list = Mock(spec_set=RequestList)
-        self._response_list = Mock(spec_set=ResponseList)
+        self._request_list = Mock(spec_set=RequestQueue)
+        self._response_list = Mock(spec_set=ResponseQueue)
         self._task = TaskDbInsert(self._api, self._db, MagicMock(), self._request_list, self._response_list)
 
     def test_setup(self) -> None:
@@ -103,7 +103,7 @@ class TestResponseHandler(unittest.TestCase):
 
     def setUp(self) -> None:
         self._api = Mock(spec_set=WynnApi)
-        self.__request_list = Mock(spec_set=RequestList)
+        self.__request_list = Mock(spec_set=RequestQueue)
         self._manager = TaskDbInsert._ResponseHandler(self._api, self.__request_list)
 
     # OnlinePlayerResponse
