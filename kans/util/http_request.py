@@ -52,28 +52,28 @@ class HttpRequest:
     async def get(
             self,
             url_param: str,
-            retries: int = -69,
+            retries: None | int = None,  # HACK: bad code obv. please change this if you know a better
             retry_on_exc: bool = False
         ) -> ResponseSet[Any, Any]:
-        if retry_on_exc and retries == -69:
-            raise ValueError("Retries must be set if retry_on_exc is True")
+        if retry_on_exc and retries is None:
+            raise ValueError("Retries must be set to a valid integer if retry_on_exc is True")
 
         if self._session is None or self._session.closed:
             raise KansError("Session is not open")
 
-        response: ClientResponse
+        resp: ClientResponse
         if self._ratelimit:
             await self._ratelimit.limit()
-            response = await self._session.get(url_param)
-            self._ratelimit.update(dict(response.headers))
-        else:
-            response = await self._session.get(url_param)
 
-        if response.ok:
-            return ResponseSet(await response.json(), dict(response.headers))
+        resp = await self._session.get(url_param)
+
+        if resp.ok:
+            if self._ratelimit:
+                self._ratelimit.update(dict(resp.headers))
+            return ResponseSet(await resp.json(), dict(resp.headers))
 
         try:
-            match response.status:
+            match resp.status:
                 case 400:
                     raise BadRequest(url_param)
                 case 401:
@@ -97,7 +97,7 @@ class HttpRequest:
             return await self.get(url_param, retries, retry_on_exc)
 
         except HTTPError as e:
-            if retry_on_exc:
+            if retry_on_exc and retries is not None:
                 if retries <= 0:
                     raise TooManyRetries(url_param + f" ({e})")
                 return await self.get(url_param, retries - 1, retry_on_exc)
