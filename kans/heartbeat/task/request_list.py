@@ -24,7 +24,7 @@ class RequestList:
                 if len(self._list) < 1:
                     break
 
-                item: RequestList.RequestItem = min(self._list)
+                item = min(self._list)
                 if item.is_eligible(now):
                     self._list.remove(item)
                     ret.append(item.coro)
@@ -78,7 +78,7 @@ class RequestList:
             # NOTE: priority check is used to prioritize online uuids request
             if self.is_eligible() is False:
                 # NOTE: items not eligible obviously shouldn't be included in the min() result
-                return False
+                return True
 
             # NOTE: If the priority value is different, the item with the higher priority is chosen.
             # Else, the item with the lower request timestamp is chosen.
