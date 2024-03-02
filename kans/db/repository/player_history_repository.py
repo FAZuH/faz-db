@@ -26,7 +26,7 @@ class PlayerHistoryRepository(Repository[PlayerHistory, PlayerHistoryId]):
 
     async def insert(self, entities: Iterable[PlayerHistory], conn: None | Connection = None) -> int:
         SQL = f"""
-            INSERT INTO `{self.table_name}`
+            INSERT IGNORE INTO `{self.table_name}`
             (`uuid`, `username`, `support_rank`, `playtime`, `guild_name`, `guild_rank`, `rank`, `datetime`)
             VALUES
             (%(uuid)s, %(username)s, %(support_rank)s, %(playtime)s, %(guild_name)s, %(guild_rank)s, %(rank)s, %(datetime)s)
