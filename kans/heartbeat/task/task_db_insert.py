@@ -47,7 +47,7 @@ class TaskDbInsert(Task):
         try:
             self._event_loop.run_until_complete(self._run())
         except Exception as e:
-            self._event_loop.create_task(self._logger.discord.exception(f"Error inserting to database {e}"))
+            self._event_loop.create_task(self._logger.discord.exception(f"Error inserting to database", e))
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:

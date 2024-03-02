@@ -2,12 +2,7 @@ from loguru import logger
 
 
 class ConsoleLogger:
-    # TODO:
-    # warning
-    # info
-    # success
-    # exception
-    # error
+
     def __init__(self) -> None:
         self._logger = logger
 
@@ -26,8 +21,6 @@ class ConsoleLogger:
     def warning(self, message: str) -> None:
         """Logs a warning message. Used for non-critical issues."""
         self._logger.warning(message)
-
-    # TODO: send the logs below to discord
 
     def exception(self, message: str) -> None:
         """Logs an exception message. Used for critical issues that doesn't cause the program to stop."""

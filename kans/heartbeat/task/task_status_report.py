@@ -73,8 +73,8 @@ class TaskStatusReport(Task):
             else:
                 try:
                     message = await hook.fetch_message(self._message_id)
-                except discord.DiscordException:
-                    self._logger.console.exception("Failed to fetch message.")
+                except discord.DiscordException as e:
+                    await self._logger.discord.exception("Failed to fetch message.", e)
                     self._message_id = None
                     return
 

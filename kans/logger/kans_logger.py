@@ -11,7 +11,7 @@ class KansLogger(Logger):
 
     def __init__(self, config: ConfigT) -> None:
         self._console_logger = ConsoleLogger()
-        self._discord_logger = DiscordLogger(config)
+        self._discord_logger = DiscordLogger(config, self._console_logger)
         self._performance_logger = PerformanceLogger()
 
     def set_up(self) -> None:

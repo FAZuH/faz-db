@@ -69,8 +69,11 @@ class TaskApiRequest(Task):
                 continue
 
             tasks_to_remove.append(task)
-            if task.exception():
-                self._event_loop.create_task(self._logger.discord.exception(f"Error fetching from Wynn API: {task.exception()}"))
+            if task.exception() is not None:
+                self._event_loop.create_task(self._logger.discord.exception(
+                        f"Error fetching from Wynn API ({task.get_coro().__qualname__})",
+                        task.exception()
+                ))
                 # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
                 if task.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
                     self._request_list.enqueue(0, self._api.player.get_online_uuids())
