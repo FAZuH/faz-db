@@ -149,13 +149,13 @@ class TaskStatusReport(Task):
         DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
         # TODO: hacky way to do these. change later
-        avg_guild_req_duration = self._logger.performance.get_average("guild.get")
-        avg_onlineplayers_req_duration = self._logger.performance.get_average("player.get_online_uuids")
-        avg_player_req_duration = self._logger.performance.get_average("player.get_full_stats")
+        avg_guild_req_duration = self._logger.performance.get_average("GuildEndpoint.get")
+        avg_onlineplayers_req_duration = self._logger.performance.get_average("PlayerEndpoint.get_online_uuids")
+        avg_player_req_duration = self._logger.performance.get_average("PlayerEndpoint.get_full_stats")
 
-        recent_guild_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "guild.get"))
-        recent_onlineplayers_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "player.get_online_uuids"))
-        recent_player_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "player.get_full_stats"))
+        recent_guild_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "GuildEndpoint.get"))
+        recent_onlineplayers_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "PlayerEndpoint.get_online_uuids"))
+        recent_player_reqs = len(self._logger.performance.get_recent(timedelta(minutes=5), "PlayerEndpoint.get_full_stats"))
         recent_all_reqs = recent_guild_reqs + recent_onlineplayers_reqs + recent_player_reqs
 
         msg = self._DEFAULT_MSG.format(
