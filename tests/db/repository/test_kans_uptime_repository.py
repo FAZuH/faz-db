@@ -6,7 +6,7 @@ from loguru import logger
 
 from kans import config
 from kans.db import KansDatabase
-from kans.db.model import KansUptime, KansUptimeId
+from kans.db.kans.model import KansUptime, KansUptimeId
 from kans.util import ApiResponseAdapter
 
 

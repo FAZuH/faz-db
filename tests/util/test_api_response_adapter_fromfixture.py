@@ -2,7 +2,7 @@ from decimal import Decimal
 from types import NoneType
 import unittest
 
-from kans.db.model import (
+from kans.db.kans.model import (
     CharacterHistory,
     DateColumn,
     GamemodeColumn,

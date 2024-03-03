@@ -2,7 +2,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
-from . import Database, DatabaseQuery
+from .. import Database, DatabaseQuery
 from .repository import (
     CharacterInfoRepository,
     CharacterHistoryRepository,

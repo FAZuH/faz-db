@@ -6,7 +6,7 @@ from loguru import logger
 
 from kans import config
 from kans.db import KansDatabase
-from kans.db.model import GuildHistory, GuildHistoryId
+from kans.db.kans.model import GuildHistory, GuildHistoryId
 from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 

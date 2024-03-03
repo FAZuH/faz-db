@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
-from kans.db.model import DateColumn
+from .. import DateColumn
 
 if TYPE_CHECKING:
     from datetime import datetime as datetime

@@ -10,7 +10,7 @@ from kans import config
 from kans.api.wynn.model.field import HeaderDateField
 from kans.api.wynn.model.field import UsernameOrUuidField
 from kans.db import KansDatabase
-from kans.db.model import DateColumn, PlayerActivityHistory, PlayerActivityHistoryId
+from kans.db.kans.model import DateColumn, PlayerActivityHistory, PlayerActivityHistoryId
 from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 

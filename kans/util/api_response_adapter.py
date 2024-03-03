@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Generator
 
-from kans.db.model import (
+from kans.db.kans.model import (
     CharacterHistory,
     CharacterInfo,
     GuildHistory,

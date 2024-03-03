@@ -8,7 +8,7 @@ from loguru import logger
 
 from kans import config
 from kans.db import KansDatabase
-from kans.db.model import CharacterHistory, CharacterHistoryId
+from kans.db.kans.model import CharacterHistory, CharacterHistoryId
 from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 

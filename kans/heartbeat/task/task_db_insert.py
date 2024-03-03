@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Iterable
 
 from .task import Task
 from kans.api.wynn.response import GuildResponse, PlayerResponse, OnlinePlayersResponse
-from kans.db.model import KansUptime
+from kans.db.kans.model import KansUptime
 from kans.util import ApiResponseAdapter
 
 if TYPE_CHECKING:
