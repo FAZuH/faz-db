@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 if TYPE_CHECKING:
     from .endpoint import GuildEndpoint, PlayerEndpoint
     from kans import Logger
-    from kans.util import HttpRequest, RatelimitHandler
+    from .. import HttpRequest, RatelimitHandler
 
 
 class Api(Protocol):

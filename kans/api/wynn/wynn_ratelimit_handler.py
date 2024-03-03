@@ -3,7 +3,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any
 
 from .model.headers import Headers
-from kans.util import RatelimitHandler
+from .. import RatelimitHandler
 
 if TYPE_CHECKING:
     from kans import Logger

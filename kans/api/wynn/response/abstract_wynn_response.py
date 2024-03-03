@@ -2,7 +2,7 @@ from abc import ABC
 from typing import TypeVar
 
 from ..model import Headers
-from kans.util import ResponseSet
+from ... import ResponseSet
 
 T = TypeVar('T')
 

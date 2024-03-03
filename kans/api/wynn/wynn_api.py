@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, Any
 from . import Api, WynnRatelimitHandler
 from .endpoint import GuildEndpoint, PlayerEndpoint
 from kans import __version__
-from kans.util import HttpRequest
+from .. import HttpRequest
 
 if TYPE_CHECKING:
     from kans import Logger
-    from kans.util import RatelimitHandler
+    from .. import RatelimitHandler
 
 
 class WynnApi(Api):
