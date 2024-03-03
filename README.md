@@ -15,9 +15,7 @@ Code design is inspired by moto-bot!
 ## Usage
 *repository usage guide*
 
-## Important Todo
-- Add tests for database repositories
-
 ## Todo
 - Add documentation to the whole code
 - Add more magic methods to db and api models
+- Add more error classes and do better error handling
