@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 class SimpleHeartbeat(Thread, Heartbeat):
 
-    def __init__(self, config: Config, logger: Logger, api: Api, db: Database) -> None:
+    def __init__(self, api: Api, config: Config, db: Database, logger: Logger) -> None:
         super().__init__(target=self.run, daemon=True)
         self._logger = logger
 
