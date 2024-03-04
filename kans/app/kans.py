@@ -19,7 +19,7 @@ class Kans(App):
         self._logger = KansLogger(self.config)
         self._api = WynnApi(self.logger)
         self._db = KansDatabase(self.config, self.logger)
-        self._heartbeat = SimpleHeartbeat(self.config, self.logger, self.api, self.db)
+        self._heartbeat = SimpleHeartbeat(self.api, self.config, self.db, self.logger)
 
     def start(self) -> None:
         self.logger.console.info("Starting Kans Heartbeat...")
