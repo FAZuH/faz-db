@@ -15,10 +15,10 @@ class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
     async def insert(self, entities: Iterable[GuildInfo], conn: None | Connection = None) -> int:
         # NOTE: This doesn't change. Ignore duplicates.
         SQL = f"""
-            INSERT IGNORE INTO `{self.table_name}` (`name`, `prefix`, `created`)
-            VALUES (%(name)s, %(prefix)s, %(created)s)
+            INSERT IGNORE INTO `{self.table_name}` (`uuid`, `name`, `prefix`, `created`)
+            VALUES (%(uuid)s, %(name)s, %(prefix)s, %(created)s)
         """
-        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
+        return await self._db.execute_many(SQL, (self._adapt(entity) for entity in entities), conn)
 
     async def exists(self, id_: GuildInfoId, conn: None | Connection = None) -> bool:
         SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `name` = %(name)s"
@@ -57,6 +57,7 @@ class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
                 `name` varchar(30) NOT NULL,
                 `prefix` varchar(4) NOT NULL,
                 `created` datetime NOT NULL,
+                `uuid` binary(16) NOT NULL,
                 PRIMARY KEY (`name`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """

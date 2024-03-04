@@ -104,7 +104,8 @@ class ApiResponseAdapter:
             return GuildInfo(
                     name=resp.body.name,
                     prefix=resp.body.prefix,
-                    created=resp.body.created.to_datetime()
+                    created=resp.body.created.to_datetime(),
+                    uuid=resp.body.uuid.to_bytes()
             )
 
         @staticmethod

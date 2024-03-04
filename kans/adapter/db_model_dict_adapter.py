@@ -75,6 +75,7 @@ class DbModelDictAdapter:
     def from_guild_info(entity: GuildInfo) -> GuildInfo.Type:
         return {
                 "name": entity.name,
+                "uuid": entity.uuid.uuid,
                 "prefix": entity.prefix,
                 "created": entity.created.datetime
         }
