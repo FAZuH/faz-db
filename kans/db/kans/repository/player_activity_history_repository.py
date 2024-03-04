@@ -6,8 +6,8 @@ from ..model import PlayerActivityHistory, PlayerActivityHistoryId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
+    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
     from kans.db import DatabaseQuery
-    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
 
 
 class PlayerActivityHistoryRepository(Repository[PlayerActivityHistory, PlayerActivityHistoryId]):

@@ -15,7 +15,7 @@ class PlayerEndpoint(AbstractEndpoint):
 
     async def get_full_stats(self, username_or_uuid: str | UUID) -> PlayerResponse:
         response = await self._request.get(
-                (self.path + "/%s?fullResult=True") % username_or_uuid,
+                f"{self.path}/%s?fullResult=True" % username_or_uuid,
                 retries=self._retries,
                 retry_on_exc=self._retry_on_exc,
         )
@@ -23,7 +23,7 @@ class PlayerEndpoint(AbstractEndpoint):
 
     async def get_online_uuids(self) -> OnlinePlayersResponse:
         response = await self._request.get(
-                self.path + "?identifier=uuid",
+                f"{self.path}?identifier=uuid",
                 retries=self._retries,
                 retry_on_exc=self._retry_on_exc,
         )

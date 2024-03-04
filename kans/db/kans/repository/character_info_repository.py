@@ -6,8 +6,8 @@ from ..model import CharacterInfo, CharacterInfoId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
+    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
     from kans.db import DatabaseQuery
-    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
 
 
 

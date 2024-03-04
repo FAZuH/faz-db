@@ -2,16 +2,14 @@
 from copy import deepcopy
 from datetime import datetime
 import unittest
+from unittest.mock import MagicMock
 from uuid import UUID
 
-from loguru import logger
-
-from kans import config
-from kans.api.wynn.model.field import HeaderDateField
-from kans.api.wynn.model.field import UsernameOrUuidField
+from kans import Config
+from kans.api.wynn.model.field import HeaderDateField, UsernameOrUuidField
+from kans.adapter import ApiResponseAdapter
 from kans.db import KansDatabase
 from kans.db.kans.model import DateColumn, PlayerActivityHistory, PlayerActivityHistoryId
-from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
@@ -21,7 +19,7 @@ class TestPlayerActivityHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self._adapter = ApiResponseAdapter()
-        self._db = KansDatabase(config, logger)
+        self._db = KansDatabase(Config(), MagicMock())
         self._repo = self._db.player_activity_history_repository
 
         self._repo._TABLE_NAME = "test_player_activity_history"

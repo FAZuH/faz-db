@@ -33,5 +33,5 @@ if __name__ == "__main__":
     try:
         main.main()
     except Exception as e:
-        asyncio.run(main.app.logger.discord.error(f"FATAL ERROR", e))
+        asyncio.run(main.app.logger.discord.error("FATAL ERROR", e))
         exit(1)

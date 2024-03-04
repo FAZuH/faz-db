@@ -13,12 +13,12 @@ from .task import (
 
 if TYPE_CHECKING:
     from .task import Task
-    from kans import Api, ConfigT, Database, Logger
+    from kans import Api, Config, Database, Logger
 
 
 class SimpleHeartbeat(Thread, Heartbeat):
 
-    def __init__(self, config: ConfigT, logger: Logger, api: Api, db: Database) -> None:
+    def __init__(self, config: Config, logger: Logger, api: Api, db: Database) -> None:
         super().__init__(target=self.run, daemon=True)
         self._logger = logger
 

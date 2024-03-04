@@ -4,14 +4,14 @@ from threading import Lock
 from typing import TYPE_CHECKING, Any, Coroutine, Generator
 
 if TYPE_CHECKING:
-    from kans import Api
+    # from kans import Api
     from kans.api.wynn.response import AbstractWynnResponse
 
 
 class RequestQueue:
 
     def __init__(self) -> None:
-        self._api: Api  # TODO: inject dependency into constructor
+        # self._api: Api  # TODO: inject dependency into constructor
         self._list: list[RequestQueue.RequestItem] = []
         self._lock: Lock = Lock()
 

@@ -6,8 +6,8 @@ from ..model import CharacterHistory, CharacterHistoryId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
+    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
     from kans.db import DatabaseQuery
-    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
 
 
 class CharacterHistoryRepository(Repository[CharacterHistory, CharacterHistoryId]):

@@ -4,14 +4,14 @@ import traceback
 from aiohttp import ClientSession
 import discord
 
-from kans import ConfigT
+from kans import Config
 from . import ConsoleLogger
 
 
 class DiscordLogger:  # NOTE: i hate how this class looks
     """For exceptions needed to be sent to discord to be logged and reported to the developer."""
 
-    def __init__(self, config: ConfigT, console_logger: ConsoleLogger) -> None:
+    def __init__(self, config: Config, console_logger: ConsoleLogger) -> None:
         self._config = config
         self._console_logger = console_logger
 
@@ -24,7 +24,7 @@ class DiscordLogger:  # NOTE: i hate how this class looks
 
     async def _send_to_discord(self, message: str, exc: None | BaseException) -> None:
         async with ClientSession() as s:
-            hook = discord.Webhook.from_url(self._config["ISSUES_WEBHOOK"], session=s)
+            hook = discord.Webhook.from_url(self._config.issues_webhook, session=s)
             if exc is None:
                 await hook.send(f"Caught exception: {message}")
             else:

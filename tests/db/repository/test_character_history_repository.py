@@ -2,14 +2,13 @@
 import unittest
 from datetime import datetime
 from decimal import Decimal
+from unittest.mock import MagicMock
 from uuid import UUID
 
-from loguru import logger
-
-from kans import config
+from kans import Config
+from kans.adapter import ApiResponseAdapter
 from kans.db import KansDatabase
 from kans.db.kans.model import CharacterHistory, CharacterHistoryId
-from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
@@ -19,7 +18,7 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self._adapter = ApiResponseAdapter()
-        self._db = KansDatabase(config, logger)
+        self._db = KansDatabase(Config(), MagicMock())
         self._repo = self._db.character_history_repository
 
         self._repo._TABLE_NAME = "test_character_history"

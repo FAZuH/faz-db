@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from . import ConsoleLogger, DiscordLogger, PerformanceLogger
-    from kans import ConfigT
+    from kans import Config
 
 
 class Logger(Protocol):
-    def __init__(self, config: ConfigT) -> None: ...
+    def __init__(self, config: Config) -> None: ...
     def set_up(self) -> None: ...
     @property
     def console(self) -> ConsoleLogger: ...

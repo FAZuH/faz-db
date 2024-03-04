@@ -16,19 +16,19 @@ from .repository import (
     PlayerHistoryRepository,
     Repository,
 )
-from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
+from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
 
 if TYPE_CHECKING:
-    from kans import ConfigT, Logger
+    from kans import Config, Logger
 
 
 class KansDatabase(Database):
 
-    def __init__(self, config: ConfigT, logger: Logger) -> None:
+    def __init__(self, config: Config, logger: Logger) -> None:
         self._dbquery: DatabaseQuery = DatabaseQuery(
-                config["DB_USERNAME"],
-                config["DB_PASSWORD"],
-                config["SCHEMA_NAME"],
+                config.db_username,
+                config.db_password,
+                config.schema_name,
                 2
         )
         adapter = DbModelDictAdapter()

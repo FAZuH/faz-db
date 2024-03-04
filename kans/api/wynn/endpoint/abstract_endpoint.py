@@ -3,7 +3,7 @@ from abc import ABC
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from kans.util import HttpRequest
+    from ... import HttpRequest
 
 
 class AbstractEndpoint(ABC):

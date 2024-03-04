@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from kans import Api, Database, ConfigT, Heartbeat, Logger
+    from kans import Api, Database, Config, Heartbeat, Logger
 
 
 class App(Protocol):
@@ -12,7 +12,7 @@ class App(Protocol):
     @property
     def api(self) -> Api: ...
     @property
-    def config(self) -> ConfigT: ...
+    def config(self) -> Config: ...
     @property
     def db(self) -> Database: ...
     @property

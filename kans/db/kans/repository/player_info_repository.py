@@ -7,7 +7,7 @@ from ..model import PlayerInfo, PlayerInfoId
 if TYPE_CHECKING:
     from aiomysql import Connection
     from kans.db import DatabaseQuery
-    from kans.util import DbModelDictAdapter, DbModelIdDictAdapter
+    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
 
 
 class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):

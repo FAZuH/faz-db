@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Iterable
 
 from .task import Task
 from kans.api.wynn.response import GuildResponse, PlayerResponse, OnlinePlayersResponse
+from kans.adapter import ApiResponseAdapter
 from kans.db.kans.model import KansUptime
-from kans.util import ApiResponseAdapter
 
 if TYPE_CHECKING:
     from . import RequestQueue, ResponseQueue

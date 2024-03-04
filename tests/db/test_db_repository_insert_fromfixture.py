@@ -1,13 +1,12 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
+from unittest.mock import MagicMock
 import unittest
 
-from loguru import logger
-
-from kans import config
+from kans import Config
+from kans.adapter import ApiResponseAdapter
 from kans.db import Database, KansDatabase
 from kans.db.kans.model import KansUptime
-from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
@@ -16,7 +15,7 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self.adapter = ApiResponseAdapter()  # type: ignore
-        self.db: Database = KansDatabase(config, logger)
+        self.db: Database = KansDatabase(Config(), MagicMock())
 
         fixtures = FixturesApi()
         self.mock_guildstats = fixtures.get_guilds()

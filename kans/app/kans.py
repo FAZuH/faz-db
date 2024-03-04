@@ -1,22 +1,21 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from dotenv import dotenv_values
-
-from .app import App
+from . import App
+from kans import Config
 from kans.api import WynnApi
 from kans.db import KansDatabase
 from kans.heartbeat import SimpleHeartbeat
 from kans.logger import KansLogger
 
 if TYPE_CHECKING:
-    from kans import Api, ConfigT, Database, Heartbeat, Logger
+    from kans import Api, Database, Heartbeat, Logger
 
 
 class Kans(App):
 
     def __init__(self) -> None:
-        self._config: ConfigT = dotenv_values(".env")  # type: ignore
+        self._config = Config()
         self._logger = KansLogger(self.config)
         self._api = WynnApi(self.logger)
         self._db = KansDatabase(self.config, self.logger)
@@ -35,7 +34,7 @@ class Kans(App):
         return self._api
 
     @property
-    def config(self) -> ConfigT:
+    def config(self) -> Config:
         return self._config
 
     @property

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from decimal import Decimal
     from . import DatabaseQuery
-    from .repository import (
+    from .kans.repository import (
         CharacterInfoRepository,
         CharacterHistoryRepository,
         GuildInfoRepository,

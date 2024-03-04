@@ -1,12 +1,11 @@
 # pyright: reportPrivateUsage=none
 import unittest
+from unittest.mock import MagicMock
 
-from loguru import logger
-
-from kans import config
+from kans import Config
+from kans.adapter import ApiResponseAdapter
 from kans.db import KansDatabase
 from kans.db.kans.model import GuildInfo, GuildInfoId
-from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
@@ -16,7 +15,7 @@ class TestGuildInfoRepository(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self._adapter = ApiResponseAdapter()
-        self._db = KansDatabase(config, logger)
+        self._db = KansDatabase(Config(), MagicMock())
         self._repo = self._db.guild_info_repository
 
         self._repo._TABLE_NAME = "test_guild_info"

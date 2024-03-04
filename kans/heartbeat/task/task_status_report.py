@@ -12,7 +12,7 @@ from . import Task
 
 if TYPE_CHECKING:
     from . import RequestQueue, TaskApiRequest, TaskDbInsert
-    from kans import Api, ConfigT, Database, Logger
+    from kans import Api, Config, Database, Logger
 
 
 class TaskStatusReport(Task):
@@ -20,7 +20,7 @@ class TaskStatusReport(Task):
 
     def __init__(
         self,
-        config: ConfigT,
+        config: Config,
         logger: Logger,
         api: Api,
         api_request: TaskApiRequest,
@@ -38,7 +38,7 @@ class TaskStatusReport(Task):
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = self._start_time = datetime.now()
         self._message_id: None | int = None
-        self._url = config["STATUS_REPORT_WEBHOOK"]
+        self._url = config.status_report_webhook
 
     def setup(self) -> None:
         self._event_loop.run_until_complete(self.async_setup())

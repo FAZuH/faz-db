@@ -2,13 +2,13 @@ from decimal import Decimal
 from types import NoneType
 import unittest
 
+from kans.adapter import ApiResponseAdapter
 from kans.db.kans.model import (
     CharacterHistory,
     DateColumn,
     GamemodeColumn,
     UuidColumn,
 )
-from kans.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
