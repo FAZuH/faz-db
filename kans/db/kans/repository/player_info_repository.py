@@ -6,23 +6,11 @@ from ..model import PlayerInfo, PlayerInfoId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from kans.db import DatabaseQuery
-    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
 
 
 class PlayerInfoRepository(Repository[PlayerInfo, PlayerInfoId]):
 
     _TABLE_NAME: str = "player_info"
-
-    def __init__(
-        self,
-        db: DatabaseQuery,
-        db_model_dict_adapter: DbModelDictAdapter,
-        db_model_id_dict_adapter: DbModelIdDictAdapter
-    ) -> None:
-        super().__init__(db)
-        self._adapt = db_model_dict_adapter.from_player_info
-        self._adapt_id = db_model_id_dict_adapter.from_player_info
 
     async def insert(self, entities: Iterable[PlayerInfo], conn: None | Connection = None) -> int:
         SQL = f"""

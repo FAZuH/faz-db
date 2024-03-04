@@ -6,24 +6,11 @@ from ..model import GuildMemberHistory, GuildMemberHistoryId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
-    from kans.db import DatabaseQuery
-
 
 
 class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHistoryId]):
 
     _TABLE_NAME: str = "guild_member_history"
-
-    def __init__(
-        self,
-        db: DatabaseQuery,
-        db_model_dict_adapter: DbModelDictAdapter,
-        db_model_id_dict_adapter: DbModelIdDictAdapter
-    ) -> None:
-        super().__init__(db)
-        self._adapt = db_model_dict_adapter.from_guild_member_history
-        self._adapt_id = db_model_id_dict_adapter.from_guild_member_history
 
     async def insert(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
         SQL = f"""

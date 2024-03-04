@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, Iterable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, Iterable, TypeVar
 
 T = TypeVar('T')
 ID = TypeVar('ID')
@@ -8,7 +8,7 @@ ID = TypeVar('ID')
 if TYPE_CHECKING:
     from decimal import Decimal
     from aiomysql import Connection
-    from .. import DatabaseQuery
+    from ... import DatabaseQuery
 
 
 class Repository(ABC, Generic[T, ID]):
@@ -18,8 +18,14 @@ class Repository(ABC, Generic[T, ID]):
         `Generic[T, ID]`: The type of the entity and the type of the entity's id.
     """
 
-    def __init__(self, db: DatabaseQuery) -> None:
+    def __init__(
+        self, db: DatabaseQuery,
+        adapt: Callable[[T], Any],
+        adapt_id: Callable[[ID], Any]
+    ) -> None:
         self._db = db
+        self._adapt = adapt
+        self._adapt_id = adapt_id
 
     async def insert(self, entities: Iterable[T], conn: None | Connection = None) -> int: ...
 

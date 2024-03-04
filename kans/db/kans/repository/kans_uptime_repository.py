@@ -6,24 +6,11 @@ from ..model import KansUptime, KansUptimeId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
-    from kans.db import DatabaseQuery
-
 
 
 class KansUptimeRepository(Repository[KansUptime, KansUptimeId]):
 
     _TABLE_NAME: str = "kans_uptime"
-
-    def __init__(
-        self,
-        db: DatabaseQuery,
-        db_model_dict_adapter: DbModelDictAdapter,
-        db_model_id_dict_adapter: DbModelIdDictAdapter
-    ) -> None:
-        super().__init__(db)
-        self._adapt = db_model_dict_adapter.from_kans_uptime
-        self._adapt_id = db_model_id_dict_adapter.from_kans_uptime
 
     async def insert(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int:
         SQL = f"""

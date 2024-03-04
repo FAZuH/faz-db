@@ -6,24 +6,11 @@ from ..model import GuildInfo, GuildInfoId
 
 if TYPE_CHECKING:
     from aiomysql import Connection
-    from kans.adapter import DbModelDictAdapter, DbModelIdDictAdapter
-    from kans.db import DatabaseQuery
-
 
 
 class GuildInfoRepository(Repository[GuildInfo, GuildInfoId]):
 
     _TABLE_NAME: str = "guild_info"
-
-    def __init__(
-        self,
-        db: DatabaseQuery,
-        db_model_dict_adapter: DbModelDictAdapter,
-        db_model_id_dict_adapter: DbModelIdDictAdapter
-    ) -> None:
-        super().__init__(db)
-        self._adapt = db_model_dict_adapter.from_guild_info
-        self._adapt_id = db_model_id_dict_adapter.from_guild_info
 
     async def insert(self, entities: Iterable[GuildInfo], conn: None | Connection = None) -> int:
         # NOTE: This doesn't change. Ignore duplicates.
