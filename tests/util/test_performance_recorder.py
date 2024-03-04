@@ -10,14 +10,14 @@ class TestPerformanceRecorder(unittest.TestCase):
     def setUp(self) -> None:
         self.recorder = PerformanceLogger()
 
-    async def test_listen_async(self) -> None:
+    async def test_bind_async(self) -> None:
         # PREPARE
         async def async_method() -> int:
             await asyncio.sleep(0.1)
             return 42
 
         # ACT
-        wrapped_method = self.recorder.listen_async(async_method, "test_method")
+        wrapped_method = self.recorder.bind_async(async_method, "test_method")
 
         # ASSERT
         result = await wrapped_method()
