@@ -15,7 +15,7 @@ class Repository(ABC, Generic[T]):
     """Abstract class for a repository.
 
     Args:
-        `Generic[T, ID]`: The type of the entity and the type of the entity's id.
+        `Generic[T]`: The type of the entity.
     """
 
     def __init__(self, db: DatabaseQuery, adapter: Callable[[T], Any]) -> None:
@@ -23,7 +23,7 @@ class Repository(ABC, Generic[T]):
         self._adapt = adapter
 
     async def table_size(self, conn: None | Connection = None) -> Decimal:
-        sql = f"""
+        SQL = f"""
             SELECT
                 ROUND(((data_length + index_length)), 2) AS "size_bytes"
             FROM
@@ -32,11 +32,14 @@ class Repository(ABC, Generic[T]):
                 table_schema = '{self._db.database}'
                 AND table_name = '{self.table_name}';
         """
-        res = await self._db.fetch(sql, connection=conn)
+        res = await self._db.fetch(SQL, connection=conn)
         return res[0].get("size_bytes", 0)
 
     @abstractmethod
     async def insert(self, entities: Iterable[T], conn: None | Connection = None) -> int: ...
+
+    @abstractmethod
+    async def create_table(self, conn: None | Connection = None) -> None: ...
 
     @property
     @abstractmethod

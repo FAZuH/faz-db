@@ -42,7 +42,7 @@ class KansDatabase(Database):
         self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query, adapter.from_player_activity_history)
         self._player_history_repository = PlayerHistoryRepository(self.query, adapter.from_player_history)
         self._player_info_repository = PlayerInfoRepository(self.query, adapter.from_player_info)
-        self._all_repositories: list[Repository[Any, Any]] = [
+        self._repositories: list[Repository[Any]] = [
                 self._character_history_repository,
                 self._character_info_repository,
                 self._guild_history_repository,
@@ -56,12 +56,12 @@ class KansDatabase(Database):
         ]
 
     async def create_all(self) -> None:
-        for repo in self._all_repositories:
+        for repo in self._repositories:
             await repo.create_table()
 
     async def total_size(self) -> Decimal:
         sum_size = Decimal(0)
-        for repo in self._all_repositories:
+        for repo in self._repositories:
             sum_size += await repo.table_size()
         return sum_size
 

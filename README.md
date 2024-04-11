@@ -1,10 +1,11 @@
-# Kans (IN DEVELOPMENT)
-Python program that fetches stats of online players and guilds with online members, and saves it into a MySQL database.
+# WynnDB (IN DEVELOPMENT)
+Python program that fetches stats of online players and guilds, and saves it into a MySQL database.
 
 Code design is inspired by moto-bot!
 
 ## Key Features
 - Asynchronous API and database calls
+- Typehinted with scrict pyright type analysis
 - Multithreaded tasks
 - Object oriented design
 - Ratelimit handling
