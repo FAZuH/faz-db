@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 import unittest
 
-from kans import Config
-from kans.adapter import ApiResponseAdapter
-from kans.db import KansDatabase
-from kans.db.kans.model import KansUptime, KansUptimeId
+from wynndb import Config
+from wynndb.adapter import ApiResponseAdapter
+from wynndb.db import KansDatabase
+from wynndb.db.wynndb.model import KansUptime, KansUptimeId
 
 
 class TestKansUptimeRepository(unittest.IsolatedAsyncioTestCase):

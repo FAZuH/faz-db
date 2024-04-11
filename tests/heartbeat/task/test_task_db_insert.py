@@ -3,10 +3,10 @@ from datetime import datetime
 import unittest
 from unittest.mock import AsyncMock, MagicMock, Mock
 
-from kans.api import WynnApi
-from kans.api.wynn.response import OnlinePlayersResponse, PlayerResponse, GuildResponse
-from kans.db import KansDatabase
-from kans.heartbeat.task import RequestQueue, ResponseQueue, TaskDbInsert
+from wynndb.api import WynnApi
+from wynndb.api.wynn.response import OnlinePlayersResponse, PlayerResponse, GuildResponse
+from wynndb.db import KansDatabase
+from wynndb.heartbeat.task import RequestQueue, ResponseQueue, TaskDbInsert
 
 
 class TestTaskDbInsert(unittest.TestCase):

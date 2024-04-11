@@ -5,7 +5,7 @@ The fixture data will be modified accordingly to test specific cases."""
 import json
 import os
 
-from kans.api.wynn.response import (
+from wynndb.api.wynn.response import (
     GuildResponse,
     PlayerResponse,
     OnlinePlayersResponse,

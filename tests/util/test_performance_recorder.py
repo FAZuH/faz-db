@@ -3,7 +3,7 @@ import asyncio
 import unittest
 from datetime import datetime, timedelta
 
-from kans.logger import PerformanceLogger
+from wynndb.logger import PerformanceLogger
 
 
 class TestPerformanceRecorder(unittest.TestCase):

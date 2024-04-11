@@ -5,11 +5,11 @@ import unittest
 from unittest.mock import MagicMock
 from uuid import UUID
 
-from kans import Config
-from kans.api.wynn.model.field import HeaderDateField, UsernameOrUuidField
-from kans.adapter import ApiResponseAdapter
-from kans.db import KansDatabase
-from kans.db.kans.model import DateColumn, PlayerActivityHistory, PlayerActivityHistoryId
+from wynndb import Config
+from wynndb.api.wynn.model.field import HeaderDateField, UsernameOrUuidField
+from wynndb.adapter import ApiResponseAdapter
+from wynndb.db import KansDatabase
+from wynndb.db.wynndb.model import DateColumn, PlayerActivityHistory, PlayerActivityHistoryId
 from tests.fixtures_api import FixturesApi
 
 

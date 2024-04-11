@@ -2,7 +2,7 @@
 import unittest
 from datetime import datetime as dt
 
-from kans.heartbeat.task import RequestQueue
+from wynndb.heartbeat.task import RequestQueue
 
 
 class TestRequestList(unittest.TestCase):

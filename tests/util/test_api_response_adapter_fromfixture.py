@@ -2,8 +2,8 @@ from decimal import Decimal
 from types import NoneType
 import unittest
 
-from kans.adapter import ApiResponseAdapter
-from kans.db.kans.model import (
+from wynndb.adapter import ApiResponseAdapter
+from wynndb.db.wynndb.model import (
     CharacterHistory,
     DateColumn,
     GamemodeColumn,

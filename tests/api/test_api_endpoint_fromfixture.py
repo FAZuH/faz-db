@@ -1,9 +1,9 @@
 from datetime import datetime
 import unittest
 
-from kans import config
-from kans.api import Api, WynnApi
-from kans.logger import KansLogger
+from wynndb import config
+from wynndb.api import Api, WynnApi
+from wynndb.logger import KansLogger
 
 
 class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):

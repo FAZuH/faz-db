@@ -3,10 +3,10 @@ import unittest
 from unittest.mock import MagicMock
 from uuid import UUID
 
-from kans import Config
-from kans.adapter import ApiResponseAdapter
-from kans.db import KansDatabase
-from kans.db.kans.model import CharacterInfo, CharacterInfoId
+from wynndb import Config
+from wynndb.adapter import ApiResponseAdapter
+from wynndb.db import KansDatabase
+from wynndb.db.wynndb.model import CharacterInfo, CharacterInfoId
 from tests.fixtures_api import FixturesApi
 
 

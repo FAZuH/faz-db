@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from kans.heartbeat.task.response_queue import ResponseQueue
+from wynndb.heartbeat.task.response_queue import ResponseQueue
 
 
 class TestResponseList(unittest.TestCase):

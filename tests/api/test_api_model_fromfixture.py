@@ -2,8 +2,8 @@ from datetime import datetime as dt
 from types import NoneType
 import unittest
 
-from kans.api.wynn.model import Guild, Player
-from kans.api.wynn.model.field import (
+from wynndb.api.wynn.model import Guild, Player
+from wynndb.api.wynn.model.field import (
     BodyDateField,
     CharacterTypeField,
     GamemodeField,
