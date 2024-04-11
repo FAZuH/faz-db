@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, Generic, Iterable, TypeVar
 
 T = TypeVar('T')
@@ -11,37 +11,16 @@ if TYPE_CHECKING:
     from ... import DatabaseQuery
 
 
-class Repository(ABC, Generic[T, ID]):
+class Repository(ABC, Generic[T]):
     """Abstract class for a repository.
 
     Args:
         `Generic[T, ID]`: The type of the entity and the type of the entity's id.
     """
 
-    def __init__(
-        self, db: DatabaseQuery,
-        adapt: Callable[[T], Any],
-        adapt_id: Callable[[ID], Any]
-    ) -> None:
+    def __init__(self, db: DatabaseQuery, adapter: Callable[[T], Any]) -> None:
         self._db = db
-        self._adapt = adapt
-        self._adapt_id = adapt_id
-
-    async def insert(self, entities: Iterable[T], conn: None | Connection = None) -> int: ...
-
-    async def exists(self, id_: ID, conn: None | Connection = None) -> bool: ...
-
-    async def count(self, conn: None | Connection = None) -> float: ...
-
-    async def find_one(self, id_: ID, conn: None | Connection = None) -> None | T: ...
-
-    async def find_all(self, conn: None | Connection = None) -> list[T]: ...
-
-    async def update(self, entities: Iterable[T], conn: None | Connection = None) -> int: ...
-
-    async def delete(self, id_: ID, conn: None | Connection = None) -> int: ...
-
-    async def create_table(self, conn: None | Connection = None) -> None: ...
+        self._adapt = adapter
 
     async def table_size(self, conn: None | Connection = None) -> Decimal:
         sql = f"""
@@ -56,5 +35,9 @@ class Repository(ABC, Generic[T, ID]):
         res = await self._db.fetch(sql, connection=conn)
         return res[0].get("size_bytes", 0)
 
+    @abstractmethod
+    async def insert(self, entities: Iterable[T], conn: None | Connection = None) -> int: ...
+
     @property
+    @abstractmethod
     def table_name(self) -> str: ...

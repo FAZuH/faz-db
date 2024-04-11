@@ -27,7 +27,7 @@ class TestTaskDbInsert(unittest.TestCase):
 
         # ASSERT
         self._db.create_all.assert_called_once()
-        self._request_list.enqueue.assert_called_once_with(0, self._api.player.get_online_uuids(), priority=500)
+        self._request_list.enqueue.assert_called_once_with(0, self._api.player.get_online_uuids(), priority=999)
 
     def test_run(self) -> None:
         # PREPARE

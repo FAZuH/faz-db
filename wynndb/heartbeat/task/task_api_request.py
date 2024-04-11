@@ -37,7 +37,10 @@ class TaskApiRequest(Task):
             req.cancel()
 
     def run(self) -> None:
-        self._event_loop.run_until_complete(self._run())
+        try:
+            self._event_loop.run_until_complete(self._run())
+        except Exception as e:
+            self._event_loop.create_task(self._logger.discord.exception(f"Error {self.__class__.__qualname__}", e))
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:

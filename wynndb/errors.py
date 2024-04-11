@@ -19,6 +19,19 @@ class BadRequest(HTTPError):
     """HTTP 400. The server could not process our request, likely due to an error of ours."""
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Unauthorized(HTTPError):
     """HTTP 401. We are not authorized to access the requested resource.
     This can occur due to an invalid or expired Bearer token.

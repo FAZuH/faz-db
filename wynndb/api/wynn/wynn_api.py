@@ -25,15 +25,6 @@ class WynnApi(Api):
         self._guild_endpoint = GuildEndpoint(self._request, 3, True)
         self._player_endpoint = PlayerEndpoint(self._request, 3, True)
 
-        self._setup_performance_logger()
-
-    def _setup_performance_logger(self) -> None:
-        perf = self._logger.performance
-        self.guild.get = perf.bind_async(self.guild.get)
-        self.guild.get_from_prefix = perf.bind_async(self.guild.get_from_prefix)
-        self.player.get_full_stats = perf.bind_async(self.player.get_full_stats)
-        self.player.get_online_uuids = perf.bind_async(self.player.get_online_uuids)
-
     async def start(self) -> None:
         await self._request.start()
 

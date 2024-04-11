@@ -49,6 +49,7 @@ class DbModelDictAdapter:
                 "quest_completions": entity.quest_completions,
                 "raid_completions": entity.raid_completions,
                 "datetime": entity.datetime.datetime,
+                "unique_id": entity.unique_id.uuid
         }
 
     @staticmethod
@@ -68,14 +69,15 @@ class DbModelDictAdapter:
                 "wars": entity.wars,
                 "member_total": entity.member_total,
                 "online_members": entity.online_members,
-                "datetime": entity.datetime.datetime
+                "datetime": entity.datetime.datetime,
+                "unique_id": entity.unique_id.uuid
         }
 
     @staticmethod
     def from_guild_info(entity: GuildInfo) -> GuildInfo.Type:
         return {
-                "name": entity.name,
                 "uuid": entity.uuid.uuid,
+                "name": entity.name,
                 "prefix": entity.prefix,
                 "created": entity.created.datetime
         }
@@ -86,7 +88,8 @@ class DbModelDictAdapter:
                 "uuid": entity.uuid.uuid,
                 "contributed": entity.contributed,
                 "joined": entity.joined.datetime,
-                "datetime": entity.datetime.datetime
+                "datetime": entity.datetime.datetime,
+                "unique_id": entity.unique_id.uuid
         }
 
     @staticmethod
@@ -108,7 +111,7 @@ class DbModelDictAdapter:
         return {
                 "uuid": entity.uuid.uuid,
                 "logon_datetime": entity.logon_datetime.datetime,
-                "logoff_datetime": entity.logoff_datetime.datetime
+                "logoff_datetime": entity.logoff_datetime.datetime,
         }
 
     @staticmethod
@@ -121,7 +124,8 @@ class DbModelDictAdapter:
                 "guild_name": entity.guild_name,
                 "guild_rank": entity.guild_rank,
                 "rank": entity.rank,
-                "datetime": entity.datetime.datetime
+                "datetime": entity.datetime.datetime,
+                "unique_id": entity.unique_id.uuid
         }
 
     @staticmethod

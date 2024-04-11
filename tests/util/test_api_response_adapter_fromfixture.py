@@ -2,13 +2,13 @@ from decimal import Decimal
 from types import NoneType
 import unittest
 
-from wynndb.adapter import ApiResponseAdapter
 from wynndb.db.wynndb.model import (
     CharacterHistory,
     DateColumn,
     GamemodeColumn,
     UuidColumn,
 )
+from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 

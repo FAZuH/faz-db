@@ -16,7 +16,7 @@ from .repository import (
     PlayerHistoryRepository,
     Repository,
 )
-from wynndb.adapter import DbModelDictAdapter, DbModelIdDictAdapter
+from wynndb.util import DbModelDictAdapter
 
 if TYPE_CHECKING:
     from wynndb import Config, Logger
@@ -32,17 +32,16 @@ class KansDatabase(Database):
                 2
         )
         adapter = DbModelDictAdapter()
-        id_adapter = DbModelIdDictAdapter()
-        self._character_history_repository = CharacterHistoryRepository(self.query, adapter.from_character_history, id_adapter.from_character_history)
-        self._character_info_repository = CharacterInfoRepository(self.query, adapter.from_character_info, id_adapter.from_character_info)
-        self._guild_history_repository = GuildHistoryRepository(self.query, adapter.from_guild_history, id_adapter.from_guild_history)
-        self._guild_info_repository = GuildInfoRepository(self.query, adapter.from_guild_info, id_adapter.from_guild_info)
-        self._guild_member_history_repository = GuildMemberHistoryRepository(self.query, adapter.from_guild_member_history, id_adapter.from_guild_member_history)
-        self._kans_uptime_repository = KansUptimeRepository(self.query, adapter.from_kans_uptime, id_adapter.from_kans_uptime)
-        self._online_players_repository = OnlinePlayersRepository(self.query, adapter.from_online_players, id_adapter.from_online_players)
-        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query, adapter.from_player_activity_history, id_adapter.from_player_activity_history)
-        self._player_history_repository = PlayerHistoryRepository(self.query, adapter.from_player_history, id_adapter.from_player_history)
-        self._player_info_repository = PlayerInfoRepository(self.query, adapter.from_player_info, id_adapter.from_player_info)
+        self._character_history_repository = CharacterHistoryRepository(self.query, adapter.from_character_history)
+        self._character_info_repository = CharacterInfoRepository(self.query, adapter.from_character_info)
+        self._guild_history_repository = GuildHistoryRepository(self.query, adapter.from_guild_history)
+        self._guild_info_repository = GuildInfoRepository(self.query, adapter.from_guild_info)
+        self._guild_member_history_repository = GuildMemberHistoryRepository(self.query, adapter.from_guild_member_history)
+        self._kans_uptime_repository = KansUptimeRepository(self.query, adapter.from_kans_uptime)
+        self._online_players_repository = OnlinePlayersRepository(self.query, adapter.from_online_players)
+        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query, adapter.from_player_activity_history)
+        self._player_history_repository = PlayerHistoryRepository(self.query, adapter.from_player_history)
+        self._player_info_repository = PlayerInfoRepository(self.query, adapter.from_player_info)
         self._all_repositories: list[Repository[Any, Any]] = [
                 self._character_history_repository,
                 self._character_info_repository,

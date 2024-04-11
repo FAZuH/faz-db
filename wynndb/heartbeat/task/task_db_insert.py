@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Iterable
 
 from .task import Task
 from wynndb.api.wynn.response import GuildResponse, PlayerResponse, OnlinePlayersResponse
-from wynndb.adapter import ApiResponseAdapter
+from wynndb.util import ApiResponseAdapter
 from wynndb.db.wynndb.model import KansUptime
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class TaskDbInsert(Task):
-    """Inserts API responses to database."""
+    """ Inserts API responses to database. """
 
     def __init__(
         self,
@@ -39,7 +39,7 @@ class TaskDbInsert(Task):
     def setup(self) -> None:
         self._event_loop.run_until_complete(self._db.create_all())
         # NOTE: Initial request. Results in a chain reaction of requests.
-        self._request_list.enqueue(0, self._api.player.get_online_uuids(), priority=500)
+        self._request_list.enqueue(0, self._api.player.get_online_uuids(), priority=999)
 
     def teardown(self) -> None: ...
 
@@ -47,7 +47,7 @@ class TaskDbInsert(Task):
         try:
             self._event_loop.run_until_complete(self._run())
         except Exception as e:
-            self._event_loop.create_task(self._logger.discord.exception(f"Error inserting to database", e))
+            self._event_loop.create_task(self._logger.discord.exception(f"Error {self.__class__.__qualname__}", e))
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:
@@ -70,7 +70,7 @@ class TaskDbInsert(Task):
         self._response_handler.handle_player_response(player_resps)
         self._response_handler.handle_guild_response(guild_resps)
 
-        if online_players_resp is not None:
+        if online_players_resp:
             await self._insert_online_players_response(online_players_resp)
         if player_resps:
             await self._insert_player_responses(player_resps)
@@ -116,28 +116,23 @@ class TaskDbInsert(Task):
         await self._db.guild_member_history_repository.insert(guild_member_history)
 
     @property
-    def response_handler(self) -> TaskDbInsert._ResponseHandler:
-        return self._response_handler
+    def response_handler(self) -> TaskDbInsert._ResponseHandler: return self._response_handler
 
     @property
-    def first_delay(self) -> float:
-        return 1.0
+    def first_delay(self) -> float: return 1.0
 
     @property
-    def interval(self) -> float:
-        return 5.0
+    def interval(self) -> float: return 5.0
 
     @property
-    def latest_run(self) -> datetime:
-        return self._latest_run
+    def latest_run(self) -> datetime: return self._latest_run
 
     @property
-    def name(self) -> str:
-        return self.__class__.__name__
+    def name(self) -> str: return self.__class__.__name__
 
 
     class _ResponseHandler:
-        """Handles Wynncraft response processing, queueing, and requeuing."""
+        """ Handles Wynncraft response processing, queueing, and requeuing. """
 
         def __init__(self, api: Api, request_list: RequestQueue) -> None:
             self._api = api
@@ -149,18 +144,19 @@ class TaskDbInsert(Task):
             self._logged_on_players: set[str] = set()
 
         def handle_onlineplayers_response(self, resp: None | OnlinePlayersResponse) -> None:
-            if resp is None:
-                return
+            if not resp: return
             self._process_onlineplayers_response(resp)
             self._requeue_onlineplayers(resp)
             self._enqueue_player()
 
         def handle_player_response(self, resps: Iterable[PlayerResponse]) -> None:
+            if not resps: return
             self._process_player_response(resps)
             self._requeue_player(resps)
             self._enqueue_guild()
 
         def handle_guild_response(self, resps: Iterable[GuildResponse]) -> None:
+            if not resps: return
             self._requeue_guild(resps)
 
         # OnlinePlayersResponse
@@ -247,20 +243,20 @@ class TaskDbInsert(Task):
 
         @property
         def logged_on_guilds(self) -> set[str]:
-            """Set of latest logged on guilds' names."""
+            """ Set of latest logged on guilds' names. """
             return self._logged_on_guilds
 
         @property
         def logged_on_players(self) -> set[str]:
-            """Set of latest logged on players' uuids. Needed by PlayerActivityHistory."""
+            """ Set of latest logged on players' uuids. Needed by PlayerActivityHistory. """
             return self._logged_on_players
 
         @property
         def online_players(self) -> dict[str, datetime]:
-            """Dict of online players' uuids, paired with their logged on timestamp."""
+            """ Dict of online players' uuids, paired with their logged on timestamp. """
             return self._online_players
 
         @property
         def online_guilds(self) -> dict[str, set[str]]:
-            """guild_name: set(online_uuids)"""
+            """ guild_name: set(online_uuids) """
             return self._online_guilds

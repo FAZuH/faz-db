@@ -4,9 +4,12 @@ from unittest.mock import MagicMock
 import unittest
 
 from wynndb import Config
-from wynndb.adapter import ApiResponseAdapter
 from wynndb.db import Database, KansDatabase
 from wynndb.db.wynndb.model import KansUptime
+
+from wynndb.db import Database, KansDatabase
+from wynndb.db.wynndb.model import KansUptime
+from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
@@ -15,7 +18,8 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         self.adapter = ApiResponseAdapter()  # type: ignore
-        self.db: Database = KansDatabase(Config(), MagicMock())
+        config = Config()
+        self.db: Database = KansDatabase(config, MagicMock())
 
         fixtures = FixturesApi()
         self.mock_guildstats = fixtures.get_guilds()

@@ -2,53 +2,24 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
 from . import Repository
-from ..model import GuildMemberHistory, GuildMemberHistoryId
+from ..model import GuildMemberHistory
 
 if TYPE_CHECKING:
     from aiomysql import Connection
 
 
-class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHistoryId]):
+class GuildMemberHistoryRepository(Repository[GuildMemberHistory]):
 
     _TABLE_NAME: str = "guild_member_history"
 
     async def insert(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
         SQL = f"""
-            INSERT IGNORE INTO `{self.table_name}` (`uuid`, `contributed`, `joined`, `datetime`)
-            VALUES (%(uuid)s, %(contributed)s, %(joined)s, %(datetime)s)
+            INSERT IGNORE INTO `{self.table_name}`
+                (`uuid`, `contributed`, `joined`, `datetime`, `unique_id`)
+            VALUES
+                (%(uuid)s, %(contributed)s, %(joined)s, %(datetime)s, %(unique_id)s)
         """
         return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
-
-    async def exists(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> bool:
-        SQL = f"SELECT COUNT(*) AS count FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
-        return result[0].get("count", 0) > 0
-
-    async def count(self, conn: None | Connection = None) -> float:
-        SQL = f"SELECT COUNT(*) FROM `{self.table_name}`"
-        return (await self._db.fetch(SQL, connection=conn))[0].get("COUNT(*)", 0)
-
-    async def find_one(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> None | GuildMemberHistory:
-        SQL = f"SELECT * FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        result = await self._db.fetch(SQL, self._adapt_id(id_), connection=conn)
-        return GuildMemberHistory(**result[0]) if result else None
-
-    async def find_all(self, conn: None | Connection = None) -> list[GuildMemberHistory]:
-        SQL = f"SELECT * FROM `{self.table_name}`"
-        result = await self._db.fetch(SQL, connection=conn)
-        return [GuildMemberHistory(**row) for row in result] if result else []
-
-    async def update(self, entities: Iterable[GuildMemberHistory], conn: None | Connection = None) -> int:
-        SQL = f"""
-            UPDATE `{self.table_name}`
-            SET `contributed` = %(contributed)s, `joined` = %(joined)s, `datetime` = %(datetime)s
-            WHERE `uuid` = %(uuid)s
-        """
-        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
-
-    async def delete(self, id_: GuildMemberHistoryId, conn: None | Connection = None) -> int:
-        SQL = f"DELETE FROM `{self.table_name}` WHERE `uuid` = %(uuid)s"
-        return await self._db.execute(SQL, self._adapt_id(id_), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
@@ -57,8 +28,9 @@ class GuildMemberHistoryRepository(Repository[GuildMemberHistory, GuildMemberHis
                 `contributed` bigint unsigned NOT NULL,
                 `joined` datetime NOT NULL,
                 `datetime` datetime NOT NULL,
-                UNIQUE KEY `guildMemberHistory_uq_UuidDt` (`uuid`,`datetime`),
-                KEY `guildMemberHistory_idx_UuidDt` (`uuid`,`datetime`) /*!80000 INVISIBLE */
+                `unique_id` binary(16) NOT NULL,
+                UNIQUE KEY `guildMemberHistory_uq_uniqueId` (`unique_id`),
+                KEY `guildMemberHistory_idx_uuidDt` (`uuid`,`datetime` DESC) /*!80000 INVISIBLE */
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         """
         await self._db.execute(SQL)

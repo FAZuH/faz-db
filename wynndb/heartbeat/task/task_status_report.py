@@ -46,18 +46,22 @@ class TaskStatusReport(Task):
     def teardown(self) -> None: ...
 
     def run(self) -> None:
-        self._event_loop.run_until_complete(self._run())
+        try:
+            self._event_loop.run_until_complete(self._run())
+        except Exception as e:
+            self._event_loop.create_task(self._logger.discord.exception(f"Error {self.__class__.__qualname__}", e))
         self._latest_run = datetime.now()
 
     async def async_setup(self):
         async with ClientSession() as s:
             hook = discord.Webhook.from_url(self._url, session=s)
-
-            await hook.edit(
-                    name="Kans Information",
-                    # TODO: set avatar
-            )
+            await hook.edit(name="Kans Information")
             await hook.send("Started Kans.")
+        perf = self._logger.performance
+        self._api.guild.get = perf.bind_async(self._api.guild.get)
+        self._api.guild.get_from_prefix = perf.bind_async(self._api.guild.get_from_prefix)
+        self._api.player.get_full_stats = perf.bind_async(self._api.player.get_full_stats)
+        self._api.player.get_online_uuids = perf.bind_async(self._api.player.get_online_uuids)
 
     async def _run(self) -> None:
         await self._send()
@@ -99,7 +103,7 @@ class TaskStatusReport(Task):
             "\n│"
             "\n├── Db Stats/"
             "\n│   └── Size : {:.2f} MB"
-            "\n├"
+            "\n│"
             "\n├── Api Stats/"
             "\n│   ├── Ratelimit      : {}"
             "\n│   ├── Online Players : {}"

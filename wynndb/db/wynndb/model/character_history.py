@@ -1,16 +1,15 @@
 from __future__ import annotations
+import hashlib
 from typing import TYPE_CHECKING, TypedDict
 
-from . import CharacterHistoryId
-from .. import GamemodeColumn
+from . import DateColumn, GamemodeColumn, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
     from decimal import Decimal
-    from .. import DateColumn, UuidColumn
 
 
-class CharacterHistory(CharacterHistoryId):
+class CharacterHistory:
     """id: `character_uuid`, `datetime`"""
 
     def __init__(
@@ -25,7 +24,7 @@ class CharacterHistory(CharacterHistoryId):
         logins: int,
         deaths: int,
         discoveries: int,
-        gamemode: bytes | list[str],
+        gamemode: bytes | list[str] | GamemodeColumn,
         alchemism: Decimal,
         armouring: Decimal,
         cooking: Decimal,
@@ -42,8 +41,10 @@ class CharacterHistory(CharacterHistoryId):
         quest_completions: int,
         raid_completions: int,
         datetime: datetime | DateColumn,
+        unique_id: bytes | UuidColumn | None = None
     ) -> None:
-        super().__init__(character_uuid, datetime)
+        self._character_uuid = character_uuid if isinstance(character_uuid, UuidColumn) else UuidColumn(character_uuid)
+        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
         self._level = level
         self._xp = xp
         self._wars = wars
@@ -69,35 +70,23 @@ class CharacterHistory(CharacterHistoryId):
         self._dungeon_completions = dungeon_completions
         self._quest_completions = quest_completions
         self._raid_completions = raid_completions
+        self._unique_id = unique_id if isinstance(unique_id, UuidColumn) else UuidColumn(hashlib.sha256(
+                f"{character_uuid}{level}{xp}{wars}{mobs_killed}{chests_found}{logins}{deaths}{discoveries}"
+                f"{gamemode}{alchemism}{armouring}{cooking}{jeweling}{scribing}{tailoring}{weaponsmithing}{woodworking}"
+                f"{mining}{woodcutting}{farming}{fishing}{dungeon_completions}{quest_completions}{raid_completions}".encode()
+        ).digest())
 
-    class Type(TypedDict, total=False):
-        character_uuid: bytes
-        level: int
-        xp: int
-        wars: int
-        playtime: Decimal
-        mobs_killed: int
-        chests_found: int
-        logins: int
-        deaths: int
-        discoveries: int
-        gamemode: bytes
-        alchemism: Decimal
-        armouring: Decimal
-        cooking: Decimal
-        jeweling: Decimal
-        scribing: Decimal
-        tailoring: Decimal
-        weaponsmithing: Decimal
-        woodworking: Decimal
-        mining: Decimal
-        woodcutting: Decimal
-        farming: Decimal
-        fishing: Decimal
-        dungeon_completions: int
-        quest_completions: int
-        raid_completions: int
-        datetime: datetime
+    @property
+    def character_uuid(self) -> UuidColumn:
+        return self._character_uuid
+
+    @property
+    def datetime(self) -> DateColumn:
+        return self._datetime
+
+    @property
+    def unique_id(self) -> UuidColumn:
+        return self._unique_id
 
     @property
     def level(self) -> int:
@@ -198,3 +187,33 @@ class CharacterHistory(CharacterHistoryId):
     @property
     def raid_completions(self) -> int:
         return self._raid_completions
+
+    class Type(TypedDict):
+        character_uuid: bytes
+        level: int
+        xp: int
+        wars: int
+        playtime: Decimal
+        mobs_killed: int
+        chests_found: int
+        logins: int
+        deaths: int
+        discoveries: int
+        gamemode: bytes
+        alchemism: Decimal
+        armouring: Decimal
+        cooking: Decimal
+        jeweling: Decimal
+        scribing: Decimal
+        tailoring: Decimal
+        weaponsmithing: Decimal
+        woodworking: Decimal
+        mining: Decimal
+        woodcutting: Decimal
+        farming: Decimal
+        fishing: Decimal
+        dungeon_completions: int
+        quest_completions: int
+        raid_completions: int
+        datetime: datetime
+        unique_id: bytes

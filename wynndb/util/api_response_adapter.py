@@ -102,10 +102,10 @@ class ApiResponseAdapter:
         @staticmethod
         def to_guild_info(resp: GuildResponse) -> GuildInfo:
             return GuildInfo(
+                    uuid=resp.body.uuid.to_bytes(),
                     name=resp.body.name,
                     prefix=resp.body.prefix,
-                    created=resp.body.created.to_datetime(),
-                    uuid=resp.body.uuid.to_bytes()
+                    created=resp.body.created.to_datetime()
             )
 
         @staticmethod
