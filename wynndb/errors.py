@@ -1,4 +1,4 @@
-class KansError(Exception):
+class WynnDbError(Exception):
     """Base error class for all library-related exceptions in this file.
     Essentially, this could be caught to handle any exceptions thrown from this library.
     """
@@ -11,25 +11,12 @@ class KansError(Exception):
         super().__init__(message)
 
 
-class HTTPError(KansError):
+class HTTPError(WynnDbError):
     """Base error class for all HTTP-related exceptions in this file."""
 
 
 class BadRequest(HTTPError):
     """HTTP 400. The server could not process our request, likely due to an error of ours."""
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class Unauthorized(HTTPError):

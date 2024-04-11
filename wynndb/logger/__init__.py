@@ -4,4 +4,4 @@ from .discord_logger import DiscordLogger  # ConsoleLogger
 from .performance_logger import PerformanceLogger
 from .logger import Logger
 
-from .kans_logger import KansLogger
+from .wynndb_logger import WynnDbLogger

@@ -2,17 +2,17 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
 from . import Repository
-from ..model import KansUptime
+from ..model import WynnDbUptime
 
 if TYPE_CHECKING:
     from aiomysql import Connection
 
 
-class KansUptimeRepository(Repository[KansUptime]):
+class WynnDbUptimeRepository(Repository[WynnDbUptime]):
 
     _TABLE_NAME: str = "kans_uptime"
 
-    async def insert(self, entities: Iterable[KansUptime], conn: None | Connection = None) -> int:
+    async def insert(self, entities: Iterable[WynnDbUptime], conn: None | Connection = None) -> int:
         SQL = f"""
             REPLACE INTO `{self.table_name}` (`start_time`, `stop_time`)
             VALUES (%(start_time)s, %(stop_time)s)

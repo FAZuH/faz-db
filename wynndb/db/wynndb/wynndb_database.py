@@ -9,7 +9,7 @@ from .repository import (
     GuildInfoRepository,
     GuildHistoryRepository,
     GuildMemberHistoryRepository,
-    KansUptimeRepository,
+    WynnDbUptimeRepository,
     OnlinePlayersRepository,
     PlayerActivityHistoryRepository,
     PlayerInfoRepository,
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from wynndb import Config, Logger
 
 
-class KansDatabase(Database):
+class WynnDbDatabase(Database):
 
     def __init__(self, config: Config, logger: Logger) -> None:
         self._dbquery: DatabaseQuery = DatabaseQuery(
@@ -37,7 +37,7 @@ class KansDatabase(Database):
         self._guild_history_repository = GuildHistoryRepository(self.query, adapter.from_guild_history)
         self._guild_info_repository = GuildInfoRepository(self.query, adapter.from_guild_info)
         self._guild_member_history_repository = GuildMemberHistoryRepository(self.query, adapter.from_guild_member_history)
-        self._kans_uptime_repository = KansUptimeRepository(self.query, adapter.from_kans_uptime)
+        self._wynndb_uptime_repository = WynnDbUptimeRepository(self.query, adapter.from_wynndb_uptime)
         self._online_players_repository = OnlinePlayersRepository(self.query, adapter.from_online_players)
         self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query, adapter.from_player_activity_history)
         self._player_history_repository = PlayerHistoryRepository(self.query, adapter.from_player_history)
@@ -48,7 +48,7 @@ class KansDatabase(Database):
                 self._guild_history_repository,
                 self._guild_info_repository,
                 self._guild_member_history_repository,
-                self._kans_uptime_repository,
+                self._wynndb_uptime_repository,
                 self._online_players_repository,
                 self._player_activity_history_repository,
                 self._player_history_repository,
@@ -78,8 +78,8 @@ class KansDatabase(Database):
         return self._guild_member_history_repository
 
     @property
-    def kans_uptime_repository(self) -> KansUptimeRepository:
-        return self._kans_uptime_repository
+    def wynndb_uptime_repository(self) -> WynnDbUptimeRepository:
+        return self._wynndb_uptime_repository
 
     @property
     def player_activity_history_repository(self) -> PlayerActivityHistoryRepository:

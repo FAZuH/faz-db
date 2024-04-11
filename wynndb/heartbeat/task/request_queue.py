@@ -4,7 +4,6 @@ from threading import Lock
 from typing import TYPE_CHECKING, Any, Coroutine, Generator
 
 if TYPE_CHECKING:
-    # from kans import Api
     from wynndb.api.wynn.response import AbstractWynnResponse
 
 

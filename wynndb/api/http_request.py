@@ -14,7 +14,7 @@ from wynndb import (
     ServerError,
     TooManyRetries,
     Unauthorized,
-    KansError
+    WynnDbError
 )
 
 if TYPE_CHECKING:
@@ -59,7 +59,7 @@ class HttpRequest:
             raise ValueError("Retries must be set to a valid integer if retry_on_exc is True")
 
         if self._session is None or self._session.closed:
-            raise KansError("Session is not open")
+            raise WynnDbError("Session is not open")
 
         resp: ClientResponse
         if self._ratelimit:

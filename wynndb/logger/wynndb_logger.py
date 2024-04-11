@@ -7,7 +7,7 @@ from . import (
 from wynndb import Config
 
 
-class KansLogger(Logger):
+class WynnDbLogger(Logger):
 
     def __init__(self, config: Config) -> None:
         self._console_logger = ConsoleLogger()

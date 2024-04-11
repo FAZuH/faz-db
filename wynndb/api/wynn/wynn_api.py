@@ -19,7 +19,7 @@ class WynnApi(Api):
         self._request = HttpRequest(
                 "https://api.wynncraft.com",
                 ratelimit=self._ratelimit,
-                headers={"User-Agent": f"Kans/{__version__}", "Content-Type": "application/json"
+                headers={"User-Agent": f"WynnDB/{__version__}", "Content-Type": "application/json"
         })
 
         self._guild_endpoint = GuildEndpoint(self._request, 3, True)

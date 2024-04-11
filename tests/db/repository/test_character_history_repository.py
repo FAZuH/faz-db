@@ -4,9 +4,9 @@ from datetime import datetime
 from uuid import UUID
 
 from wynndb.config import Config
-from wynndb.db import KansDatabase
+from wynndb.db import WynnDbDatabase
 from wynndb.db.wynndb.model import CharacterHistory
-from wynndb.logger.kans_logger import KansLogger
+from wynndb.logger.wynndb_logger import WynnDbLogger
 from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
@@ -18,7 +18,7 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         self._adapter = ApiResponseAdapter()
         config = Config()
-        self._db = KansDatabase(config, KansLogger(config))
+        self._db = WynnDbDatabase(config, WynnDbLogger(config))
         self._repo = self._db.character_history_repository
 
         self._repo._TABLE_NAME = "test_character_history"

@@ -55,8 +55,8 @@ class TaskStatusReport(Task):
     async def async_setup(self):
         async with ClientSession() as s:
             hook = discord.Webhook.from_url(self._url, session=s)
-            await hook.edit(name="Kans Information")
-            await hook.send("Started Kans.")
+            await hook.edit(name="WynnDB Information")
+            await hook.send("Started WynnDB.")
         perf = self._logger.performance
         self._api.guild.get = perf.bind_async(self._api.guild.get)
         self._api.guild.get_from_prefix = perf.bind_async(self._api.guild.get_from_prefix)
@@ -87,7 +87,7 @@ class TaskStatusReport(Task):
     _DEFAULT_MSG = (
             "```yaml"
             "\n."
-            "\n├── Kans Stats/"
+            "\n├── WynnDB Stats/"
             "\n│   ├── Runtime : {}"
             "\n│   └── RAM     : {:.2f} MB"
             "\n│"
@@ -244,7 +244,7 @@ class TaskStatusReport(Task):
 
 
 # .
-# ├── Kans Stats/
+# ├── WynnDB Stats/
 # │   ├── Runtime: 
 # │   └── RAM: 
 # ├── Tasks/
@@ -275,7 +275,7 @@ class TaskStatusReport(Task):
 #     └── Uptime: 
 
 # https://tree.nathanfriend.io/
-# - Kans Stats
+# - WynnDB Stats
 #  - Runtime: 
 #  - RAM: 
 # - Tasks

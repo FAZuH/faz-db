@@ -10,7 +10,7 @@ if TYPE_CHECKING:
         GuildInfoRepository,
         GuildHistoryRepository,
         GuildMemberHistoryRepository,
-        KansUptimeRepository,
+        WynnDbUptimeRepository,
         OnlinePlayersRepository,
         PlayerActivityHistoryRepository,
         PlayerInfoRepository,
@@ -37,7 +37,7 @@ class Database(Protocol):
     @property
     def guild_member_history_repository(self) -> GuildMemberHistoryRepository: ...
     @property
-    def kans_uptime_repository(self) -> KansUptimeRepository: ...
+    def wynndb_uptime_repository(self) -> WynnDbUptimeRepository: ...
     @property
     def online_players_repository(self) -> OnlinePlayersRepository: ...
     @property

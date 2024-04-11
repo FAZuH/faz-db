@@ -4,11 +4,11 @@ from unittest.mock import MagicMock
 import unittest
 
 from wynndb import Config
-from wynndb.db import Database, KansDatabase
-from wynndb.db.wynndb.model import KansUptime
+from wynndb.db import Database, WynnDbDatabase
+from wynndb.db.wynndb.model import WynnDbUptime
 
-from wynndb.db import Database, KansDatabase
-from wynndb.db.wynndb.model import KansUptime
+from wynndb.db import Database, WynnDbDatabase
+from wynndb.db.wynndb.model import WynnDbUptime
 from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
@@ -19,7 +19,7 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         self.adapter = ApiResponseAdapter()  # type: ignore
         config = Config()
-        self.db: Database = KansDatabase(config, MagicMock())
+        self.db: Database = WynnDbDatabase(config, MagicMock())
 
         fixtures = FixturesApi()
         self.mock_guildstats = fixtures.get_guilds()
@@ -88,17 +88,17 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
         finally:
             await self.db.query.execute("DROP TABLE temp_guild_member_history")
 
-    async def test_kans_uptime_repository(self) -> None:
-        self.db.kans_uptime_repository._TABLE_NAME = "temp_kans_uptime"  # type: ignore
+    async def test_wynndb_uptime_repository(self) -> None:
+        self.db.wynndb_uptime_repository._TABLE_NAME = "temp_wynndb_uptime"  # type: ignore
         try:
-            await self.db.kans_uptime_repository.create_table()
-            affectedrows = await self.db.kans_uptime_repository.insert([KansUptime(
+            await self.db.wynndb_uptime_repository.create_table()
+            affectedrows = await self.db.wynndb_uptime_repository.insert([WynnDbUptime(
                     dt.now(),
                     dt.now() + td(days=1.0)
             )])
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.db.query.execute("DROP TABLE temp_kans_uptime")
+            await self.db.query.execute("DROP TABLE temp_wynndb_uptime")
 
     async def test_online_players_repository(self) -> None:
         self.db.online_players_repository._TABLE_NAME = "temp_online_players"  # type: ignore

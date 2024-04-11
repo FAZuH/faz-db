@@ -2,4 +2,4 @@
 from .database_query import DatabaseQuery
 from .database import Database
 
-from .wynndb.kans_database import KansDatabase  # Database
+from .wynndb.wynndb_database import WynnDbDatabase  # Database

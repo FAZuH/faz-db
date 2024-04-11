@@ -4,25 +4,25 @@ from typing import TYPE_CHECKING
 from . import App
 from wynndb import Config
 from wynndb.api import WynnApi
-from wynndb.db import KansDatabase
+from wynndb.db import WynnDbDatabase
 from wynndb.heartbeat import SimpleHeartbeat
-from wynndb.logger import KansLogger
+from wynndb.logger import WynnDbLogger
 
 if TYPE_CHECKING:
     from wynndb import Api, Database, Heartbeat, Logger
 
 
-class Kans(App):
+class WynnDb(App):
 
     def __init__(self) -> None:
         self._config = Config()
-        self._logger = KansLogger(self.config)
+        self._logger = WynnDbLogger(self.config)
         self._api = WynnApi(self.logger)
-        self._db = KansDatabase(self.config, self.logger)
+        self._db = WynnDbDatabase(self.config, self.logger)
         self._heartbeat = SimpleHeartbeat(self.api, self.config, self.db, self.logger)
 
     def start(self) -> None:
-        self.logger.console.info("Starting Kans Heartbeat...")
+        self.logger.console.info("Starting WynnDb Heartbeat...")
         self.heartbeat.start()
 
     def stop(self) -> None:

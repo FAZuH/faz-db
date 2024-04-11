@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Iterable
 from .task import Task
 from wynndb.api.wynn.response import GuildResponse, PlayerResponse, OnlinePlayersResponse
 from wynndb.util import ApiResponseAdapter
-from wynndb.db.wynndb.model import KansUptime
+from wynndb.db.wynndb.model import WynnDbUptime
 
 if TYPE_CHECKING:
     from . import RequestQueue, ResponseQueue
@@ -51,7 +51,7 @@ class TaskDbInsert(Task):
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:
-        await self._db.kans_uptime_repository.insert((KansUptime(self._start_time, datetime.now()),))
+        await self._db.wynndb_uptime_repository.insert((WynnDbUptime(self._start_time, datetime.now()),))
 
         online_players_resp: None | OnlinePlayersResponse = None
         player_resps: list[PlayerResponse] = []

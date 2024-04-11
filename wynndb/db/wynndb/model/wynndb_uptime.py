@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-class KansUptime:
+class WynnDbUptime:
 
     def __init__(self, start_time: datetime | DateColumn, stop_time: datetime | DateColumn) -> None:
         self._start_time = start_time if isinstance(start_time, DateColumn) else DateColumn(start_time)

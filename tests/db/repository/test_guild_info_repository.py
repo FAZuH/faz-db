@@ -2,9 +2,9 @@
 import unittest
 
 from wynndb.config import Config
-from wynndb.db import KansDatabase
+from wynndb.db import WynnDbDatabase
 from wynndb.db.wynndb.model import GuildInfo
-from wynndb.logger.kans_logger import KansLogger
+from wynndb.logger.wynndb_logger import WynnDbLogger
 from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
@@ -16,7 +16,7 @@ class TestGuildInfoRepository(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         self._adapter = ApiResponseAdapter()
         config = Config()
-        self._db = KansDatabase(config, KansLogger(config))
+        self._db = WynnDbDatabase(config, WynnDbLogger(config))
         self._repo = self._db.guild_info_repository
 
         self._repo._TABLE_NAME = "test_guild_info"

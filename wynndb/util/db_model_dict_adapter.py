@@ -8,7 +8,7 @@ if TYPE_CHECKING:
         GuildHistory,
         GuildInfo,
         GuildMemberHistory,
-        KansUptime,
+        WynnDbUptime,
         OnlinePlayers,
         PlayerActivityHistory,
         PlayerHistory,
@@ -93,7 +93,7 @@ class DbModelDictAdapter:
         }
 
     @staticmethod
-    def from_kans_uptime(entity: KansUptime) -> KansUptime.Type:
+    def from_wynndb_uptime(entity: WynnDbUptime) -> WynnDbUptime.Type:
         return {
                 "start_time": entity.start_time.datetime,
                 "stop_time": entity.stop_time.datetime

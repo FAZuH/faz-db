@@ -1,3 +1,3 @@
 # type: ignore
 from .app import App
-from .kans import Kans
+from .wynndb import WynnDb

@@ -3,7 +3,7 @@ import asyncio
 from time import sleep
 from typing import TYPE_CHECKING
 
-from wynndb.app import Kans
+from wynndb.app import WynnDb
 
 if TYPE_CHECKING:
     from wynndb import App
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class Main:
 
     def __init__(self) -> None:
-        self._app = Kans()
+        self._app = WynnDb()
 
     def main(self) -> None:
         self._app.start()
