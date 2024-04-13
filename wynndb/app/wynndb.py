@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from . import App
-from wynndb import Config
 from wynndb.api import WynnApi
 from wynndb.db import WynnDbDatabase
 from wynndb.heartbeat import SimpleHeartbeat
@@ -15,11 +14,10 @@ if TYPE_CHECKING:
 class WynnDb(App):
 
     def __init__(self) -> None:
-        self._config = Config()
-        self._logger = WynnDbLogger(self.config)
+        self._logger = WynnDbLogger()
         self._api = WynnApi(self.logger)
-        self._db = WynnDbDatabase(self.config, self.logger)
-        self._heartbeat = SimpleHeartbeat(self.api, self.config, self.db, self.logger)
+        self._db = WynnDbDatabase(self.logger)
+        self._heartbeat = SimpleHeartbeat(self.api, self.db, self.logger)
 
     def start(self) -> None:
         self.logger.console.info("Starting WynnDb Heartbeat...")
@@ -32,10 +30,6 @@ class WynnDb(App):
     @property
     def api(self) -> Api:
         return self._api
-
-    @property
-    def config(self) -> Config:
-        return self._config
 
     @property
     def db(self) -> Database:

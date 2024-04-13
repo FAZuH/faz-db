@@ -13,12 +13,12 @@ from .task import (
 
 if TYPE_CHECKING:
     from .task import Task
-    from wynndb import Api, Config, Database, Logger
+    from wynndb import Api, Database, Logger
 
 
 class SimpleHeartbeat(Thread, Heartbeat):
 
-    def __init__(self, api: Api, config: Config, db: Database, logger: Logger) -> None:
+    def __init__(self, api: Api, db: Database, logger: Logger) -> None:
         super().__init__(target=self.run, daemon=True)
         self._logger = logger
 
@@ -29,7 +29,7 @@ class SimpleHeartbeat(Thread, Heartbeat):
 
         api_request = TaskApiRequest(api, logger, request_list, response_list)
         db_insert = TaskDbInsert(api, db, logger, request_list, response_list)
-        status_report = TaskStatusReport(config, logger, api, api_request, db, db_insert, request_list)
+        status_report = TaskStatusReport(logger, api, api_request, db, db_insert, request_list)
 
         self._add_task(api_request)
         self._add_task(db_insert)

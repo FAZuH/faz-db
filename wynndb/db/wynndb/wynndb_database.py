@@ -16,19 +16,20 @@ from .repository import (
     PlayerHistoryRepository,
     Repository,
 )
+from wynndb import Config
 from wynndb.util import DbModelDictAdapter
 
 if TYPE_CHECKING:
-    from wynndb import Config, Logger
+    from wynndb import Logger
 
 
 class WynnDbDatabase(Database):
 
-    def __init__(self, config: Config, logger: Logger) -> None:
+    def __init__(self, logger: Logger) -> None:
         self._dbquery: DatabaseQuery = DatabaseQuery(
-                config.db_username,
-                config.db_password,
-                config.schema_name,
+                Config.get_db_username(),
+                Config.get_db_password(),
+                Config.get_schema_name(),
                 2
         )
         adapter = DbModelDictAdapter()

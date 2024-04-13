@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from wynndb import Api, Database, Config, Heartbeat, Logger
+    from wynndb import Api, Database, Heartbeat, Logger
 
 
 class App(Protocol):
@@ -11,8 +11,6 @@ class App(Protocol):
     def stop(self) -> None: ...
     @property
     def api(self) -> Api: ...
-    @property
-    def config(self) -> Config: ...
     @property
     def db(self) -> Database: ...
     @property

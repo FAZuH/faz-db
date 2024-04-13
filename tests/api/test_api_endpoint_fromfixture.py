@@ -1,7 +1,6 @@
 from datetime import datetime
 import unittest
 
-from wynndb.config import Config
 from wynndb.api import Api, WynnApi
 from wynndb.logger import WynnDbLogger
 
@@ -9,8 +8,7 @@ from wynndb.logger import WynnDbLogger
 class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
-        config = Config()
-        self._api: Api = WynnApi(WynnDbLogger(config))
+        self._api: Api = WynnApi(WynnDbLogger())
         await self._api.start()
 
     async def test_guild_get(self) -> None:

@@ -5,47 +5,62 @@ from dotenv import dotenv_values
 
 class Config:
 
-    # def __init__(self, config: dict[str, str | None]) -> None:
-    def __init__(self) -> None:
-        config = dotenv_values(".env")  # default type for values is str | None
-        self._db_username = self._must_get(config, "DB_USERNAME")
-        self._db_password = self._must_get(config, "DB_PASSWORD")
-        self._db_max_retries = int(self._must_get(config, "DB_MAX_RETRIES"))
-        self._schema_name = self._must_get(config, "SCHEMA_NAME")
-        self._issues_webhook = self._must_get(config, "ISSUES_WEBHOOK")
-        self._error_log_file = self._must_get(config, "ERROR_LOG_FILE")
-        self._status_report_webhook = self._must_get(config, "STATUS_REPORT_WEBHOOK")
+    _debug: bool
+    _db_username: str
+    _db_password: str
+    _db_max_retries: int
+    _schema_name: str
+    _issues_webhook: str
+    _error_log_file: str
+    _status_report_webhook: str
 
-    def _must_get(self, dict_: dict[str, str | None], key: str) -> Any:
+    @classmethod
+    def load_config(cls) -> None:
+        config = dotenv_values(".env")  # default type for values is str | None
+        cls._debug = bool(int(cls._must_get(config, "DEBUG")))
+        cls._db_username = cls._must_get(config, "DB_USERNAME")
+        cls._db_password = cls._must_get(config, "DB_PASSWORD")
+        cls._db_max_retries = int(cls._must_get(config, "DB_MAX_RETRIES"))
+        cls._schema_name = cls._must_get(config, "SCHEMA_NAME")
+        cls._issues_webhook = cls._must_get(config, "ISSUES_WEBHOOK")
+        cls._error_log_file = cls._must_get(config, "ERROR_LOG_FILE")
+        cls._status_report_webhook = cls._must_get(config, "STATUS_REPORT_WEBHOOK")
+
+    @staticmethod
+    def _must_get(dict_: dict[str, str | None], key: str) -> Any:
         value = dict_.get(key)
         if value is None:
             raise ValueError(f"Missing required config key: {key}")
         return value
 
-    @property
-    def db_username(self) -> str:
-        return self._db_username
+    @classmethod
+    def get_debug(cls) -> bool:
+        return cls._debug
 
-    @property
-    def db_password(self) -> str:
-        return self._db_password
+    @classmethod
+    def get_db_username(cls) -> str:
+        return cls._db_username
 
-    @property
-    def db_max_retries(self) -> int:
-        return self._db_max_retries
+    @classmethod
+    def get_db_password(cls) -> str:
+        return cls._db_password
 
-    @property
-    def schema_name(self) -> str:
-        return self._schema_name
+    @classmethod
+    def get_db_max_retries(cls) -> int:
+        return cls._db_max_retries
 
-    @property
-    def issues_webhook(self) -> str:
-        return self._issues_webhook
+    @classmethod
+    def get_schema_name(cls) -> str:
+        return cls._schema_name
 
-    @property
-    def error_log_file(self) -> str:
-        return self._error_log_file
+    @classmethod
+    def get_issues_webhook(cls) -> str:
+        return cls._issues_webhook
 
-    @property
-    def status_report_webhook(self) -> str:
-        return self._status_report_webhook
+    @classmethod
+    def get_error_log_file(cls) -> str:
+        return cls._error_log_file
+
+    @classmethod
+    def get_status_report_webhook(cls) -> str:
+        return cls._status_report_webhook

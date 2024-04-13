@@ -11,8 +11,7 @@ from . import ConsoleLogger
 class DiscordLogger:  # NOTE: i hate how this class looks
     """For exceptions needed to be sent to discord to be logged and reported to the developer."""
 
-    def __init__(self, config: Config, console_logger: ConsoleLogger) -> None:
-        self._config = config
+    def __init__(self, console_logger: ConsoleLogger) -> None:
         self._console_logger = console_logger
 
     async def exception(self, message: str, exception: None | BaseException = None) -> None:
@@ -24,7 +23,7 @@ class DiscordLogger:  # NOTE: i hate how this class looks
 
     async def _send_to_discord(self, message: str, exc: None | BaseException) -> None:
         async with ClientSession() as s:
-            hook = discord.Webhook.from_url(self._config.issues_webhook, session=s)
+            hook = discord.Webhook.from_url(Config.get_issues_webhook(), session=s)
             if exc is None:
                 await hook.send(f"Caught exception: {message}")
             else:

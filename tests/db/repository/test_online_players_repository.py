@@ -15,9 +15,9 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
     # self.test_data to access test data
 
     async def asyncSetUp(self) -> None:
+        Config.load_config()
         self._adapter = ApiResponseAdapter()
-        config = Config()
-        self._db = WynnDbDatabase(config, WynnDbLogger(config))
+        self._db = WynnDbDatabase(WynnDbLogger())
         self._repo = self._db.online_players_repository
 
         self._repo._TABLE_NAME = "test_online_players"

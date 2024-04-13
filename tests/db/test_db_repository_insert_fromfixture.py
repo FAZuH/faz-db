@@ -3,7 +3,7 @@ from datetime import timedelta as td
 from unittest.mock import MagicMock
 import unittest
 
-from wynndb import Config
+from wynndb.config import Config
 from wynndb.db import Database, WynnDbDatabase
 from wynndb.db.wynndb.model import WynnDbUptime
 
@@ -17,9 +17,9 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
     """Tests if db.repositories is able to insert data into database."""
 
     async def asyncSetUp(self) -> None:
+        Config.load_config()
         self.adapter = ApiResponseAdapter()  # type: ignore
-        config = Config()
-        self.db: Database = WynnDbDatabase(config, MagicMock())
+        self.db: Database = WynnDbDatabase(MagicMock())
 
         fixtures = FixturesApi()
         self.mock_guildstats = fixtures.get_guilds()
