@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+from wynndb.config import Config
+
 from . import App
 from wynndb.api import WynnApi
 from wynndb.db import WynnDbDatabase
@@ -14,6 +16,7 @@ if TYPE_CHECKING:
 class WynnDb(App):
 
     def __init__(self) -> None:
+        Config.load_config()
         self._logger = WynnDbLogger()
         self._api = WynnApi(self.logger)
         self._db = WynnDbDatabase(self.logger)

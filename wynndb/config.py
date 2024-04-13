@@ -34,7 +34,7 @@ class Config:
         return value
 
     @classmethod
-    def get_debug(cls) -> bool:
+    def get_is_debug(cls) -> bool:
         return cls._debug
 
     @classmethod
