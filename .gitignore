@@ -161,3 +161,7 @@ cython_debug/
 .vscode/
 .VSCodeCounter/
 .logs
+sandbox.ipynb
+sandbox.py
+.dev-venv
+
