@@ -25,18 +25,23 @@ class GamemodeField:
     def get_liststr(self) -> list[str]:
         return self._gamemodes_str
 
+    @property
     def is_hardcore(self) -> bool:
         return Gamemode.HARDCORE in self._gamemodes
 
+    @property
     def is_ultimate_ironman(self) -> bool:
         return Gamemode.ULTIMATE_IRONMAN in self._gamemodes
 
+    @property
     def is_ironman(self) -> bool:
         return Gamemode.IRONMAN in self._gamemodes
 
+    @property
     def is_craftsman(self) -> bool:
         return Gamemode.CRAFTSMAN in self._gamemodes
 
+    @property
     def is_hunted(self) -> bool:
         return Gamemode.HUNTED in self._gamemodes
 

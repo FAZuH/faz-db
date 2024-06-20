@@ -179,11 +179,11 @@ class TestApiModelFromfixture(unittest.IsolatedAsyncioTestCase):
                 # character.gamemode
                 self.assertIsInstance(ch.gamemode, GamemodeField)
                 self.assertIsInstance(ch.gamemode.get_liststr(), list)
-                self.assertIsInstance(ch.gamemode.is_craftsman(), bool)
-                self.assertIsInstance(ch.gamemode.is_hardcore(), bool)
-                self.assertIsInstance(ch.gamemode.is_hunted(), bool)
-                self.assertIsInstance(ch.gamemode.is_ironman(), bool)
-                self.assertIsInstance(ch.gamemode.is_ultimate_ironman(), bool)
+                self.assertIsInstance(ch.gamemode.is_craftsman, bool)
+                self.assertIsInstance(ch.gamemode.is_hardcore, bool)
+                self.assertIsInstance(ch.gamemode.is_hunted, bool)
+                self.assertIsInstance(ch.gamemode.is_ironman, bool)
+                self.assertIsInstance(ch.gamemode.is_ultimate_ironman, bool)
                 # character.skill_points
                 self.assertIsInstance(ch.skill_points, Player.Character.SkillPoints)
                 self.assertGreaterEqual(ch.skill_points.earth, 0)
