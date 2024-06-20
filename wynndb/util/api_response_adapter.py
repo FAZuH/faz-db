@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Generator
+from typing import Generator, TYPE_CHECKING
 
 from wynndb.db.wynndb.model import (
     CharacterHistory,
@@ -10,7 +10,7 @@ from wynndb.db.wynndb.model import (
     OnlinePlayers,
     PlayerActivityHistory,
     PlayerHistory,
-    PlayerInfo
+    PlayerInfo,
 )
 
 if TYPE_CHECKING:
@@ -37,7 +37,11 @@ class ApiResponseAdapter:
                     logins=ch.logins,
                     deaths=ch.deaths,
                     discoveries=ch.discoveries,
-                    gamemode=ch.gamemode.get_liststr(),
+                    hardcore=ch.gamemode.is_hardcore,
+                    ultimate_ironman=ch.gamemode.is_ultimate_ironman,
+                    ironman=ch.gamemode.is_ironman,
+                    craftsman=ch.gamemode.is_craftsman,
+                    hunted=ch.gamemode.is_hunted,
                     alchemism=ch.professions.alchemism.to_decimal(),
                     armouring=ch.professions.armouring.to_decimal(),
                     cooking=ch.professions.cooking.to_decimal(),
