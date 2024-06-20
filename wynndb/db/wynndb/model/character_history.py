@@ -131,8 +131,24 @@ class CharacterHistory(UniqueIdMixin):
         return self._discoveries
 
     @property
-    def gamemode(self) -> GamemodeColumn:
-        return self._gamemode
+    def hardcore(self) -> bool:
+        return self._hardcore
+
+    @property
+    def ultimate_ironman(self) -> bool:
+        return self._ultimate_ironman
+
+    @property
+    def ironman(self) -> bool:
+        return self._ironman
+
+    @property
+    def craftsman(self) -> bool:
+        return self._craftsman
+
+    @property
+    def hunted(self) -> bool:
+        return self._hunted
 
     @property
     def alchemism(self) -> Decimal:
@@ -205,7 +221,11 @@ class CharacterHistory(UniqueIdMixin):
         logins: int
         deaths: int
         discoveries: int
-        gamemode: bytes
+        hardcore: bool
+        ultimate_ironman: bool
+        ironman: bool
+        craftsman: bool
+        hunted: bool
         alchemism: Decimal
         armouring: Decimal
         cooking: Decimal
