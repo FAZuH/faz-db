@@ -1,5 +1,5 @@
 # pyright: reportPrivateUsage=none
-import unittest
+from unittest import IsolatedAsyncioTestCase
 from datetime import datetime
 from uuid import UUID
 
@@ -11,7 +11,7 @@ from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
 
 
-class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
+class TestCharacterHistoryRepository(IsolatedAsyncioTestCase):
     # self.repo to access repo
     # self.test_data to access test data
 
@@ -34,7 +34,7 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         # NOTE: Assert if the table exists
         res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEquals(self._repo.table_name, next(iter(res[0].values())))
+        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
 
     async def test_insert(self) -> None:
         # ACT
@@ -42,7 +42,7 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is correct
-        self.assertEquals(10, n)
+        self.assertEqual(10, n)
 
         # PREPARE
         toTest1: list[CharacterHistory] = self._testData[1:]
@@ -56,7 +56,7 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert unique constraints of character_uuid and datetime
-        self.assertEquals(1, n)
+        self.assertEqual(1, n)
 
     async def asyncTearDown(self) -> None:
         await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
@@ -70,7 +70,7 @@ class TestCharacterHistoryRepository(unittest.IsolatedAsyncioTestCase):
                 for e in self._adapter.Player.to_character_history(datum)
         ]
         raw_test_data = raw_test_data[:10]  # Get 10
-        self.assertEquals(10, len(raw_test_data))
+        self.assertEqual(10, len(raw_test_data))
 
         testDatetime = datetime.fromtimestamp(1709181095)
         testData: list[CharacterHistory] = []

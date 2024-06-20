@@ -38,7 +38,7 @@ class TestPlayerActivityHistoryRepository(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         # NOTE: Assert if the table exists
         res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEquals(self._repo.table_name, next(iter(res[0].values())))
+        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
 
     async def test_insert(self) -> None:
         # ACT
@@ -46,14 +46,14 @@ class TestPlayerActivityHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert if new players are inserted properly
-        self.assertEquals(10, n)
+        self.assertEqual(10, n)
 
         # ACT
         n = await self._repo.insert(self._testData2)
 
         # ASSERT
         # NOTE: Assert if new players are inserted properly
-        # self.assertEquals(15, len(await self._repo.find_all()))  # TODO:
+        # self.assertEqual(15, len(await self._repo.find_all()))  # TODO:
 
     async def asyncTearDown(self) -> None:
         await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
@@ -91,6 +91,6 @@ class TestPlayerActivityHistoryRepository(unittest.IsolatedAsyncioTestCase):
                 resp2, {uuid.username_or_uuid: testDatetime4 for uuid in resp2.body.players}  # type: ignore
         ))
 
-        self.assertEquals(10, len(raw_test_data1))
-        self.assertEquals(10, len(raw_test_data2))
+        self.assertEqual(10, len(raw_test_data1))
+        self.assertEqual(10, len(raw_test_data2))
         return raw_test_data1, raw_test_data2

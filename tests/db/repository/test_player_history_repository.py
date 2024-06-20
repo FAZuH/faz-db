@@ -33,7 +33,7 @@ class TestPlayerHistoryRepository(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         # NOTE: Assert if the table exists
         res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEquals(self._repo.table_name, next(iter(res[0].values())))
+        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
 
     async def test_insert(self) -> None:
         # ACT
@@ -41,7 +41,7 @@ class TestPlayerHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is correct
-        self.assertEquals(10, n)
+        self.assertEqual(10, n)
 
         # PREPARE
         toTest1: list[PlayerHistory] = []
@@ -59,7 +59,7 @@ class TestPlayerHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert unique constraints of uuid and datetime
-        # self.assertEquals(1, n)  # TODO:
+        # self.assertEqual(1, n)  # TODO:
 
     async def asyncTearDown(self) -> None:
         await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
@@ -72,7 +72,7 @@ class TestPlayerHistoryRepository(unittest.IsolatedAsyncioTestCase):
                 for datum in fixtures.get_players()[:10]
         ]
         raw_test_data = raw_test_data[:10]  # Get 10
-        self.assertEquals(10, len(raw_test_data))
+        self.assertEqual(10, len(raw_test_data))
 
         testDatetime = datetime.fromtimestamp(1709181095)
         testData: list[PlayerHistory] = []

@@ -32,7 +32,7 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         # NOTE: Assert if the table exists
         res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEquals(self._repo.table_name, next(iter(res[0].values())))
+        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
 
     async def test_insert(self) -> None:
         # ACT
@@ -40,7 +40,7 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is correct
-        self.assertEquals(10, n)
+        self.assertEqual(10, n)
 
         # PREPARE
         toTest1: list[OnlinePlayers] = []
@@ -54,7 +54,7 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert unique constraints.
-        # self.assertEquals(len(toTest1), (await self._repo.count()))  # TODO:
+        # self.assertEqual(len(toTest1), (await self._repo.count()))  # TODO:
 
     async def asyncTearDown(self) -> None:
         await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
@@ -64,7 +64,7 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
         fixtures = FixturesApi()
         raw_test_data = list(self._adapter.OnlinePlayers.to_online_players(fixtures.get_online_uuids()))
         raw_test_data = raw_test_data[:10]  # Get 10
-        self.assertEquals(10, len(raw_test_data))
+        self.assertEqual(10, len(raw_test_data))
 
         testData: list[OnlinePlayers] = []
         for i, e in enumerate(raw_test_data):  # Ensure unique ids

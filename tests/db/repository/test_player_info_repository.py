@@ -33,7 +33,7 @@ class TestPlayerInfoRepository(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         # NOTE: Assert if the table exists
         res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEquals(self._repo.table_name, next(iter(res[0].values())))
+        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
 
     async def test_insert(self) -> None:
         # ACT
@@ -41,7 +41,7 @@ class TestPlayerInfoRepository(unittest.IsolatedAsyncioTestCase):
 
         # ASSERT
         # NOTE: Assert if the number of inserted entities is correct
-        self.assertEquals(10, n)
+        self.assertEqual(10, n)
 
     async def asyncTearDown(self) -> None:
         await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
@@ -55,7 +55,7 @@ class TestPlayerInfoRepository(unittest.IsolatedAsyncioTestCase):
                 for datum in fixtures.get_players()[:10]
         ]
         raw_test_data = raw_test_data[:10]  # Get 10
-        self.assertEquals(10, len(raw_test_data))
+        self.assertEqual(10, len(raw_test_data))
 
         testData: list[PlayerInfo] = []
         for i, e in enumerate(raw_test_data):  # Modify the e id

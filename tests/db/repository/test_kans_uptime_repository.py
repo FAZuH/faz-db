@@ -32,7 +32,7 @@ class TestWynnDbUptimeRepository(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         # NOTE: Assert if the table exists
         res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEquals(self._repo.table_name, next(iter(res[0].values())))
+        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
 
     async def test_insert(self) -> None:
         # ACT
@@ -41,7 +41,7 @@ class TestWynnDbUptimeRepository(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         # NOTE: Assert if the number of inserted entities is correct
         res = await self._db.query.fetch(f"SELECT * FROM {self._repo.table_name}")
-        self.assertEquals(2, len(res))
+        self.assertEqual(2, len(res))
 
     async def asyncTearDown(self) -> None:
         await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
