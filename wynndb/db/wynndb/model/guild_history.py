@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from .column import DateColumn, UniqueIdMixin, UuidColumn
 
@@ -58,13 +58,3 @@ class GuildHistory(UniqueIdMixin):
     @property
     def online_members(self) -> int:
         return self._online_members
-
-    class Type(TypedDict):
-        name: str
-        level: Decimal
-        territories: int
-        wars: int
-        member_total: int
-        online_members: int
-        datetime: datetime
-        unique_id: bytes

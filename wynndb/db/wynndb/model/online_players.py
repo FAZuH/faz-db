@@ -1,6 +1,3 @@
-from __future__ import annotations
-from typing import TypedDict
-
 from .column import UuidColumn
 
 
@@ -17,7 +14,3 @@ class OnlinePlayers:
     @property
     def server(self) -> str:
         return self._server
-
-    class Type(TypedDict):
-        uuid: bytes
-        server: str

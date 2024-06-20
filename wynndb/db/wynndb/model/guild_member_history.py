@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from .column import DateColumn, UniqueIdMixin, UuidColumn
 
@@ -39,10 +39,3 @@ class GuildMemberHistory(UniqueIdMixin):
     @property
     def joined(self) -> DateColumn:
         return self._joined
-
-    class Type(TypedDict):
-        uuid: bytes
-        contributed: int
-        joined: datetime
-        datetime: datetime
-        unique_id: bytes

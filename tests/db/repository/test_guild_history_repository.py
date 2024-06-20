@@ -1,39 +1,24 @@
 # pyright: reportPrivateUsage=none
 from datetime import datetime
-import unittest
 
-from wynndb.config import Config
-from wynndb.db import WynnDbDatabase
-from wynndb.db.wynndb.model import GuildHistory
-from wynndb.logger.wynndb_logger import WynnDbLogger
-from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
+from wynndb.db.wynndb.model import GuildHistory
+from wynndb.db.wynndb.repository import GuildHistoryRepository
+
+from ._base_repository_testcase import BaseRepositoryTestCase
 
 
-class TestGuildHistoryRepository(unittest.IsolatedAsyncioTestCase):
-    # self.repo to access repo
-    # self.test_data to access test data
+class TestGuildHistoryRepository(BaseRepositoryTestCase[GuildHistory]):
 
-    async def asyncSetUp(self) -> None:
-        Config.load_config()
-        self._adapter = ApiResponseAdapter()
-        self._db = WynnDbDatabase(WynnDbLogger())
-        self._repo = self._db.guild_history_repository
-
-        self._repo._TABLE_NAME = "test_guild_history"
-        await self._repo.create_table()
-
-        self._testData = self._get_data()
-
+    def __init__(self, methodName: str) -> None:
+        super().__init__(GuildHistoryRepository, methodName)
 
     async def test_create_table(self) -> None:
         # ACT
         await self._repo.create_table()
 
         # ASSERT
-        # NOTE: Assert if the table exists
-        res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
+        await self.assert_table_exists()
 
     async def test_insert(self) -> None:
         # ACT
@@ -45,7 +30,7 @@ class TestGuildHistoryRepository(unittest.IsolatedAsyncioTestCase):
 
         # PREPARE
         toTest1: list[GuildHistory] = self._testData[1:]
-        as_dict = self._repo._adapt(self._testData[0])
+        as_dict = self._repo._model_to_dict(self._testData[0])
         as_dict["level"] += 1
         as_dict.pop("unique_id")  # type: ignore
         toTest1.append(GuildHistory(**as_dict))  # type: ignore
@@ -58,7 +43,7 @@ class TestGuildHistoryRepository(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, n)
 
     async def asyncTearDown(self) -> None:
-        await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
+        await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo.table_name}`")
         return
 
     def _get_data(self) -> list[GuildHistory]:
@@ -73,7 +58,7 @@ class TestGuildHistoryRepository(unittest.IsolatedAsyncioTestCase):
         testDatetime = datetime.fromtimestamp(1709181095)
         testData: list[GuildHistory] = []
         for i, e in enumerate(raw_test_data):  # Modify the e id
-            as_dict = self._repo._adapt(e)
+            as_dict = self._repo._model_to_dict(e)
             as_dict["name"] = str(i)
             as_dict["datetime"] = testDatetime
             as_dict.pop("unique_id")  # type: ignore

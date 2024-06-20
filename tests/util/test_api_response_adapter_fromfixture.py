@@ -2,14 +2,10 @@ from decimal import Decimal
 from types import NoneType
 import unittest
 
-from wynndb.db.wynndb.model import (
-    CharacterHistory,
-    DateColumn,
-    GamemodeColumn,
-    UuidColumn,
-)
-from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
+from wynndb.db.wynndb.model import CharacterHistory
+from wynndb.db.wynndb.model.column import DateColumn, GamemodeColumn, UuidColumn
+from wynndb.util import ApiResponseAdapter
 
 
 class TestApiResponseAdapterFromfixture(unittest.IsolatedAsyncioTestCase):

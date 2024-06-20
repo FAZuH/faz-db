@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from wynndb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
 
 
-
 class ApiResponseAdapter:
     """Adapter for converting wynncraft API responses to DB models."""
 

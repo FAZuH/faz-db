@@ -1,7 +1,7 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
-from .column import DateColumn, GamemodeColumn, UniqueIdMixin, UuidColumn
+from .column import DateColumn, UniqueIdMixin, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -209,37 +209,3 @@ class CharacterHistory(UniqueIdMixin):
     @property
     def raid_completions(self) -> int:
         return self._raid_completions
-
-    class Type(TypedDict):
-        character_uuid: bytes
-        level: int
-        xp: int
-        wars: int
-        playtime: Decimal
-        mobs_killed: int
-        chests_found: int
-        logins: int
-        deaths: int
-        discoveries: int
-        hardcore: bool
-        ultimate_ironman: bool
-        ironman: bool
-        craftsman: bool
-        hunted: bool
-        alchemism: Decimal
-        armouring: Decimal
-        cooking: Decimal
-        jeweling: Decimal
-        scribing: Decimal
-        tailoring: Decimal
-        weaponsmithing: Decimal
-        woodworking: Decimal
-        mining: Decimal
-        woodcutting: Decimal
-        farming: Decimal
-        fishing: Decimal
-        dungeon_completions: int
-        quest_completions: int
-        raid_completions: int
-        datetime: datetime
-        unique_id: bytes

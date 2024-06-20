@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING
 
 from . import Repository
 from ..model import GuildHistory
@@ -19,7 +19,7 @@ class GuildHistoryRepository(Repository[GuildHistory]):
             VALUES
                 (%(name)s, %(level)s, %(territories)s, %(wars)s, %(member_total)s, %(online_members)s, %(datetime)s, %(unique_id)s)
         """
-        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._model_to_dict(entity) for entity in entities), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
@@ -34,9 +34,24 @@ class GuildHistoryRepository(Repository[GuildHistory]):
                 `unique_id` binary(16) NOT NULL,
                 UNIQUE KEY `guildHistory_uq_uniqueId` (`unique_id`),
                 KEY `guildHistory_idx_nameDt` (`name`,`datetime` DESC) /*!80000 INVISIBLE */
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """
         await self._db.execute(SQL)
+
+    @staticmethod
+    def _model_to_dict(entity: GuildHistory) -> dict[str, Any]:
+        return {
+            "name": entity.name,
+            "level": entity.level,
+            "territories": entity.territories,
+            "wars": entity.wars,
+            "member_total": entity.member_total,
+            "online_members": entity.online_members,
+            "datetime": entity.datetime.datetime,
+            "unique_id": entity.unique_id.uuid
+        }
+
+
     @property
     def table_name(self) -> str:
         return self._TABLE_NAME

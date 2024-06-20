@@ -1,16 +1,18 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from wynndb.config import Config
-
-from . import App
 from wynndb.api import WynnApi
-from wynndb.db import WynnDbDatabase
+from wynndb.config import Config
+from wynndb.db import DatabaseQuery
+from wynndb.db.wynndb import WynnDbDatabase
 from wynndb.heartbeat import SimpleHeartbeat
 from wynndb.logger import WynnDbLogger
 
+from . import App
+
 if TYPE_CHECKING:
-    from wynndb import Api, Database, Heartbeat, Logger
+    from wynndb.db.wynndb import IWynnDbDatabase
+    from wynndb import Api, Heartbeat, Logger, IWynnDbDatabase
 
 
 class WynnDb(App):
@@ -18,8 +20,17 @@ class WynnDb(App):
     def __init__(self) -> None:
         Config.load_config()
         self._logger = WynnDbLogger()
+
         self._api = WynnApi(self.logger)
-        self._db = WynnDbDatabase(self.logger)
+
+        wynndb_query = DatabaseQuery(
+            Config.get_db_username(),
+            Config.get_db_password(),
+            Config.get_schema_name(),
+            Config.get_db_max_retries()
+        )
+        self._db = WynnDbDatabase(self.logger, wynndb_query)
+
         self._heartbeat = SimpleHeartbeat(self.api, self.db, self.logger)
 
     def start(self) -> None:
@@ -35,7 +46,7 @@ class WynnDb(App):
         return self._api
 
     @property
-    def db(self) -> Database:
+    def db(self) -> IWynnDbDatabase:
         return self._db
 
     @property

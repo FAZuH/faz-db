@@ -4,8 +4,12 @@ import unittest
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 from wynndb.api import WynnApi
-from wynndb.api.wynn.response import OnlinePlayersResponse, PlayerResponse, GuildResponse
-from wynndb.db import WynnDbDatabase
+from wynndb.api.wynn.response import (
+    GuildResponse,
+    OnlinePlayersResponse,
+    PlayerResponse,
+)
+from wynndb.db.wynndb import WynnDbDatabase
 from wynndb.heartbeat.task import RequestQueue, ResponseQueue, TaskDbInsert
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from decimal import Decimal
@@ -15,9 +15,8 @@ class Repository[T](ABC):
         `Generic[T]`: The type of the entity.
     """
 
-    def __init__(self, db: DatabaseQuery, adapter: Callable[[T], Any]) -> None:
+    def __init__(self, db: DatabaseQuery) -> None:
         self._db = db
-        self._adapt = adapter
 
     async def table_size(self, conn: None | Connection = None) -> Decimal:
         SQL = f"""
@@ -37,6 +36,10 @@ class Repository[T](ABC):
 
     @abstractmethod
     async def create_table(self, conn: None | Connection = None) -> None: ...
+
+    @staticmethod
+    @abstractmethod
+    def _model_to_dict(entity: T) -> dict[str, Any]: ...
 
     @property
     @abstractmethod

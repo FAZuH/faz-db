@@ -1,16 +1,14 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
-from unittest.mock import MagicMock
 import unittest
+from unittest.mock import MagicMock
 
+from tests.fixtures_api import FixturesApi
 from wynndb.config import Config
-from wynndb.db import Database, WynnDbDatabase
-from wynndb.db.wynndb.model import WynnDbUptime
-
-from wynndb.db import Database, WynnDbDatabase
+from wynndb.db import DatabaseQuery
+from wynndb.db.wynndb import WynnDbDatabase
 from wynndb.db.wynndb.model import WynnDbUptime
 from wynndb.util import ApiResponseAdapter
-from tests.fixtures_api import FixturesApi
 
 
 class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
@@ -19,12 +17,19 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         Config.load_config()
         self.adapter = ApiResponseAdapter()  # type: ignore
-        self.db: Database = WynnDbDatabase(MagicMock())
+
+        wynndb_query = DatabaseQuery(
+            Config.get_db_username(),
+            Config.get_db_password(),
+            Config.get_schema_name(),
+            Config.get_db_max_retries()
+        )
+        self.db = WynnDbDatabase(MagicMock(), wynndb_query)
 
         fixtures = FixturesApi()
         self.mock_guildstats = fixtures.get_guilds()
         self.mock_onlineuuids = fixtures.get_online_uuids()
-        self.mock_playerstats  = fixtures.get_players()
+        self.mock_playerstats = fixtures.get_players()
 
     async def test_character_history_repository(self) -> None:
         self.db.character_history_repository._TABLE_NAME = "temp_character_history"  # type: ignore

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING
 
 from . import Repository
 from ..model import GuildInfo
@@ -18,7 +18,7 @@ class GuildInfoRepository(Repository[GuildInfo]):
             INSERT IGNORE INTO `{self.table_name}` (`uuid`, `name`, `prefix`, `created`)
             VALUES (%(uuid)s, %(name)s, %(prefix)s, %(created)s)
         """
-        return await self._db.execute_many(SQL, (self._adapt(entity) for entity in entities), conn)
+        return await self._db.execute_many(SQL, (self._model_to_dict(entity) for entity in entities), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
@@ -28,9 +28,18 @@ class GuildInfoRepository(Repository[GuildInfo]):
                 `created` datetime NOT NULL,
                 `uuid` binary(16) NOT NULL,
                 PRIMARY KEY (`name`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """
         await self._db.execute(SQL)
+
+    @staticmethod
+    def _model_to_dict(entity: GuildInfo) -> dict[str, Any]:
+        return {
+            "uuid": entity.uuid.uuid,
+            "name": entity.name,
+            "prefix": entity.prefix,
+            "created": entity.created.datetime
+        }
 
     @property
     def table_name(self) -> str:

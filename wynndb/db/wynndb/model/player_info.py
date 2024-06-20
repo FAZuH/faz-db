@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from .column import DateColumn, UuidColumn
 
@@ -25,8 +25,3 @@ class PlayerInfo:
     @property
     def first_join(self) -> DateColumn:
         return self._first_join
-
-    class Type(TypedDict):
-        uuid: bytes
-        latest_username: str
-        first_join: datetime

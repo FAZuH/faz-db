@@ -18,7 +18,7 @@ class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):
         # ASSERT
         self.assertIsNotNone(response.body)
         self.assertEqual(response.body.name, "Avicia")
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
                 response.headers.expires.to_datetime().timestamp(),
                 datetime.now().timestamp(),
                 delta=500
@@ -28,7 +28,7 @@ class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):
         response = await self._api.guild.get_from_prefix("AVO")
         self.assertIsNotNone(response.body)
         self.assertEqual(response.body.prefix, "AVO")
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
                 response.headers.expires.to_datetime().timestamp(),
                 datetime.now().timestamp(),
                 delta=500
@@ -38,7 +38,7 @@ class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):
         response = await self._api.player.get_full_stats("FAZuH")
         self.assertIsNotNone(response.body)
         self.assertEqual(response.body.username, "FAZuH")
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
                 response.headers.expires.to_datetime().timestamp(),
                 datetime.now().timestamp(),
                 delta=500
@@ -47,7 +47,7 @@ class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):
     async def test_online_players(self) -> None:
         response = await self._api.player.get_online_uuids()
         self.assertIsNotNone(response.body)
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
                 response.headers.expires.to_datetime().timestamp(),
                 datetime.now().timestamp(),
                 delta=500

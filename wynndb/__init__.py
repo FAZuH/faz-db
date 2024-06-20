@@ -5,6 +5,6 @@ from .errors import *
 
 from .api import Api
 from .app import App
-from .db import Database
+from .db.wynndb import IWynnDbDatabase
 from .heartbeat import Heartbeat
 from .logger import Logger

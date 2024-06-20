@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from wynndb import Api, Database, Heartbeat, Logger
+    from wynndb import Api, Heartbeat, Logger, IWynnDbDatabase
 
 
 class App(Protocol):
@@ -12,7 +12,7 @@ class App(Protocol):
     @property
     def api(self) -> Api: ...
     @property
-    def db(self) -> Database: ...
+    def db(self) -> IWynnDbDatabase: ...
     @property
     def heartbeat(self) -> Heartbeat: ...
     @property

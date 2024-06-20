@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from .column import DateColumn, UniqueIdMixin, UuidColumn
 
@@ -64,14 +64,3 @@ class PlayerHistory(UniqueIdMixin):
     @property
     def rank(self) -> None | str:
         return self._rank
-
-    class Type(TypedDict):
-        uuid: bytes
-        username: str
-        support_rank: None | str
-        playtime: Decimal
-        guild_name: None | str
-        guild_rank: None | str
-        rank: None | str
-        datetime: datetime
-        unique_id: bytes

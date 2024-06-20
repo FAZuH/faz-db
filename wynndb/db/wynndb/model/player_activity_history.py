@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from .column import DateColumn, UuidColumn
 
@@ -30,8 +30,3 @@ class PlayerActivityHistory:
     @property
     def logoff_datetime(self) -> DateColumn:
         return self._logoff_datetime
-
-    class Type(TypedDict):
-        uuid: bytes
-        logon_datetime: datetime
-        logoff_datetime: datetime

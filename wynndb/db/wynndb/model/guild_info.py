@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from .column import DateColumn, UuidColumn
 
@@ -36,9 +36,3 @@ class GuildInfo:
     @property
     def created(self) -> DateColumn:
         return self._created
-
-    class Type(TypedDict):
-        uuid: bytes
-        name: str
-        prefix: str
-        created: datetime

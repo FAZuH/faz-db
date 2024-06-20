@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING
 
 from . import Repository
 from ..model import CharacterInfo
@@ -18,7 +18,7 @@ class CharacterInfoRepository(Repository[CharacterInfo]):
             INSERT IGNORE INTO `{self.table_name}` (`character_uuid`, `uuid`, `type`)
             VALUES (%(character_uuid)s, %(uuid)s, %(type)s)
         """
-        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._model_to_dict(entity) for entity in entities), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
@@ -27,9 +27,17 @@ class CharacterInfoRepository(Repository[CharacterInfo]):
                 `uuid` binary(16) NOT NULL,
                 `type` enum('ARCHER','ASSASSIN','MAGE','SHAMAN','WARRIOR') NOT NULL,
                 PRIMARY KEY (`character_uuid`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """
         await self._db.execute(SQL)
+
+    @staticmethod
+    def _model_to_dict(entity: CharacterInfo) -> dict[str, Any]:
+        return {
+            "character_uuid": entity.character_uuid.uuid,
+            "uuid": entity.uuid.uuid,
+            "type": entity.type
+        }
 
     @property
     def table_name(self) -> str:

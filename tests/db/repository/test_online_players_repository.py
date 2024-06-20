@@ -1,38 +1,24 @@
 # pyright: reportPrivateUsage=none
-import unittest
 from uuid import UUID
 
-from wynndb.config import Config
-from wynndb.db import WynnDbDatabase
-from wynndb.db.wynndb.model import OnlinePlayers
-from wynndb.logger.wynndb_logger import WynnDbLogger
-from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
+from wynndb.db.wynndb.model import OnlinePlayers
+from wynndb.db.wynndb.repository import OnlinePlayersRepository
+
+from ._base_repository_testcase import BaseRepositoryTestCase
 
 
-class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
-    # self.repo to access repo
-    # self.test_data to access test data
+class TestOnlinePlayersRepository(BaseRepositoryTestCase[OnlinePlayers]):
 
-    async def asyncSetUp(self) -> None:
-        Config.load_config()
-        self._adapter = ApiResponseAdapter()
-        self._db = WynnDbDatabase(WynnDbLogger())
-        self._repo = self._db.online_players_repository
-
-        self._repo._TABLE_NAME = "test_online_players"
-        await self._repo.create_table()
-
-        self._testData = self._get_data()
+    def __init__(self, methodName: str) -> None:
+        super().__init__(OnlinePlayersRepository, methodName)
 
     async def test_create_table(self) -> None:
         # ACT
         await self._repo.create_table()
 
         # ASSERT
-        # NOTE: Assert if the table exists
-        res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
+        await self.assert_table_exists()
 
     async def test_insert(self) -> None:
         # ACT
@@ -45,7 +31,7 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
         # PREPARE
         toTest1: list[OnlinePlayers] = []
         for i, e in enumerate(self._testData):
-            as_dict = self._repo._adapt(e)
+            as_dict = self._repo._model_to_dict(e)
             as_dict["uuid"] = UUID(int=69 + i).bytes
             toTest1.append(e.__class__(**as_dict))
 
@@ -57,7 +43,7 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
         # self.assertEqual(len(toTest1), (await self._repo.count()))  # TODO:
 
     async def asyncTearDown(self) -> None:
-        await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
+        await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo.table_name}`")
         return
 
     def _get_data(self) -> list[OnlinePlayers]:
@@ -68,7 +54,7 @@ class TestOnlinePlayersRepository(unittest.IsolatedAsyncioTestCase):
 
         testData: list[OnlinePlayers] = []
         for i, e in enumerate(raw_test_data):  # Ensure unique ids
-            as_dict = self._repo._adapt(e)
+            as_dict = self._repo._model_to_dict(e)
             as_dict["uuid"] = UUID(int=i).bytes
             testData.append(e.__class__(**as_dict))
         return testData

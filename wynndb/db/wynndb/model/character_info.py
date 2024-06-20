@@ -1,6 +1,3 @@
-from __future__ import annotations
-from typing import TypedDict
-
 from .column import UuidColumn
 
 
@@ -22,8 +19,3 @@ class CharacterInfo:
     @property
     def type(self) -> str:
         return self._type
-
-    class Type(TypedDict):
-        character_uuid: bytes
-        uuid: bytes
-        type: str

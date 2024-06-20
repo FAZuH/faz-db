@@ -16,14 +16,12 @@ if TYPE_CHECKING:
         PlayerInfoRepository,
         PlayerHistoryRepository,
     )
-    from wynndb import Logger
 
 
 class IWynnDbDatabase(Protocol):
     """<<interface>>
 
     implemented by `WynndataDatabase`"""
-    def __init__(self, config: dict[str, str], logger: Logger) -> None: ...
     async def create_all(self) -> None: ...
     async def total_size(self) -> Decimal: ...
     @property

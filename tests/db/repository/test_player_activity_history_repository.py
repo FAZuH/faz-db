@@ -1,44 +1,34 @@
 # pyright: reportPrivateUsage=none
 from copy import deepcopy
 from datetime import datetime
-import unittest
 from uuid import UUID
 
-from wynndb.config import Config
-from wynndb.api.wynn.model.field import HeaderDateField
-from wynndb.api.wynn.model.field import UsernameOrUuidField
-from wynndb.db import WynnDbDatabase
-from wynndb.db.wynndb.model import PlayerActivityHistory
-from wynndb.logger.wynndb_logger import WynnDbLogger
-from wynndb.util import ApiResponseAdapter
 from tests.fixtures_api import FixturesApi
+from wynndb.api.wynn.model.field import HeaderDateField, UsernameOrUuidField
+from wynndb.db.wynndb.model import PlayerActivityHistory
+from wynndb.db.wynndb.repository import PlayerActivityHistoryRepository
+
+from ._base_repository_testcase import BaseRepositoryTestCase
 
 
-class TestPlayerActivityHistoryRepository(unittest.IsolatedAsyncioTestCase):
-    # self.repo to access repo
-    # self.test_data to access test data
+class TestPlayerActivityHistoryRepository(BaseRepositoryTestCase):
 
+    def __init__(self, methodName: str) -> None:
+        super().__init__(PlayerActivityHistoryRepository, methodName)
+
+    # override
     async def asyncSetUp(self) -> None:
-        Config.load_config()
-        self._adapter = ApiResponseAdapter()
-        self._db = WynnDbDatabase(WynnDbLogger())
-        self._repo = self._db.player_activity_history_repository
-
-        self._repo._TABLE_NAME = "test_player_activity_history"
-        await self._repo.create_table()
-
-        testData = self._get_data()
-        self._testData1 = testData[0]
-        self._testData2 = testData[1]
+        await super().asyncSetUp()
+        test_data = self.__get_data()
+        self._testData1 = test_data[0]
+        self._testData2 = test_data[1]
 
     async def test_create_table(self) -> None:
         # ACT
         await self._repo.create_table()
 
         # ASSERT
-        # NOTE: Assert if the table exists
-        res = await self._repo._db.fetch(f"SHOW TABLES LIKE '{self._repo._TABLE_NAME}'")
-        self.assertEqual(self._repo.table_name, next(iter(res[0].values())))
+        await self.assert_table_exists()
 
     async def test_insert(self) -> None:
         # ACT
@@ -56,10 +46,13 @@ class TestPlayerActivityHistoryRepository(unittest.IsolatedAsyncioTestCase):
         # self.assertEqual(15, len(await self._repo.find_all()))  # TODO:
 
     async def asyncTearDown(self) -> None:
-        await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo._TABLE_NAME}`")
+        await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo.table_name}`")
         return
 
-    def _get_data(self) -> tuple[list[PlayerActivityHistory], list[PlayerActivityHistory]]:
+    def _get_data(self):
+        return None
+
+    def __get_data(self) -> tuple[list[PlayerActivityHistory], list[PlayerActivityHistory]]:
         testDatetime1 = datetime.fromtimestamp(1_709_181_095)
         testDatetime2 = datetime.fromtimestamp(1_709_181_195)  # + 100
         testDatetime3 = datetime.fromtimestamp(1_709_180_095)  # - 1000

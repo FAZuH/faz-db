@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING
 
 from . import Repository
 from ..model import PlayerHistory
@@ -19,7 +19,7 @@ class PlayerHistoryRepository(Repository[PlayerHistory]):
             VALUES
                 (%(uuid)s, %(username)s, %(support_rank)s, %(playtime)s, %(guild_name)s, %(guild_rank)s, %(rank)s, %(datetime)s, %(unique_id)s)
         """
-        return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
+        return await self._db.execute_many(SQL, tuple(self._model_to_dict(entity) for entity in entities), conn)
 
     async def create_table(self, conn: None | Connection = None) -> None:
         SQL = f"""
@@ -35,9 +35,23 @@ class PlayerHistoryRepository(Repository[PlayerHistory]):
                 `unique_id` binary(16) NOT NULL,
                 UNIQUE KEY `playerHistory_uq_uniqueId` (`unique_id`),
                 KEY `playerHistory_idx_uuidDt` (`uuid`,`datetime` DESC)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """
         await self._db.execute(SQL)
+
+    @staticmethod
+    def _model_to_dict(entity: PlayerHistory) -> dict[str, Any]:
+        return {
+            "uuid": entity.uuid.uuid,
+            "username": entity.username,
+            "support_rank": entity.support_rank,
+            "playtime": entity.playtime,
+            "guild_name": entity.guild_name,
+            "guild_rank": entity.guild_rank,
+            "rank": entity.rank,
+            "datetime": entity.datetime.datetime,
+            "unique_id": entity.unique_id.uuid
+        }
 
     @property
     def table_name(self) -> str:

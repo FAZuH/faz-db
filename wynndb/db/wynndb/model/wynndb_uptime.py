@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from .column import DateColumn
 
@@ -20,7 +20,3 @@ class WynnDbUptime:
     @property
     def stop_time(self) -> DateColumn:
         return self._stop_time
-
-    class Type(TypedDict):
-        start_time: datetime
-        stop_time: datetime

@@ -1,5 +1,5 @@
 # type: ignore
-from .repository import Repository
+from ._repository import Repository
 
 # below depends on Repository
 from .character_history_repository import CharacterHistoryRepository
