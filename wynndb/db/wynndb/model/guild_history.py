@@ -1,15 +1,14 @@
 from __future__ import annotations
 from decimal import Decimal
-import hashlib
 from typing import TYPE_CHECKING, TypedDict
 
-from . import DateColumn, UuidColumn
+from .column import DateColumn, UniqueIdMixin, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class GuildHistory:
+class GuildHistory(UniqueIdMixin):
 
     def __init__(
         self,
@@ -20,6 +19,7 @@ class GuildHistory:
         member_total: int,
         online_members: int,
         datetime: datetime | DateColumn,
+        unique_id: bytes | UuidColumn | None = None
     ) -> None:
         self._name = name
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
@@ -28,7 +28,8 @@ class GuildHistory:
         self._wars = wars
         self._member_total = member_total
         self._online_members = online_members
-        self._unique_id = UuidColumn(hashlib.sha256(f"{name}{level}{territories}{wars}{member_total}{online_members}".encode()).digest())
+
+        super().__init__(unique_id, name, level, territories, wars, member_total, online_members)
 
     @property
     def name(self) -> str:
@@ -37,10 +38,6 @@ class GuildHistory:
     @property
     def datetime(self) -> DateColumn:
         return self._datetime
-
-    @property
-    def unique_id(self) -> UuidColumn:
-        return self._unique_id
 
     @property
     def level(self) -> Decimal:

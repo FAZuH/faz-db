@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterable
+from typing import Iterable, TYPE_CHECKING
 
 from . import Repository
 from ..model import CharacterHistory
@@ -16,15 +16,17 @@ class CharacterHistoryRepository(Repository[CharacterHistory]):
         SQL = f"""
             INSERT IGNORE INTO `{self.table_name}` (
                 `character_uuid`, `level`, `xp`, `wars`, `playtime`, `mobs_killed`, `chests_found`, `logins`,
-                `deaths`, `discoveries`, `gamemode`, `alchemism`, `armouring`, `cooking`, `jeweling`, `scribing`,
-                `tailoring`, `weaponsmithing`, `woodworking`, `mining`, `woodcutting`, `farming`, `fishing`,
-                `dungeon_completions`, `quest_completions`, `raid_completions`, `datetime`, `unique_id`
+                `deaths`, `discoveries`, `hardcore`, `ultimate_ironman`, `ironman`, `craftsman`, `hunted`,
+                `alchemism`, `armouring`, `cooking`, `jeweling`, `scribing`, `tailoring`, `weaponsmithing`,
+                `woodworking`, `mining`, `woodcutting`, `farming`, `fishing`, `dungeon_completions`, 
+                `quest_completions`, `raid_completions`, `datetime`, `unique_id`
             )
             VALUES (
                 %(character_uuid)s, %(level)s, %(xp)s, %(wars)s, %(playtime)s, %(mobs_killed)s, %(chests_found)s, %(logins)s,
-                %(deaths)s, %(discoveries)s, %(gamemode)s, %(alchemism)s, %(armouring)s, %(cooking)s, %(jeweling)s, %(scribing)s,
-                %(tailoring)s, %(weaponsmithing)s, %(woodworking)s, %(mining)s, %(woodcutting)s, %(farming)s, %(fishing)s,
-                %(dungeon_completions)s, %(quest_completions)s, %(raid_completions)s, %(datetime)s, %(unique_id)s
+                %(deaths)s, %(discoveries)s, %(hardcore)s, %(ultimate_ironman)s, %(ironman)s, %(craftsman)s, %(hunted)s,
+                %(alchemism)s, %(armouring)s, %(cooking)s, %(jeweling)s, %(scribing)s, %(tailoring)s, %(weaponsmithing)s,
+                %(woodworking)s, %(mining)s, %(woodcutting)s, %(farming)s, %(fishing)s, %(dungeon_completions)s, 
+                %(quest_completions)s, %(raid_completions)s, %(datetime)s, %(unique_id)s
             )
         """
         return await self._db.execute_many(SQL, tuple(self._adapt(entity) for entity in entities), conn)
@@ -42,7 +44,11 @@ class CharacterHistoryRepository(Repository[CharacterHistory]):
                 `logins` int unsigned NOT NULL,
                 `deaths` int unsigned NOT NULL,
                 `discoveries` int unsigned NOT NULL,
-                `gamemode` bit(5) NOT NULL,
+                `hardcore` boolean NOT NULL,
+                `ultimate_ironman` boolean NOT NULL,
+                `ironman` boolean NOT NULL,
+                `craftsman` boolean NOT NULL,
+                `hunted` boolean NOT NULL,
                 `alchemism` decimal(5,2) unsigned NOT NULL,
                 `armouring` decimal(5,2) unsigned NOT NULL,
                 `cooking` decimal(5,2) unsigned NOT NULL,

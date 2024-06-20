@@ -1,29 +1,31 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import Any, TYPE_CHECKING
 
-from .. import Database, DatabaseQuery
-from .repository import (
-    CharacterInfoRepository,
-    CharacterHistoryRepository,
-    GuildInfoRepository,
-    GuildHistoryRepository,
-    GuildMemberHistoryRepository,
-    WynnDbUptimeRepository,
-    OnlinePlayersRepository,
-    PlayerActivityHistoryRepository,
-    PlayerInfoRepository,
-    PlayerHistoryRepository,
-    Repository,
-)
 from wynndb import Config
 from wynndb.util import DbModelDictAdapter
+
+from . import IWynnDbDatabase
+from .. import DatabaseQuery
+from .repository import (
+    CharacterHistoryRepository,
+    CharacterInfoRepository,
+    GuildHistoryRepository,
+    GuildInfoRepository,
+    GuildMemberHistoryRepository,
+    OnlinePlayersRepository,
+    PlayerActivityHistoryRepository,
+    PlayerHistoryRepository,
+    PlayerInfoRepository,
+    Repository,
+    WynnDbUptimeRepository,
+)
 
 if TYPE_CHECKING:
     from wynndb import Logger
 
 
-class WynnDbDatabase(Database):
+class WynnDbDatabase(IWynnDbDatabase):
 
     def __init__(self, logger: Logger) -> None:
         self._dbquery: DatabaseQuery = DatabaseQuery(

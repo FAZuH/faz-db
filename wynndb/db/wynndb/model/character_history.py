@@ -1,15 +1,14 @@
 from __future__ import annotations
-import hashlib
 from typing import TYPE_CHECKING, TypedDict
 
-from . import DateColumn, GamemodeColumn, UuidColumn
+from .column import DateColumn, GamemodeColumn, UniqueIdMixin, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
     from decimal import Decimal
 
 
-class CharacterHistory:
+class CharacterHistory(UniqueIdMixin):
     """id: `character_uuid`, `datetime`"""
 
     def __init__(
@@ -24,7 +23,11 @@ class CharacterHistory:
         logins: int,
         deaths: int,
         discoveries: int,
-        gamemode: bytes | list[str] | GamemodeColumn,
+        hardcore: bool,
+        ultimate_ironman: bool,
+        ironman: bool,
+        craftsman: bool,
+        hunted: bool,
         alchemism: Decimal,
         armouring: Decimal,
         cooking: Decimal,
@@ -54,7 +57,11 @@ class CharacterHistory:
         self._logins = logins
         self._deaths = deaths
         self._discoveries = discoveries
-        self._gamemode = gamemode if isinstance(gamemode, GamemodeColumn) else GamemodeColumn(gamemode)
+        self._hardcore = hardcore
+        self._ultimate_ironman = ultimate_ironman
+        self._ironman = ironman
+        self._craftsman = craftsman
+        self._hunted = hunted
         self._alchemism = alchemism
         self._armouring = armouring
         self._cooking = cooking
@@ -70,11 +77,14 @@ class CharacterHistory:
         self._dungeon_completions = dungeon_completions
         self._quest_completions = quest_completions
         self._raid_completions = raid_completions
-        self._unique_id = unique_id if isinstance(unique_id, UuidColumn) else UuidColumn(hashlib.sha256(
-                f"{character_uuid}{level}{xp}{wars}{mobs_killed}{chests_found}{logins}{deaths}{discoveries}"
-                f"{gamemode}{alchemism}{armouring}{cooking}{jeweling}{scribing}{tailoring}{weaponsmithing}{woodworking}"
-                f"{mining}{woodcutting}{farming}{fishing}{dungeon_completions}{quest_completions}{raid_completions}".encode()
-        ).digest())
+
+        super().__init__(
+            unique_id,
+            character_uuid, level, xp, wars, mobs_killed, chests_found, logins, deaths,
+            discoveries, hardcore, ultimate_ironman, ironman, craftsman, hunted, alchemism,
+            armouring, cooking, jeweling, scribing, tailoring, weaponsmithing, woodworking,
+            mining, woodcutting, farming, fishing, dungeon_completions, quest_completions, raid_completions,
+        )
 
     @property
     def character_uuid(self) -> UuidColumn:
@@ -83,10 +93,6 @@ class CharacterHistory:
     @property
     def datetime(self) -> DateColumn:
         return self._datetime
-
-    @property
-    def unique_id(self) -> UuidColumn:
-        return self._unique_id
 
     @property
     def level(self) -> int:

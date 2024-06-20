@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterable
+from typing import Iterable, TYPE_CHECKING
 
 from . import Repository
 from ..model import CharacterInfo

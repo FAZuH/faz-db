@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from decimal import Decimal
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from wynndb import Logger
 
 
-class Database(Protocol):
+class IWynnDbDatabase(Protocol):
     """<<interface>>
 
     implemented by `WynndataDatabase`"""

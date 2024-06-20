@@ -1,6 +1,7 @@
 # type: ignore
 from .repository import Repository
 
+# below depends on Repository
 from .character_history_repository import CharacterHistoryRepository
 from .character_info_repository import CharacterInfoRepository
 from .guild_history_repository import GuildHistoryRepository

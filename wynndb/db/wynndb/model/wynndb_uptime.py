@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
-from . import DateColumn
+from .column import DateColumn
 
 if TYPE_CHECKING:
     from datetime import datetime

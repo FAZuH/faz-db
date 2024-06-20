@@ -1,14 +1,13 @@
 from __future__ import annotations
-import hashlib
 from typing import TYPE_CHECKING, TypedDict
 
-from . import DateColumn, UuidColumn
+from .column import DateColumn, UniqueIdMixin, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class GuildMemberHistory:
+class GuildMemberHistory(UniqueIdMixin):
 
     def __init__(
         self,
@@ -16,12 +15,14 @@ class GuildMemberHistory:
         contributed: int,
         joined: datetime | DateColumn,
         datetime: datetime | DateColumn,
+        unique_id: bytes | UuidColumn | None = None
     ) -> None:
         self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
         self._contributed = contributed
         self._joined = joined if isinstance(joined, DateColumn) else DateColumn(joined)
-        self._unique_id = UuidColumn(hashlib.sha256(f"{uuid}{contributed}{joined}".encode()).digest())
+
+        super().__init__(unique_id, uuid, contributed, joined)
 
     @property
     def uuid(self) -> UuidColumn:
@@ -30,10 +31,6 @@ class GuildMemberHistory:
     @property
     def datetime(self) -> DateColumn:
         return self._datetime
-
-    @property
-    def unique_id(self) -> UuidColumn:
-        return self._unique_id
 
     @property
     def contributed(self) -> int:

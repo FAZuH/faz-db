@@ -1,9 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Generic, Iterable, TypeVar
-
-T = TypeVar('T')
-ID = TypeVar('ID')
+from typing import Any, Callable, Iterable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from decimal import Decimal
@@ -11,7 +8,7 @@ if TYPE_CHECKING:
     from ... import DatabaseQuery
 
 
-class Repository(ABC, Generic[T]):
+class Repository[T](ABC):
     """Abstract class for a repository.
 
     Args:

@@ -1,15 +1,14 @@
 from __future__ import annotations
 from decimal import Decimal
-import hashlib
 from typing import TYPE_CHECKING, TypedDict
 
-from . import DateColumn, UuidColumn
+from .column import DateColumn, UniqueIdMixin, UuidColumn
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class PlayerHistory:
+class PlayerHistory(UniqueIdMixin):
 
     def __init__(
         self,
@@ -21,6 +20,7 @@ class PlayerHistory:
         guild_rank: None | str,
         rank: None | str,
         datetime: datetime | DateColumn,
+        unique_id: bytes | UuidColumn | None = None
     ) -> None:
         self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
         self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
@@ -30,7 +30,8 @@ class PlayerHistory:
         self._guild_name = guild_name
         self._guild_rank = guild_rank
         self._rank = rank
-        self._unique_id = UuidColumn(hashlib.sha256(f"{uuid}{username}{support_rank}{guild_name}{guild_rank}{rank}".encode()).digest())
+
+        super().__init__(unique_id, uuid, username, support_rank, guild_name, guild_rank, rank)
 
     @property
     def uuid(self) -> UuidColumn:
@@ -39,10 +40,6 @@ class PlayerHistory:
     @property
     def datetime(self) -> DateColumn:
         return self._datetime
-
-    @property
-    def unique_id(self) -> UuidColumn:
-        return self._unique_id
 
     @property
     def username(self) -> str:
