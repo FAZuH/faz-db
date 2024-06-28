@@ -2,8 +2,8 @@
 from datetime import datetime
 
 from tests.fixtures_api import FixturesApi
-from wynndb.db.wynndb.model import GuildHistory
-from wynndb.db.wynndb.repository import GuildHistoryRepository
+from fazdb.db.fazdb.model import GuildHistory
+from fazdb.db.fazdb.repository import GuildHistoryRepository
 
 from ._base_repository_testcase import BaseRepositoryTestCase
 

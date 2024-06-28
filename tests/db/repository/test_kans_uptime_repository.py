@@ -1,16 +1,16 @@
 # pyright: reportPrivateUsage=none
 from datetime import datetime
 
-from wynndb.db.wynndb.model import WynnDbUptime
-from wynndb.db.wynndb.repository import WynnDbUptimeRepository
+from fazdb.db.fazdb.model import FazDbUptime
+from fazdb.db.fazdb.repository import FazDbUptimeRepository
 
 from ._base_repository_testcase import BaseRepositoryTestCase
 
 
-class TestWynnDbUptimeRepository(BaseRepositoryTestCase[WynnDbUptime]):
+class TestFazDbUptimeRepository(BaseRepositoryTestCase[FazDbUptime]):
 
     def __init__(self, methodName: str) -> None:
-        super().__init__(WynnDbUptimeRepository, methodName)
+        super().__init__(FazDbUptimeRepository, methodName)
 
     async def test_create_table(self) -> None:
         # ACT
@@ -32,17 +32,17 @@ class TestWynnDbUptimeRepository(BaseRepositoryTestCase[WynnDbUptime]):
         await self._repo._db.execute(f"DROP TABLE IF EXISTS `{self._repo.table_name}`")
         return
 
-    def _get_data(self) -> list[WynnDbUptime]:
+    def _get_data(self) -> list[FazDbUptime]:
         testTimestamp1 = 1709181095
-        testData: list[WynnDbUptime] = [
-                WynnDbUptime(
+        testData: list[FazDbUptime] = [
+                FazDbUptime(
                         start_time=datetime.fromtimestamp(testTimestamp1),
                         stop_time=datetime.fromtimestamp(testTimestamp1 + i)
                 )
                 for i in range(5)
         ]
         testData.extend(
-                WynnDbUptime(
+                FazDbUptime(
                         start_time=datetime.fromtimestamp(testTimestamp1 + 10),
                         stop_time=datetime.fromtimestamp(testTimestamp1 + i)
                 )

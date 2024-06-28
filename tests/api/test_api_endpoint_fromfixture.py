@@ -1,14 +1,14 @@
 from datetime import datetime
 import unittest
 
-from wynndb.api import Api, WynnApi
-from wynndb.logger import WynnDbLogger
+from fazdb.api import Api, WynnApi
+from fazdb.logger import FazDbLogger
 
 
 class TestApiEndpointFromfixture(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
-        self._api: Api = WynnApi(WynnDbLogger())
+        self._api: Api = WynnApi(FazDbLogger())
         await self._api.start()
 
     async def test_guild_get(self) -> None:

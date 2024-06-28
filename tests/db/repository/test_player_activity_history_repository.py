@@ -4,9 +4,9 @@ from datetime import datetime
 from uuid import UUID
 
 from tests.fixtures_api import FixturesApi
-from wynndb.api.wynn.model.field import HeaderDateField, UsernameOrUuidField
-from wynndb.db.wynndb.model import PlayerActivityHistory
-from wynndb.db.wynndb.repository import PlayerActivityHistoryRepository
+from fazdb.api.wynn.model.field import HeaderDateField, UsernameOrUuidField
+from fazdb.db.fazdb.model import PlayerActivityHistory
+from fazdb.db.fazdb.repository import PlayerActivityHistoryRepository
 
 from ._base_repository_testcase import BaseRepositoryTestCase
 

@@ -3,7 +3,7 @@ import asyncio
 import unittest
 from datetime import datetime, timedelta
 
-from wynndb.logger import PerformanceLogger
+from fazdb.logger import PerformanceLogger
 
 
 class TestPerformanceRecorder(unittest.TestCase):

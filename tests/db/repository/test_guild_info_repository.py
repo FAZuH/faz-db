@@ -1,7 +1,7 @@
 # pyright: reportPrivateUsage=none
 from tests.fixtures_api import FixturesApi
-from wynndb.db.wynndb.model import GuildInfo
-from wynndb.db.wynndb.repository import GuildInfoRepository
+from fazdb.db.fazdb.model import GuildInfo
+from fazdb.db.fazdb.repository import GuildInfoRepository
 
 from ._base_repository_testcase import BaseRepositoryTestCase
 

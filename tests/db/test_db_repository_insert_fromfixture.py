@@ -4,27 +4,29 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests.fixtures_api import FixturesApi
-from wynndb.config import Config
-from wynndb.db import DatabaseQuery
-from wynndb.db.wynndb import WynnDbDatabase
-from wynndb.db.wynndb.model import WynnDbUptime
-from wynndb.util import ApiResponseAdapter
+from fazdb.config import Config
+from fazdb.db import DatabaseQuery
+from fazdb.db.fazdb import FazDbDatabase
+from fazdb.db.fazdb.model import FazDbUptime
+from fazdb.util import ApiResponseAdapter
 
 
 class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
     """Tests if db.repositories is able to insert data into database."""
 
     async def asyncSetUp(self) -> None:
-        Config.load_config()
+        config = Config()
+        config.read()
+
         self.adapter = ApiResponseAdapter()  # type: ignore
 
-        wynndb_query = DatabaseQuery(
-            Config.get_db_username(),
-            Config.get_db_password(),
-            Config.get_schema_name(),
-            Config.get_db_max_retries()
+        fazdb_query = DatabaseQuery(
+            config.mysql_username,
+            config.mysql_password,
+            config.fazdb_db_name,
+            config.fazdb_db_max_retries
         )
-        self.db = WynnDbDatabase(MagicMock(), wynndb_query)
+        self.db = FazDbDatabase(MagicMock(), fazdb_query)
 
         fixtures = FixturesApi()
         self.mock_guildstats = fixtures.get_guilds()
@@ -93,17 +95,17 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
         finally:
             await self.db.query.execute("DROP TABLE temp_guild_member_history")
 
-    async def test_wynndb_uptime_repository(self) -> None:
-        self.db.wynndb_uptime_repository._TABLE_NAME = "temp_wynndb_uptime"  # type: ignore
+    async def test_fazdb_uptime_repository(self) -> None:
+        self.db.fazdb_uptime_repository._TABLE_NAME = "temp_fazdb_uptime"  # type: ignore
         try:
-            await self.db.wynndb_uptime_repository.create_table()
-            affectedrows = await self.db.wynndb_uptime_repository.insert([WynnDbUptime(
+            await self.db.fazdb_uptime_repository.create_table()
+            affectedrows = await self.db.fazdb_uptime_repository.insert([FazDbUptime(
                     dt.now(),
                     dt.now() + td(days=1.0)
             )])
             self.assertGreaterEqual(affectedrows, 0)
         finally:
-            await self.db.query.execute("DROP TABLE temp_wynndb_uptime")
+            await self.db.query.execute("DROP TABLE temp_fazdb_uptime")
 
     async def test_online_players_repository(self) -> None:
         self.db.online_players_repository._TABLE_NAME = "temp_online_players"  # type: ignore
@@ -115,7 +117,7 @@ class TestDbRepositoryInsertFromfixture(unittest.IsolatedAsyncioTestCase):
         finally:
             await self.db.query.execute("DROP TABLE temp_online_players")
 
-    @unittest.skip("Needs long and time-consuming process to test.")
+    @unittest.skip("in development")
     async def test_player_activity_history_repository(self) -> None:
         pass
         # if self.toTest_guildStats is None:

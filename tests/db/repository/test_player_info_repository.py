@@ -2,8 +2,8 @@
 from uuid import UUID
 
 from tests.fixtures_api import FixturesApi
-from wynndb.db.wynndb.model import PlayerInfo
-from wynndb.db.wynndb.repository import PlayerInfoRepository
+from fazdb.db.fazdb.model import PlayerInfo
+from fazdb.db.fazdb.repository import PlayerInfoRepository
 
 from ._base_repository_testcase import BaseRepositoryTestCase
 

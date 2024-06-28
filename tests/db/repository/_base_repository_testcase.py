@@ -3,12 +3,12 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 from unittest import IsolatedAsyncioTestCase
 
-from wynndb.config import Config
-from wynndb.db import DatabaseQuery
-from wynndb.util import ApiResponseAdapter
+from fazdb.config import Config
+from fazdb.db import DatabaseQuery
+from fazdb.util import ApiResponseAdapter
 
 if TYPE_CHECKING:
-    from wynndb.db.wynndb.repository import Repository
+    from fazdb.db.fazdb.repository import Repository
 
 
 class BaseRepositoryTestCase[T](IsolatedAsyncioTestCase, ABC):
@@ -19,15 +19,17 @@ class BaseRepositoryTestCase[T](IsolatedAsyncioTestCase, ABC):
 
     # override
     async def asyncSetUp(self) -> None:
-        Config.load_config()
-        wynndb_query = DatabaseQuery(
-            Config.get_db_username(),
-            Config.get_db_password(),
-            Config.get_schema_name(),
-            Config.get_db_max_retries()
+        config = Config()
+        config.read()
+
+        fazdb_query = DatabaseQuery(
+            config.mysql_username,
+            config.mysql_password,
+            config.fazdb_db_name,
+            config.fazdb_db_max_retries
         )
 
-        self._repo = self._repo_type(wynndb_query)
+        self._repo = self._repo_type(fazdb_query)
         self._repo._TABLE_NAME = f"test_{self._repo.table_name}"  # type: ignore
         await self._repo.create_table()
 

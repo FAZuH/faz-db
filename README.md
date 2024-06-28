@@ -1,4 +1,4 @@
-# WynnDB (IN DEVELOPMENT)
+# faz-db (IN DEVELOPMENT)
 Python program that fetches stats of online players and guilds, and saves it into a MySQL database.
 
 Code design is inspired by moto-bot!

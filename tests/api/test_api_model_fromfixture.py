@@ -2,8 +2,8 @@ from datetime import datetime as dt
 from types import NoneType
 import unittest
 
-from wynndb.api.wynn.model import Guild, Player
-from wynndb.api.wynn.model.field import (
+from fazdb.api.wynn.model import Guild, Player
+from fazdb.api.wynn.model.field import (
     BodyDateField,
     CharacterTypeField,
     GamemodeField,

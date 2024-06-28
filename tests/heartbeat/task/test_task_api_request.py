@@ -2,7 +2,7 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
-from wynndb.heartbeat.task.task_api_request import TaskApiRequest
+from fazdb.heartbeat.task.task_api_request import TaskApiRequest
 
 
 class TestTaskApiRequest(unittest.TestCase):

@@ -3,21 +3,21 @@ from datetime import datetime
 import unittest
 from unittest.mock import AsyncMock, MagicMock, Mock
 
-from wynndb.api import WynnApi
-from wynndb.api.wynn.response import (
+from fazdb.api import WynnApi
+from fazdb.api.wynn.response import (
     GuildResponse,
     OnlinePlayersResponse,
     PlayerResponse,
 )
-from wynndb.db.wynndb import WynnDbDatabase
-from wynndb.heartbeat.task import RequestQueue, ResponseQueue, TaskDbInsert
+from fazdb.db.fazdb import FazDbDatabase
+from fazdb.heartbeat.task import RequestQueue, ResponseQueue, TaskDbInsert
 
 
 class TestTaskDbInsert(unittest.TestCase):
 
     def setUp(self) -> None:
         self._api = Mock(spec=WynnApi)
-        self._db = Mock(spec=WynnDbDatabase)
+        self._db = Mock(spec=FazDbDatabase)
         self._request_list = Mock(spec_set=RequestQueue)
         self._response_list = Mock(spec_set=ResponseQueue)
         self._task = TaskDbInsert(self._api, self._db, MagicMock(), self._request_list, self._response_list)
@@ -55,7 +55,7 @@ class TestTaskDbInsert(unittest.TestCase):
         await self._task._run()
 
         # ASSERT
-        self._db.wynndb_uptime_repository.insert.assert_called_once()
+        self._db.fazdb_uptime_repository.insert.assert_called_once()
         self._task._response_handler.handle_onlineplayers_response.assert_not_called()
         self._task._response_handler.handle_player_response.assert_not_called()
         self._task._response_handler.handle_guild_response.assert_not_called()
@@ -70,7 +70,7 @@ class TestTaskDbInsert(unittest.TestCase):
         self._task._response_handler.handle_onlineplayers_response.assert_called_once_with(online_players)
         self._task._response_handler.handle_player_response.assert_called_once_with(player)
         self._task._response_handler.handle_guild_response.assert_called_once_with(guild)
-        self._db.wynndb_uptime_repository.insert.assert_called_once()
+        self._db.fazdb_uptime_repository.insert.assert_called_once()
         self._db.online_players_repository.insert.assert_called_once()
         self._db.player_activity_history_repository.insert.assert_called_once()
         self._db.player_info_repository.insert.assert_called_once()

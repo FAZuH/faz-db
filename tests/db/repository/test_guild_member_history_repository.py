@@ -3,8 +3,8 @@ from datetime import datetime
 from uuid import UUID
 
 from tests.fixtures_api import FixturesApi
-from wynndb.db.wynndb.model import GuildMemberHistory
-from wynndb.db.wynndb.repository import GuildMemberHistoryRepository
+from fazdb.db.fazdb.model import GuildMemberHistory
+from fazdb.db.fazdb.repository import GuildMemberHistoryRepository
 
 from ._base_repository_testcase import BaseRepositoryTestCase
 

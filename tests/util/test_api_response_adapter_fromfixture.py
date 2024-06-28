@@ -3,9 +3,9 @@ from types import NoneType
 import unittest
 
 from tests.fixtures_api import FixturesApi
-from wynndb.db.wynndb.model import CharacterHistory
-from wynndb.db.wynndb.model.column import DateColumn, GamemodeColumn, UuidColumn
-from wynndb.util import ApiResponseAdapter
+from fazdb.db.fazdb.model import CharacterHistory
+from fazdb.db.fazdb.model.column import DateColumn, GamemodeColumn, UuidColumn
+from fazdb.util import ApiResponseAdapter
 
 
 class TestApiResponseAdapterFromfixture(unittest.IsolatedAsyncioTestCase):
