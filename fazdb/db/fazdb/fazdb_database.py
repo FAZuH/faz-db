@@ -33,7 +33,7 @@ class FazDbDatabase(IFazDbDatabase):
         self._guild_history_repository = GuildHistoryRepository(self.query)
         self._guild_info_repository = GuildInfoRepository(self.query)
         self._guild_member_history_repository = GuildMemberHistoryRepository(self.query)
-        self._wynndb_uptime_repository = FazDbUptimeRepository(self.query)
+        self._fazdb_uptime_repository = FazDbUptimeRepository(self.query)
         self._online_players_repository = OnlinePlayersRepository(self.query)
         self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query)
         self._player_history_repository = PlayerHistoryRepository(self.query)
@@ -44,7 +44,7 @@ class FazDbDatabase(IFazDbDatabase):
                 self._guild_history_repository,
                 self._guild_info_repository,
                 self._guild_member_history_repository,
-                self._wynndb_uptime_repository,
+                self._fazdb_uptime_repository,
                 self._online_players_repository,
                 self._player_activity_history_repository,
                 self._player_history_repository,
@@ -75,7 +75,7 @@ class FazDbDatabase(IFazDbDatabase):
 
     @property
     def fazdb_uptime_repository(self) -> FazDbUptimeRepository:
-        return self._wynndb_uptime_repository
+        return self._fazdb_uptime_repository
 
     @property
     def player_activity_history_repository(self) -> PlayerActivityHistoryRepository:

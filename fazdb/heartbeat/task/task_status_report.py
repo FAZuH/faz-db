@@ -13,7 +13,7 @@ from fazdb import Config
 
 if TYPE_CHECKING:
     from . import RequestQueue, TaskApiRequest, TaskDbInsert
-    from fazdb import Api, Database, Logger
+    from fazdb import Api, IFazDbDatabase, Logger
 
 
 class TaskStatusReport(Task):
@@ -24,7 +24,7 @@ class TaskStatusReport(Task):
         logger: Logger,
         api: Api,
         api_request: TaskApiRequest,
-        db: Database,
+        db: IFazDbDatabase,
         db_insert: TaskDbInsert,
         request_list: RequestQueue
     ) -> None:
@@ -38,7 +38,7 @@ class TaskStatusReport(Task):
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = self._start_time = datetime.now()
         self._message_id: None | int = None
-        self._url = Config.get_status_report_webhook()
+        self._url = Config.discord_log_webhook
 
     def setup(self) -> None:
         self._event_loop.run_until_complete(self.async_setup())

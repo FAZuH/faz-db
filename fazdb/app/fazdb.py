@@ -18,18 +18,20 @@ if TYPE_CHECKING:
 class FazDb(App):
 
     def __init__(self) -> None:
-        Config.load_config()
+        config = Config()
+        config.read()
+
         self._logger = FazDbLogger()
 
         self._api = WynnApi(self.logger)
 
-        wynndb_query = DatabaseQuery(
-            Config.get_db_username(),
-            Config.get_db_password(),
-            Config.get_schema_name(),
-            Config.get_db_max_retries()
+        fazdb_query = DatabaseQuery(
+            config.mysql_username,
+            config.mysql_password,
+            config.fazdb_db_name,
+            config.fazdb_db_max_retries
         )
-        self._db = FazDbDatabase(self.logger, wynndb_query)
+        self._db = FazDbDatabase(self.logger, fazdb_query)
 
         self._heartbeat = SimpleHeartbeat(self.api, self.db, self.logger)
 

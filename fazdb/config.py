@@ -6,21 +6,34 @@ from dotenv import load_dotenv
 
 class Config:
 
-    def read(self) -> None:
+    discord_log_webhook: str
+    discord_status_webhook: str
+
+    fazdb_db_max_retries: int
+
+    mysql_host: str
+    mysql_port: int
+    mysql_username: str
+    mysql_password: str
+    fazdb_db_name: str
+
+    @classmethod
+    def read(cls) -> None:
         load_dotenv()
 
-        self.discord_log_webhook = self.__must_get_env("DISCORD_LOG_WEBHOOK")
-        self.discord_status_webhook = self.__must_get_env("DISCORD_STATUS_WEBHOOK")
+        cls.discord_log_webhook = cls.__must_get_env("DISCORD_LOG_WEBHOOK")
+        cls.discord_status_webhook = cls.__must_get_env("DISCORD_STATUS_WEBHOOK")
 
-        self.fazdb_db_max_retries = self.__must_get_env("FAZDB_DB_MAX_RETRIES", int)
+        cls.fazdb_db_max_retries = cls.__must_get_env("FAZDB_DB_MAX_RETRIES", int)
 
-        self.mysql_host = self.__must_get_env("MYSQL_HOST")
-        self.mysql_port = self.__must_get_env("MYSQL_PORT", int)
-        self.mysql_username = self.__must_get_env("MYSQL_USER")
-        self.mysql_password = self.__must_get_env("MYSQL_PASSWORD")
-        self.fazdb_db_name = self.__must_get_env("MYSQL_FAZDB_DATABASE")
+        cls.mysql_host = cls.__must_get_env("MYSQL_HOST")
+        cls.mysql_port = cls.__must_get_env("MYSQL_PORT", int)
+        cls.mysql_username = cls.__must_get_env("MYSQL_USER")
+        cls.mysql_password = cls.__must_get_env("MYSQL_PASSWORD")
+        cls.fazdb_db_name = cls.__must_get_env("MYSQL_FAZDB_DATABASE")
 
-    def __must_get_env[T](self, key: str, type_strategy: Callable[[str], T] = str) -> T:
+    @staticmethod
+    def __must_get_env[T](key: str, type_strategy: Callable[[str], T] = str) -> T:
         try:
             env = os.getenv(key)
             return type_strategy(env)  # type: ignore

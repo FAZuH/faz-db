@@ -23,7 +23,7 @@ class DiscordLogger:  # NOTE: i hate how this class looks
 
     async def _send_to_discord(self, message: str, exc: None | BaseException) -> None:
         async with ClientSession() as s:
-            hook = discord.Webhook.from_url(Config.get_issues_webhook(), session=s)
+            hook = discord.Webhook.from_url(Config.discord_log_webhook, session=s)
             if exc is None:
                 await hook.send(f"Caught exception: {message}")
             else:
