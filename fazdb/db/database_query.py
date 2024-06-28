@@ -16,11 +16,21 @@ filterwarnings("ignore", category=Warning)
 
 class DatabaseQuery:
 
-    def __init__(self, user: str, password: str, database: str, retries: int = 0) -> None:
-        self._user: str = user
-        self._password: str = password
-        self._database: str = database
-        self._retries: int = retries
+    def __init__(
+            self,
+            user: str,
+            password: str,
+            host: str,
+            port: int,
+            database: str,
+            retries: int = 0
+        ) -> None:
+        self._user = user
+        self._password = password
+        self._host = host
+        self._port = port
+        self._database = database
+        self._retries = retries
 
         self._retry_decorator = ErrorHandler.retry_decorator(self.retries, Exception)
 
@@ -85,7 +95,9 @@ class DatabaseQuery:
     @asynccontextmanager
     async def create_connection(self) -> AsyncGenerator[Connection, Any]:
         conn: Connection
-        async with connect(user=self.user, password=self.password, db=self.database) as conn:
+        async with connect(
+            user=self.user, password=self.password, db=self.database, host=self.host, port=self.port
+        ) as conn:
             yield conn
 
     def transaction_group(self) -> DatabaseQuery._TransactionGroupContextManager:
@@ -106,6 +118,14 @@ class DatabaseQuery:
     @property
     def password(self) -> str:
         return self._password
+
+    @property
+    def port(self) -> int:
+        return self._port
+
+    @property
+    def host(self) -> str:
+        return self._host
 
     @property
     def database(self) -> str:

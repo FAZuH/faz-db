@@ -28,8 +28,10 @@ class FazDb(App):
         fazdb_query = DatabaseQuery(
             config.mysql_username,
             config.mysql_password,
+            config.mysql_host,
+            config.mysql_port,
             config.fazdb_db_name,
-            config.fazdb_db_max_retries
+            config.fazdb_db_max_retries,
         )
         self._db = FazDbDatabase(self.logger, fazdb_query)
 
