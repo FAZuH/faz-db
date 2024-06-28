@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  faz-db:
+    container_name: faz-db
+    build: .
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: faz
+      MYSQL_PASSWORD: password
+      MYSQL_FAZDB_DATABASE: faz-db
