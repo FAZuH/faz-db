@@ -38,7 +38,7 @@ class TaskStatusReport(Task):
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = self._start_time = datetime.now()
         self._message_id: None | int = None
-        self._url = Config.discord_log_webhook
+        self._url = Config.discord_status_webhook
 
     def setup(self) -> None:
         self._event_loop.run_until_complete(self.async_setup())
