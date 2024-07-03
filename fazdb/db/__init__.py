@@ -1,3 +1,2 @@
 # type: ignore
-from .database_query import DatabaseQuery
-
+from ._base_async_database import BaseAsyncDatabase

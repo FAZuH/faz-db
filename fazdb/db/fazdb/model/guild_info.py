@@ -1,38 +1,15 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from datetime import datetime as dt
 
-from .column import DateColumn, UuidColumn
+from sqlalchemy.dialects.mysql import BINARY, DATETIME, VARCHAR
+from sqlalchemy.orm import Mapped, mapped_column
 
-if TYPE_CHECKING:
-    from datetime import datetime
+from . import BaseModel
 
 
-class GuildInfo:
+class GuildInfo(BaseModel):
+    __tablename__ = "guild_info"
 
-    def __init__(
-        self,
-        uuid: bytes | UuidColumn,
-        name: str,
-        prefix: str,
-        created: datetime | DateColumn
-    ) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
-        self._name = name
-        self._prefix = prefix
-        self._created = created if isinstance(created, DateColumn) else DateColumn(created)
-
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def prefix(self) -> str:
-        return self._prefix
-
-    @property
-    def created(self) -> DateColumn:
-        return self._created
+    name: Mapped[str] = mapped_column(VARCHAR(30), primary_key=True, nullable=False)
+    prefix: Mapped[str] = mapped_column(VARCHAR(4), nullable=False)
+    created: Mapped[dt] = mapped_column(DATETIME, nullable=False)
+    uuid: Mapped[bytes] = mapped_column(BINARY(16), nullable=False)

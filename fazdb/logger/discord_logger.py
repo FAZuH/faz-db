@@ -1,39 +1,89 @@
 from __future__ import annotations
+
 import traceback
+from threading import Lock
+from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession
-import discord
+from discord import Colour, Embed, Webhook
 
-from fazdb import Config
-from . import ConsoleLogger
+if TYPE_CHECKING:
+    from . import ConsoleLogger
 
 
-class DiscordLogger:  # NOTE: i hate how this class looks
-    """For exceptions needed to be sent to discord to be logged and reported to the developer."""
+class DiscordLogger:
 
-    def __init__(self, console_logger: ConsoleLogger) -> None:
+    def __init__(self, webhook_url: str, ping_discord_id: int | None = None, console_logger: ConsoleLogger | None = None) -> None:
+        """Sends and logs messages into a Discord webhook.
+
+        Args:
+            webhook_url (str): The webhook url to send the log message to
+            ping_discord_id (int | None, optional): The discord user to ping when a fatal error occurs. Defaults to None.
+            console_logger (ConsoleLogger): Console logger instance. Defaults to None
+        """
+        self._webhook_url = webhook_url
         self._console_logger = console_logger
+        self._ping_discord_id = ping_discord_id
 
-    async def exception(self, message: str, exception: None | BaseException = None) -> None:
-        self._console_logger.exception(message)
-        await self._send_to_discord(message, exception)
+        self._locks: dict[str, Lock] = {}
 
-    async def error(self, message: str, exception: None | BaseException = None) -> None:
-        await self._send_to_discord(message, exception)
+    async def success(self, message: str) -> None:
+        self.__check_console_logger(message)
+        embed = self.__get_embed("Success", message, colour=Colour.green())
+        await self.__send_to_discord(embed)
 
-    async def _send_to_discord(self, message: str, exc: None | BaseException) -> None:
+    async def info(self, message: str) -> None:
+        self.__check_console_logger(message)
+        embed = self.__get_embed("Info", message, colour=Colour.blue())
+        await self.__send_to_discord(embed)
+
+    async def debug(self, message: str | None = None, exception: None | BaseException = None) -> None:
+        self.__check_console_logger(message)
+        embed = self.__get_embed("Debug", message, exception, Colour.dark_purple())  # type: ignore
+        await self.__send_to_discord(embed)
+
+    async def warning(self, message: str | None = None, exception: None | BaseException = None) -> None:
+        self.__check_console_logger(message)
+        embed = self.__get_embed("Warning", message, exception, Colour.yellow())  # type: ignore
+        await self.__send_to_discord(embed)
+
+    async def exception(self, message: str | None = None, exception: None | BaseException = None) -> None:
+        self.__check_console_logger(message)
+        embed = self.__get_embed("Caught Exception", message, exception, Colour.red())  # type: ignore
+        await self.__send_to_discord(embed)
+
+    async def error(self, message: str | None = None, exception: None | BaseException = None) -> None:
+        self.__check_console_logger(message)
+        embed = self.__get_embed("Fatal Error", message, exception, Colour.red())  # type: ignore
+        await self.__send_to_discord(embed)
+
+    async def __send_to_discord(self, embed: Embed, message: None | str = None) -> None:
         async with ClientSession() as s:
-            hook = discord.Webhook.from_url(Config.discord_log_webhook, session=s)
-            if exc is None:
-                await hook.send(f"Caught exception: {message}")
-            else:
-                await hook.send(embed=self._get_embed(message, exc))
+            hook = Webhook.from_url(self._webhook_url, session=s)
+            with self._get_lock("webhook"):
+                if message:
+                    await hook.send(message, embed=embed)
+                else:
+                    await hook.send(embed=embed)
 
-    def _get_embed(self, message: str, exc: BaseException) -> discord.Embed:
-        tb = f"`{exc}` ```{''.join(traceback.format_exception(type(exc), exc, exc.__traceback__))}```"
-        tb = tb[:1024]
-        return discord.Embed(
-                title="Caught exception",
-                description=message,
-                color=discord.Colour.red()
-        ).add_field(name="Traceback", value=tb)
+    def __get_embed(self, title: str, description: str, exception: BaseException | None = None, colour: Colour | None = None) -> Embed:
+        embed = Embed(title=title, description=description, colour=colour)
+        if exception:
+            tb = traceback.format_exception(exception)
+            tb_msg = f"{'\n'.join(tb)}"[:1000]
+            tb_msg = f"```{tb_msg}```"
+            embed.add_field(name='Traceback', value=tb_msg, inline=False)
+        return embed
+
+    def __check_console_logger(self, message: str | None) -> bool:
+        if self._console_logger and message:
+            return True
+        return False
+
+    def _get_lock(self, key: str) -> Lock:
+        if key not in self._locks:
+            lock = Lock()
+            self._locks[key] = lock
+        else:
+            lock = self._locks[key]
+        return lock

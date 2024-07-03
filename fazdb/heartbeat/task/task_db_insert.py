@@ -1,16 +1,17 @@
 from __future__ import annotations
 import asyncio
 from datetime import datetime
-from typing import TYPE_CHECKING, Iterable
+from typing import Iterable, TYPE_CHECKING
+
+from fazdb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
+from fazdb.db.fazdb.model import FazdbUptime
+from fazdb.util import ApiResponseAdapter
 
 from .task import Task
-from fazdb.api.wynn.response import GuildResponse, PlayerResponse, OnlinePlayersResponse
-from fazdb.util import ApiResponseAdapter
-from fazdb.db.fazdb.model import FazDbUptime
 
 if TYPE_CHECKING:
     from . import RequestQueue, ResponseQueue
-    from fazdb import Api, IFazDbDatabase, Logger
+    from fazdb import Api, IFazdbDatabase, Logger
 
 
 class TaskDbInsert(Task):
@@ -19,7 +20,7 @@ class TaskDbInsert(Task):
     def __init__(
         self,
         api: Api,
-        db: IFazDbDatabase,
+        db: IFazdbDatabase,
         logger: Logger,
         request_list: RequestQueue,
         response_list: ResponseQueue,
@@ -47,11 +48,13 @@ class TaskDbInsert(Task):
         try:
             self._event_loop.run_until_complete(self._run())
         except Exception as e:
-            self._event_loop.create_task(self._logger.discord.exception(f"Error {self.__class__.__qualname__}", e))
+            self._event_loop.run_until_complete(self._logger.discord.exception(f"Error {self.__class__.__qualname__}", e))
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:
-        await self._db.fazdb_uptime_repository.insert((FazDbUptime(self._start_time, datetime.now()),))
+        await self._db.fazdb_uptime_repository.insert((
+            FazdbUptime(start_time=self._start_time, stop_time=datetime.now()
+        ),))
 
         online_players_resp: None | OnlinePlayersResponse = None
         player_resps: list[PlayerResponse] = []

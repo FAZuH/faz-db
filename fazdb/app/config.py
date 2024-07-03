@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 class Config:
 
+    admin_discord_id: int
+    
     discord_log_webhook: str
     discord_status_webhook: str
 
@@ -20,6 +22,8 @@ class Config:
     @classmethod
     def read(cls) -> None:
         load_dotenv()
+
+        cls.admin_discord_id = cls.__must_get_env("ADMIN_DISCORD_ID", int)
 
         cls.discord_log_webhook = cls.__must_get_env("DISCORD_LOG_WEBHOOK")
         cls.discord_status_webhook = cls.__must_get_env("DISCORD_STATUS_WEBHOOK")

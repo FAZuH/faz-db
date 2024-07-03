@@ -1,11 +1,12 @@
-from __future__ import annotations
-from decimal import Decimal
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from . import IFazDbDatabase
+from . import IFazdbDatabase
+from .. import BaseAsyncDatabase
+from .model import BaseModel
 from .repository import (
     CharacterHistoryRepository,
     CharacterInfoRepository,
+    FazdbUptimeRepository,
     GuildHistoryRepository,
     GuildInfoRepository,
     GuildMemberHistoryRepository,
@@ -13,53 +14,59 @@ from .repository import (
     PlayerActivityHistoryRepository,
     PlayerHistoryRepository,
     PlayerInfoRepository,
-    Repository,
-    FazDbUptimeRepository,
 )
 
 if TYPE_CHECKING:
-    from .. import DatabaseQuery
-    from fazdb import Logger
+    from .repository import Repository
 
 
-class FazDbDatabase(IFazDbDatabase):
+class FazdbDatabase(BaseAsyncDatabase[BaseModel], IFazdbDatabase):
+    
+    def __init__(self, driver: str, user: str, password: str, host: str, port: int, database: str) -> None:
+        super().__init__(driver, user, password, host, port, database)
+        self._base_model = BaseModel()
 
-    def __init__(self, logger: Logger, database_query: DatabaseQuery) -> None:
-        self._logger = logger
-        self._dbquery = database_query
+        self._character_history_repository = CharacterHistoryRepository(self)
+        self._character_history_repository = CharacterHistoryRepository(self)
+        self._character_info_repository = CharacterInfoRepository(self)
+        self._fazdb_uptime_repository = FazdbUptimeRepository(self)
+        self._guild_history_repository = GuildHistoryRepository(self)
+        self._guild_info_repository = GuildInfoRepository(self)
+        self._guild_member_history_repository = GuildMemberHistoryRepository(self)
+        self._online_players_repository = OnlinePlayersRepository(self)
+        self._player_activity_history_repository = PlayerActivityHistoryRepository(self)
+        self._player_history_repository = PlayerHistoryRepository(self)
+        self._player_info_repository = PlayerInfoRepository(self)
 
-        self._character_history_repository = CharacterHistoryRepository(self.query)
-        self._character_info_repository = CharacterInfoRepository(self.query)
-        self._guild_history_repository = GuildHistoryRepository(self.query)
-        self._guild_info_repository = GuildInfoRepository(self.query)
-        self._guild_member_history_repository = GuildMemberHistoryRepository(self.query)
-        self._fazdb_uptime_repository = FazDbUptimeRepository(self.query)
-        self._online_players_repository = OnlinePlayersRepository(self.query)
-        self._player_activity_history_repository = PlayerActivityHistoryRepository(self.query)
-        self._player_history_repository = PlayerHistoryRepository(self.query)
-        self._player_info_repository = PlayerInfoRepository(self.query)
-        self._repositories: list[Repository[Any]] = [
-                self._character_history_repository,
-                self._character_info_repository,
-                self._guild_history_repository,
-                self._guild_info_repository,
-                self._guild_member_history_repository,
-                self._fazdb_uptime_repository,
-                self._online_players_repository,
-                self._player_activity_history_repository,
-                self._player_history_repository,
-                self._player_info_repository,
+        self._repositories: list[Repository] = [
+            self._character_history_repository,
+            self._character_history_repository,
+            self._character_info_repository,
+            self._fazdb_uptime_repository,
+            self._guild_history_repository,
+            self._guild_info_repository,
+            self._guild_member_history_repository,
+            self._online_players_repository,
+            self._player_activity_history_repository,
+            self._player_history_repository,
+            self._player_info_repository,
         ]
 
-    async def create_all(self) -> None:
-        for repo in self._repositories:
-            await repo.create_table()
+    @property
+    def repositories(self) -> list[Repository]:
+        return self._repositories
 
-    async def total_size(self) -> Decimal:
-        sum_size = Decimal(0)
-        for repo in self._repositories:
-            sum_size += await repo.table_size()
-        return sum_size
+    @property
+    def character_history_repository(self) -> CharacterHistoryRepository:
+        return self._character_history_repository
+
+    @property
+    def character_info_repository(self) -> CharacterInfoRepository:
+        return self._character_info_repository
+
+    @property
+    def fazdb_uptime_repository(self) -> FazdbUptimeRepository:
+        return self._fazdb_uptime_repository
 
     @property
     def guild_history_repository(self) -> GuildHistoryRepository:
@@ -74,20 +81,12 @@ class FazDbDatabase(IFazDbDatabase):
         return self._guild_member_history_repository
 
     @property
-    def fazdb_uptime_repository(self) -> FazDbUptimeRepository:
-        return self._fazdb_uptime_repository
+    def online_players_repository(self) -> OnlinePlayersRepository:
+        return self._online_players_repository
 
     @property
     def player_activity_history_repository(self) -> PlayerActivityHistoryRepository:
         return self._player_activity_history_repository
-
-    @property
-    def character_history_repository(self) -> CharacterHistoryRepository:
-        return self._character_history_repository
-
-    @property
-    def character_info_repository(self) -> CharacterInfoRepository:
-        return self._character_info_repository
 
     @property
     def player_history_repository(self) -> PlayerHistoryRepository:
@@ -97,10 +96,7 @@ class FazDbDatabase(IFazDbDatabase):
     def player_info_repository(self) -> PlayerInfoRepository:
         return self._player_info_repository
 
+    # override
     @property
-    def online_players_repository(self) -> OnlinePlayersRepository:
-        return self._online_players_repository
-
-    @property
-    def query(self) -> DatabaseQuery:
-        return self._dbquery
+    def base_model(self) -> BaseModel:
+        return self._base_model

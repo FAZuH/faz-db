@@ -13,12 +13,12 @@ from .task import (
 
 if TYPE_CHECKING:
     from .task import Task
-    from fazdb import Api, Database, Logger
+    from fazdb import Api, IFazdbDatabase, Logger
 
 
 class SimpleHeartbeat(Thread, Heartbeat):
 
-    def __init__(self, api: Api, db: Database, logger: Logger) -> None:
+    def __init__(self, api: Api, db: IFazdbDatabase, logger: Logger) -> None:
         super().__init__(target=self.run, daemon=True)
         self._logger = logger
 

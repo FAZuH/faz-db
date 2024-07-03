@@ -1,60 +1,33 @@
-from __future__ import annotations
-from decimal import Decimal
-from typing import TYPE_CHECKING
+from datetime import datetime as dt
 
-from .column import DateColumn, UniqueIdMixin, UuidColumn
+from sqlalchemy import Index, UniqueConstraint
+from sqlalchemy.dialects.mysql import (
+    BINARY,
+    DATETIME,
+    DECIMAL,
+    INTEGER,
+    SMALLINT,
+    TINYINT,
+    VARCHAR,
+)
+from sqlalchemy.orm import Mapped, mapped_column
 
-if TYPE_CHECKING:
-    from datetime import datetime
+from . import BaseModel
 
 
-class GuildHistory(UniqueIdMixin):
+class GuildHistory(BaseModel):
+    __tablename__ = "guild_history"
 
-    def __init__(
-        self,
-        name: str,
-        level: Decimal,
-        territories: int,
-        wars: int,
-        member_total: int,
-        online_members: int,
-        datetime: datetime | DateColumn,
-        unique_id: bytes | UuidColumn | None = None
-    ) -> None:
-        self._name = name
-        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
-        self._level = level
-        self._territories = territories
-        self._wars = wars
-        self._member_total = member_total
-        self._online_members = online_members
+    name: Mapped[str] = mapped_column(VARCHAR(30), nullable=False, primary_key=True)
+    level: Mapped[float] = mapped_column(DECIMAL(5, 2, unsigned=True), nullable=False)
+    territories: Mapped[int] = mapped_column(SMALLINT(unsigned=True), nullable=False)
+    wars: Mapped[int] = mapped_column(INTEGER(unsigned=True), nullable=False)
+    member_total: Mapped[int] = mapped_column(TINYINT(unsigned=True), nullable=False)
+    online_members: Mapped[int] = mapped_column(TINYINT(unsigned=True), nullable=False)
+    datetime: Mapped[dt] = mapped_column(DATETIME, nullable=False, primary_key=True)
+    unique_id: Mapped[bytes] = mapped_column(BINARY(16), nullable=False)
 
-        super().__init__(unique_id, name, level, territories, wars, member_total, online_members)
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def datetime(self) -> DateColumn:
-        return self._datetime
-
-    @property
-    def level(self) -> Decimal:
-        return self._level
-
-    @property
-    def territories(self) -> int:
-        return self._territories
-
-    @property
-    def wars(self) -> int:
-        return self._wars
-
-    @property
-    def member_total(self) -> int:
-        return self._member_total
-
-    @property
-    def online_members(self) -> int:
-        return self._online_members
+    __table_args__ = (
+        Index('datetime_idx', datetime.desc()),
+        UniqueConstraint(unique_id, name='unique_id_idx')
+    )

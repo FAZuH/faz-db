@@ -1,16 +1,11 @@
-from .column import UuidColumn
+from sqlalchemy.dialects.mysql import BINARY, VARCHAR
+from sqlalchemy.orm import Mapped, mapped_column
+
+from . import BaseModel
 
 
-class OnlinePlayers:
+class OnlinePlayers(BaseModel):
+    __tablename__ = "online_players"
 
-    def __init__(self, uuid: bytes | UuidColumn, server: str) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
-        self._server = server
-
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
-
-    @property
-    def server(self) -> str:
-        return self._server
+    uuid: Mapped[bytes] = mapped_column(BINARY(16), primary_key=True, nullable=False)
+    server: Mapped[str] = mapped_column(VARCHAR(10), nullable=False)

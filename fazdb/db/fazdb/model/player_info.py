@@ -1,27 +1,15 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from datetime import datetime as dt
 
-from .column import DateColumn, UuidColumn
+from sqlalchemy import PrimaryKeyConstraint
+from sqlalchemy.dialects.mysql import BINARY, DATETIME, VARCHAR
+from sqlalchemy.orm import Mapped, mapped_column
 
-if TYPE_CHECKING:
-    from datetime import datetime
+from . import BaseModel
 
 
-class PlayerInfo:
+class PlayerInfo(BaseModel):
+    __tablename__ = "player_info"
 
-    def __init__(self, uuid: bytes | UuidColumn, latest_username: str, first_join: datetime | DateColumn) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
-        self._latest_username = latest_username
-        self._first_join = first_join if isinstance(first_join, DateColumn) else DateColumn(first_join)
-
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
-
-    @property
-    def latest_username(self) -> str:
-        return self._latest_username
-
-    @property
-    def first_join(self) -> DateColumn:
-        return self._first_join
+    uuid: Mapped[bytes] = mapped_column(BINARY(16), primary_key=True, nullable=False)
+    latest_username: Mapped[str] = mapped_column(VARCHAR(16), nullable=False)
+    first_join: Mapped[dt] = mapped_column(DATETIME, nullable=False)

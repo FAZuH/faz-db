@@ -1,66 +1,26 @@
-from __future__ import annotations
-from decimal import Decimal
-from typing import TYPE_CHECKING
+from datetime import datetime as dt
 
-from .column import DateColumn, UniqueIdMixin, UuidColumn
+from sqlalchemy import Index, UniqueConstraint
+from sqlalchemy.dialects.mysql import BINARY, DATETIME, DECIMAL, ENUM, VARCHAR
+from sqlalchemy.orm import Mapped, mapped_column
 
-if TYPE_CHECKING:
-    from datetime import datetime
+from . import BaseModel
 
 
-class PlayerHistory(UniqueIdMixin):
+class PlayerHistory(BaseModel):
+    __tablename__ = "player_history"
 
-    def __init__(
-        self,
-        uuid: bytes | UuidColumn,
-        username: str,
-        support_rank: None | str,
-        playtime: Decimal,
-        guild_name: None | str,
-        guild_rank: None | str,
-        rank: None | str,
-        datetime: datetime | DateColumn,
-        unique_id: bytes | UuidColumn | None = None
-    ) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
-        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
-        self._username = username
-        self._support_rank = support_rank
-        self._playtime = playtime
-        self._guild_name = guild_name
-        self._guild_rank = guild_rank
-        self._rank = rank
+    uuid: Mapped[bytes] = mapped_column(BINARY(16), nullable=False, primary_key=True)
+    username: Mapped[str] = mapped_column(VARCHAR(16), nullable=False)
+    support_rank: Mapped[str] = mapped_column(VARCHAR(45), default=None)
+    playtime: Mapped[float] = mapped_column(DECIMAL(8, 2, unsigned=True), nullable=False)
+    guild_name: Mapped[str] = mapped_column(VARCHAR(30), default=None)
+    guild_rank: Mapped[str] = mapped_column(ENUM('OWNER', 'CHIEF', 'STRATEGIST', 'CAPTAIN', 'RECRUITER', 'RECRUIT'), default=None)
+    rank: Mapped[str] = mapped_column(VARCHAR(30), default=None)
+    datetime: Mapped[dt] = mapped_column(DATETIME, nullable=False, primary_key=True)
+    unique_id: Mapped[bytes] = mapped_column(BINARY(16), nullable=False)
 
-        super().__init__(unique_id, uuid, username, support_rank, guild_name, guild_rank, rank)
-
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
-
-    @property
-    def datetime(self) -> DateColumn:
-        return self._datetime
-
-    @property
-    def username(self) -> str:
-        return self._username
-
-    @property
-    def support_rank(self) -> None | str:
-        return self._support_rank
-
-    @property
-    def playtime(self) -> Decimal:
-        return self._playtime
-
-    @property
-    def guild_name(self) -> None | str:
-        return self._guild_name
-
-    @property
-    def guild_rank(self) -> None | str:
-        return self._guild_rank
-
-    @property
-    def rank(self) -> None | str:
-        return self._rank
+    __table_args__ = (
+        Index('datetime_idx', datetime.desc()),
+        UniqueConstraint('unique_id', name='unique_id_idx')
+    )

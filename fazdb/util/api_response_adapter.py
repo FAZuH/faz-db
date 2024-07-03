@@ -133,9 +133,9 @@ class ApiResponseAdapter:
         ) -> Generator[PlayerActivityHistory, None, None]:
             return (
                     PlayerActivityHistory(
-                            uuid.to_bytes(),  # the user's uuid
-                            logon_timestamps[uuid.username_or_uuid],  # when did the user logged on
-                            resp.headers.to_datetime()  # the response timestamp
+                            uuid=uuid.to_bytes(),  # the user's uuid
+                            logon_datetime=logon_timestamps[uuid.username_or_uuid],  # when did the user logged on
+                            logoff_datetime=resp.headers.to_datetime()  # the response timestamp
                     )
                     for uuid in resp.body.players
                     if uuid.is_uuid() is True

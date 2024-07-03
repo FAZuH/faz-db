@@ -1,32 +1,20 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from datetime import datetime as dt
 
-from .column import DateColumn, UuidColumn
+from sqlalchemy import Index
+from sqlalchemy.dialects.mysql import BINARY, DATETIME
+from sqlalchemy.orm import Mapped, mapped_column
 
-if TYPE_CHECKING:
-    from datetime import datetime
+from . import BaseModel
 
 
-class PlayerActivityHistory:
+class PlayerActivityHistory(BaseModel):
+    __tablename__ = "player_activity_history"
 
-    def __init__(
-        self,
-        uuid: bytes | UuidColumn,
-        logon_datetime: datetime | DateColumn,
-        logoff_datetime: datetime | DateColumn,
-    ) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
-        self._logon_datetime = logon_datetime if isinstance(logon_datetime, DateColumn) else DateColumn(logon_datetime)
-        self._logoff_datetime = logoff_datetime if isinstance(logoff_datetime, DateColumn) else DateColumn(logoff_datetime)
+    uuid: Mapped[bytes] = mapped_column(BINARY(16), nullable=False, primary_key=True)
+    logon_datetime: Mapped[dt] = mapped_column(DATETIME, nullable=False, primary_key=True)
+    logoff_datetime: Mapped[dt] = mapped_column(DATETIME, nullable=False)
 
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
-
-    @property
-    def logon_datetime(self) -> DateColumn:
-        return self._logon_datetime
-
-    @property
-    def logoff_datetime(self) -> DateColumn:
-        return self._logoff_datetime
+    __table_args__ = (
+        Index('logon_datetime_idx', logon_datetime.desc()),
+        Index('logoff_datetime_idx', logoff_datetime.desc())
+    )

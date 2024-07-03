@@ -1,41 +1,22 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from datetime import datetime as dt
 
-from .column import DateColumn, UniqueIdMixin, UuidColumn
+from sqlalchemy import Index, UniqueConstraint
+from sqlalchemy.dialects.mysql import BIGINT, BINARY, DATETIME
+from sqlalchemy.orm import Mapped, mapped_column
 
-if TYPE_CHECKING:
-    from datetime import datetime
+from . import BaseModel
 
 
-class GuildMemberHistory(UniqueIdMixin):
+class GuildMemberHistory(BaseModel):
+    __tablename__ = "guild_member_history"
 
-    def __init__(
-        self,
-        uuid: bytes | UuidColumn,
-        contributed: int,
-        joined: datetime | DateColumn,
-        datetime: datetime | DateColumn,
-        unique_id: bytes | UuidColumn | None = None
-    ) -> None:
-        self._uuid = uuid if isinstance(uuid, UuidColumn) else UuidColumn(uuid)
-        self._datetime = datetime if isinstance(datetime, DateColumn) else DateColumn(datetime)
-        self._contributed = contributed
-        self._joined = joined if isinstance(joined, DateColumn) else DateColumn(joined)
+    uuid: Mapped[bytes] = mapped_column(BINARY(16), nullable=False, primary_key=True)
+    contributed: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False)
+    joined: Mapped[dt] = mapped_column(DATETIME, nullable=False, primary_key=True)
+    datetime: Mapped[dt] = mapped_column(DATETIME, nullable=False)
+    unique_id: Mapped[bytes] = mapped_column(BINARY(16), nullable=False)
 
-        super().__init__(unique_id, uuid, contributed, joined)
-
-    @property
-    def uuid(self) -> UuidColumn:
-        return self._uuid
-
-    @property
-    def datetime(self) -> DateColumn:
-        return self._datetime
-
-    @property
-    def contributed(self) -> int:
-        return self._contributed
-
-    @property
-    def joined(self) -> DateColumn:
-        return self._joined
+    __table_args__ = (
+        Index('datetime_idx', datetime.desc()),
+        UniqueConstraint('unique_id', name='unique_id_idx')
+    )

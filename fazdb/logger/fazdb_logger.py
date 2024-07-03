@@ -1,16 +1,15 @@
-from . import (
-    ConsoleLogger,
-    DiscordLogger,
-    Logger,
-    PerformanceLogger
-)
+from fazdb.app import Config
+
+from . import ConsoleLogger, DiscordLogger, Logger, PerformanceLogger
 
 
 class FazDbLogger(Logger):
 
     def __init__(self) -> None:
         self._console_logger = ConsoleLogger()
-        self._discord_logger = DiscordLogger(self._console_logger)
+        self._discord_logger = DiscordLogger(
+            Config.discord_log_webhook, Config.admin_discord_id, self._console_logger
+        )
         self._performance_logger = PerformanceLogger()
 
     def set_up(self) -> None:

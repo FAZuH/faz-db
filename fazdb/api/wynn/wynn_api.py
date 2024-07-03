@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any
 
+from .. import HttpRequest
 from . import Api, WynnRatelimitHandler
 from .endpoint import GuildEndpoint, PlayerEndpoint
-from fazdb import __version__
-from .. import HttpRequest
 
 if TYPE_CHECKING:
     from fazdb import Logger
+
     from .. import RatelimitHandler
 
 
@@ -19,7 +20,7 @@ class WynnApi(Api):
         self._request = HttpRequest(
                 "https://api.wynncraft.com",
                 ratelimit=self._ratelimit,
-                headers={"User-Agent": f"faz-db/{__version__}", "Content-Type": "application/json"
+                headers={"User-Agent": f"faz-db", "Content-Type": "application/json"
         })
 
         self._guild_endpoint = GuildEndpoint(self._request, 3, True)

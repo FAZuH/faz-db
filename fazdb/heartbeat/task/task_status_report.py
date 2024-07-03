@@ -9,11 +9,11 @@ from aiohttp import ClientSession
 import discord
 
 from . import Task
-from fazdb import Config
+from fazdb.app import Config
 
 if TYPE_CHECKING:
     from . import RequestQueue, TaskApiRequest, TaskDbInsert
-    from fazdb import Api, IFazDbDatabase, Logger
+    from fazdb import Api, IFazdbDatabase, Logger
 
 
 class TaskStatusReport(Task):
@@ -24,7 +24,7 @@ class TaskStatusReport(Task):
         logger: Logger,
         api: Api,
         api_request: TaskApiRequest,
-        db: IFazDbDatabase,
+        db: IFazdbDatabase,
         db_insert: TaskDbInsert,
         request_list: RequestQueue
     ) -> None:
@@ -89,7 +89,8 @@ class TaskStatusReport(Task):
             "\n."
             "\n├── faz-db Stats/"
             "\n│   ├── Runtime : {}"
-            "\n│   └── RAM     : {:.2f} MB"
+            "\n│   ├── RAM     : {:.2f} MB"
+            "\n│   └── CPU     : {:.2f}%"
             "\n│"
             "\n├── Tasks/"
             "\n│   ├── ApiRequest Latest   : {}"
@@ -100,9 +101,6 @@ class TaskStatusReport(Task):
             "\n│           ├── GuildStat     : [ {:<4} | {:<4} | {:<4} ]"
             "\n│           ├── OnlinePlayers : [ {:<4} | {:<4} | {:<4} ]"
             "\n│           └── PlayerStat    : [ {:<4} | {:<4} | {:<4} ]"
-            "\n│"
-            "\n├── Db Stats/"
-            "\n│   └── Size : {:.2f} MB"
             "\n│"
             "\n├── Api Stats/"
             "\n│   ├── Ratelimit      : {}"
@@ -124,7 +122,6 @@ class TaskStatusReport(Task):
 
     # TODO: clean code
     async def _get_report(self) -> str:
-        db_total_size = asyncio.create_task(self._db.total_size())
         now = datetime.now()
         now_ts = now.timestamp()
 
@@ -165,6 +162,7 @@ class TaskStatusReport(Task):
         msg = self._DEFAULT_MSG.format(
                 now - self._start_time,  # runtime
                 self.Util.get_memory_usage() / self.Util.MB_TO_BYTE,  # ram
+                self.Util.get_cpu_usage(),  # cpu
 
                 self._api_request.latest_run.strftime(DATETIME_FORMAT),  # api request latest
                 self._db_insert.latest_run.strftime(DATETIME_FORMAT),  # db insert latest
@@ -181,8 +179,6 @@ class TaskStatusReport(Task):
                 unique_request_list["queued"][0],  # queued player stat
                 unique_request_list["eligible"][0],  # eligible player stat
                 unique_request_list["running"][0],  # running player stat
-
-                (await db_total_size) / self.Util.MB_TO_BYTE,  # db size
 
                 self._api.ratelimit.remaining,  # ratelimit
                 len(self._db_insert.response_handler.online_players),  # online player
@@ -205,6 +201,7 @@ class TaskStatusReport(Task):
     class Util:
         KB_TO_BYTE = 1024
         MB_TO_BYTE = 1024 * KB_TO_BYTE
+
         @staticmethod
         def get_memory_usage() -> int:
             """Get the memory usage of the current process in bytes.
@@ -215,6 +212,11 @@ class TaskStatusReport(Task):
             process = psutil.Process()
             memory_info = process.memory_info()
             return memory_info.rss
+
+        @staticmethod
+        def get_cpu_usage() -> float:
+            process = psutil.Process()
+            return process.cpu_percent()
 
         @staticmethod
         def get_os_info() -> str:
