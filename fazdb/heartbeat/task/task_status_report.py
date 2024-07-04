@@ -6,7 +6,7 @@ import psutil
 from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession
-import discord
+import nextcord
 
 from . import Task
 from fazdb.app import Config
@@ -46,15 +46,12 @@ class TaskStatusReport(Task):
     def teardown(self) -> None: ...
 
     def run(self) -> None:
-        try:
-            self._event_loop.run_until_complete(self._run())
-        except Exception as e:
-            self._event_loop.create_task(self._logger.discord.exception(f"Error {self.__class__.__qualname__}", e))
+        self._event_loop.run_until_complete(self._run())
         self._latest_run = datetime.now()
 
     async def async_setup(self):
         async with ClientSession() as s:
-            hook = discord.Webhook.from_url(self._url, session=s)
+            hook = nextcord.Webhook.from_url(self._url, session=s)
             await hook.edit(name="faz-db Information")
             await hook.send("Started faz-db.")
         perf = self._logger.performance
@@ -68,7 +65,7 @@ class TaskStatusReport(Task):
 
     async def _send(self) -> None:
         async with ClientSession() as s:
-            hook = discord.Webhook.from_url(self._url, session=s)
+            hook = nextcord.Webhook.from_url(self._url, session=s)
             report = await self._get_report()
 
             if self._message_id is None:
@@ -77,7 +74,7 @@ class TaskStatusReport(Task):
             else:
                 try:
                     message = await hook.fetch_message(self._message_id)
-                except discord.DiscordException as e:
+                except nextcord.DiscordException as e:
                     await self._logger.discord.exception("Failed to fetch message.", e)
                     self._message_id = None
                     return

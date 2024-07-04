@@ -1,4 +1,5 @@
 from ._base_model import BaseModel
+from ._unique_id_mixin import UniqueIdMixin
 
 from .character_history import CharacterHistory
 from .character_info import CharacterInfo

@@ -16,9 +16,10 @@ if TYPE_CHECKING:
 class FazDb(App):
 
     def __init__(self) -> None:
-        self._logger = FazDbLogger()
         self._config = Config()
         self._config.read()
+
+        self._logger = FazDbLogger()
 
         self._api = WynnApi(self.logger)
 
@@ -65,10 +66,12 @@ class FazDb(App):
     def __register_retry_handler(self) -> None:
         """Helper method to register retry handlers on faz-db Database.
         Call this method right after instantiating IFazdbDatabase."""
+        RetryHandler.set_discord_logger(self.logger.discord)
         register_lambda: Callable[[Callable[..., Any]], None] = lambda func: RetryHandler.register(
-            func, self.config.fazdb_db_max_retries, BaseException
+            func, self.config.fazdb_db_max_retries, Exception
         )
-        for repo in self.db.repositories:
+        repositories = self.db.repositories
+        for repo in repositories:
             register_lambda(repo.table_disk_usage)
             register_lambda(repo.create_table)
             register_lambda(repo.insert)

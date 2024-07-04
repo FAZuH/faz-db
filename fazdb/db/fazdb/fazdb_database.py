@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from . import IFazdbDatabase
@@ -27,7 +28,6 @@ class FazdbDatabase(BaseAsyncDatabase[BaseModel], IFazdbDatabase):
         self._base_model = BaseModel()
 
         self._character_history_repository = CharacterHistoryRepository(self)
-        self._character_history_repository = CharacterHistoryRepository(self)
         self._character_info_repository = CharacterInfoRepository(self)
         self._fazdb_uptime_repository = FazdbUptimeRepository(self)
         self._guild_history_repository = GuildHistoryRepository(self)
@@ -39,7 +39,6 @@ class FazdbDatabase(BaseAsyncDatabase[BaseModel], IFazdbDatabase):
         self._player_info_repository = PlayerInfoRepository(self)
 
         self._repositories: list[Repository] = [
-            self._character_history_repository,
             self._character_history_repository,
             self._character_info_repository,
             self._fazdb_uptime_repository,

@@ -45,10 +45,7 @@ class TaskDbInsert(Task):
     def teardown(self) -> None: ...
 
     def run(self) -> None:
-        try:
-            self._event_loop.run_until_complete(self._run())
-        except Exception as e:
-            self._event_loop.run_until_complete(self._logger.discord.exception(f"Error {self.__class__.__qualname__}", e))
+        self._event_loop.run_until_complete(self._run())
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:
@@ -73,50 +70,58 @@ class TaskDbInsert(Task):
         self._response_handler.handle_player_response(player_resps)
         self._response_handler.handle_guild_response(guild_resps)
 
-        if online_players_resp:
-            await self._insert_online_players_response(online_players_resp)
-        if player_resps:
-            await self._insert_player_responses(player_resps)
-        if guild_resps:
-            await self._insert_guild_response(guild_resps)
+        await self._insert_online_players_response(online_players_resp)
+        await self._insert_player_responses(player_resps)
+        await self._insert_guild_response(guild_resps)
 
-    async def _insert_online_players_response(self, resp: OnlinePlayersResponse) -> None:
-        await self._db.online_players_repository.insert(self._response_adapter.OnlinePlayers.to_online_players(resp))
+    async def _insert_online_players_response(self, resp: OnlinePlayersResponse | None) -> None:
+        if not resp: return
+
+        adapter = self._response_adapter.OnlinePlayers
+        await self._db.online_players_repository.insert(adapter.to_online_players(resp))
         await self._db.player_activity_history_repository.insert(
-                self._response_adapter.OnlinePlayers.to_player_activity_history(
-                        resp,
-                        self._response_handler.online_players
-                )
+            adapter.to_player_activity_history(
+                resp,
+                self._response_handler.online_players
+            )
         )
 
     async def _insert_player_responses(self, resps: list[PlayerResponse]) -> None:
+        if not resps: return
+
+        adapter = self._response_adapter.Player
         character_history = []
         character_info = []
         player_history = []
         player_info = []
         for resp in resps:
-            character_history.extend(self._response_adapter.Player.to_character_history(resp))
-            character_info.extend(self._response_adapter.Player.to_character_info(resp))
-            player_history.append(self._response_adapter.Player.to_player_history(resp))
-            player_info.append(self._response_adapter.Player.to_player_info(resp))
+            character_history.extend(adapter.to_character_history(resp))
+            character_info.extend(adapter.to_character_info(resp))
+            player_history.append(adapter.to_player_history(resp))
+            player_info.append(adapter.to_player_info(resp))
 
-        await self._db.player_info_repository.insert(player_info)
-        await self._db.character_info_repository.insert(character_info)
-        await self._db.player_history_repository.insert(player_history)
-        await self._db.character_history_repository.insert(character_history)
+        db = self._db
+        await db.player_info_repository.insert(player_info)
+        await db.character_info_repository.insert(character_info)
+        await db.player_history_repository.insert(player_history)
+        await db.character_history_repository.insert(character_history)
 
     async def _insert_guild_response(self, resps: list[GuildResponse]) -> None:
+        if not resps: return
+
+        adapter = self._response_adapter.Guild
         guild_info = []
         guild_history = []
         guild_member_history = []
         for resp in resps:
-            guild_info.append(self._response_adapter.Guild.to_guild_info(resp))
-            guild_history.append(self._response_adapter.Guild.to_guild_history(resp))
-            guild_member_history.extend(self._response_adapter.Guild.to_guild_member_history(resp))
+            guild_info.append(adapter.to_guild_info(resp))
+            guild_history.append(adapter.to_guild_history(resp))
+            guild_member_history.extend(adapter.to_guild_member_history(resp))
 
-        await self._db.guild_info_repository.insert(guild_info)
-        await self._db.guild_history_repository.insert(guild_history)
-        await self._db.guild_member_history_repository.insert(guild_member_history)
+        db = self._db
+        await db.guild_info_repository.insert(guild_info)
+        await db.guild_history_repository.insert(guild_history)
+        await db.guild_member_history_repository.insert(guild_member_history)
 
     @property
     def response_handler(self) -> TaskDbInsert._ResponseHandler: return self._response_handler

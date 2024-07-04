@@ -12,10 +12,10 @@ from sqlalchemy.dialects.mysql import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from . import BaseModel
+from . import UniqueIdMixin
 
 
-class GuildHistory(BaseModel):
+class GuildHistory(UniqueIdMixin):
     __tablename__ = "guild_history"
 
     name: Mapped[str] = mapped_column(VARCHAR(30), nullable=False, primary_key=True)

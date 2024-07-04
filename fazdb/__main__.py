@@ -23,4 +23,3 @@ if __name__ == "__main__":
         logger = Main.app.logger
         logger.console.exception(str(e))
         asyncio.run(logger.discord.error(f"FATAL ERROR", e))
-        exit(1)

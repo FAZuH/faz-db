@@ -83,7 +83,13 @@ class Repository[T: BaseModel, ID](ABC):
         """
         entities = self.__ensure_iterable(entity)
         async with self.database.must_enter_session(session) as session:
-            session.add_all(entities)
+            for entity in entities:
+                entity_d = self.__to_dict(entity)
+                stmt = entity.get_table()\
+                        .insert()\
+                        .values(**entity_d)\
+                        .prefix_with("IGNORE")
+                await session.execute(stmt)
 
     async def delete(self, id_: Iterable[ID] | ID, session: AsyncSession | None = None) -> None:
         """Deletes an entry from the repository based on `id_`
@@ -158,3 +164,6 @@ class Repository[T: BaseModel, ID](ABC):
         ids = self.__ensure_iterable(id_)
         ret = [(id__,) for id__ in ids]
         return ret
+
+    def __to_dict(self, obj: T) -> dict[str, Any]:
+        return {c.name: getattr(obj, c.name) for c in obj.get_table().columns}

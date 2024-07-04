@@ -12,10 +12,10 @@ from sqlalchemy.dialects.mysql import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from . import BaseModel
+from . import UniqueIdMixin
 
 
-class CharacterHistory(BaseModel):
+class CharacterHistory(UniqueIdMixin):
     __tablename__ = "character_history"
 
     character_uuid: Mapped[bytes] = mapped_column(BINARY(16), nullable=False, primary_key=True)
@@ -53,5 +53,5 @@ class CharacterHistory(BaseModel):
 
     __table_args__ = (
         Index('datetime_idx', datetime.desc()),
-        UniqueConstraint('unique_id', name='unique_id_idx')
+        UniqueConstraint(unique_id, name='unique_id_idx')
     )

@@ -4,10 +4,10 @@ from sqlalchemy import Index, UniqueConstraint
 from sqlalchemy.dialects.mysql import BIGINT, BINARY, DATETIME
 from sqlalchemy.orm import Mapped, mapped_column
 
-from . import BaseModel
+from . import UniqueIdMixin
 
 
-class GuildMemberHistory(BaseModel):
+class GuildMemberHistory(UniqueIdMixin):
     __tablename__ = "guild_member_history"
 
     uuid: Mapped[bytes] = mapped_column(BINARY(16), nullable=False, primary_key=True)
