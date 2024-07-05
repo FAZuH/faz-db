@@ -160,7 +160,7 @@ cython_debug/
 #.idea/
 .vscode/
 .VSCodeCounter/
-.logs
+logs/
 sandbox.ipynb
 sandbox.py
 .dev-venv
