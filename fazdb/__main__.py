@@ -18,5 +18,5 @@ class Main:
 
 
 if __name__ == "__main__":
-    with logger.catch(level="CRITICAL"):
+    with logger.catch(level="CRITICAL", reraise=True):
         Main.main()
