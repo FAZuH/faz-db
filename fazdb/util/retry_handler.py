@@ -70,4 +70,6 @@ class RetryHandler:
             wrapper = RetryHandler.decorator(max_retries, exceptions)
 
         wrapped_func = wrapper(func)
+
+        setattr(wrapped_func, "__self__", func.__self__)  # type: ignore
         setattr(func.__self__, func.__name__, wrapped_func)  # type: ignore
