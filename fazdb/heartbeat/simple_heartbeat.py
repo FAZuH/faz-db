@@ -3,13 +3,7 @@ from threading import Thread
 from typing import TYPE_CHECKING
 
 from . import Heartbeat, HeartbeatTask
-from .task import (
-    RequestQueue,
-    ResponseQueue,
-    TaskApiRequest,
-    TaskDbInsert,
-    # TaskStatusReport,
-)
+from .task import RequestQueue, ResponseQueue, TaskApiRequest, TaskDbInsert
 
 if TYPE_CHECKING:
     from .task import Task
@@ -27,11 +21,9 @@ class SimpleHeartbeat(Thread, Heartbeat):
 
         api_request = TaskApiRequest(api, request_list, response_list)
         db_insert = TaskDbInsert(api, db, request_list, response_list)
-        # status_report = TaskStatusReport(api, api_request, db, db_insert, request_list)
 
         self._add_task(api_request)
         self._add_task(db_insert)
-        # self._add_task(status_report)
 
     def start(self) -> None:
         for task in self._tasks:

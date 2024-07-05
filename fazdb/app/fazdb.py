@@ -31,9 +31,10 @@ class FazDb(App):
             self._config.mysql_port,
             self._config.fazdb_db_name
         )
-        self.__register_retry_handler()
-
         self._heartbeat = SimpleHeartbeat(self.api, self.db)
+
+        self.__register_retry_handler()
+        self.__register_metric()
 
     def start(self) -> None:
         logger.info("Starting WynnDb Heartbeat...")
@@ -60,11 +61,12 @@ class FazDb(App):
         return self._heartbeat
 
     def __register_retry_handler(self) -> None:
-        """Helper method to register retry handlers on faz-db Database.
-        Call this method right after instantiating IFazdbDatabase."""
+        """Registers retry handler to this appp"""
         register_lambda: Callable[[Callable[..., Any]], None] = lambda func: RetryHandler.register(
             func, self.config.fazdb_db_max_retries, Exception
         )
+        
+        # Register retry handler to database
         repositories = self.db.repositories
         for repo in repositories:
             register_lambda(repo.table_disk_usage)
@@ -72,3 +74,16 @@ class FazDb(App):
             register_lambda(repo.insert)
             register_lambda(repo.delete)
             register_lambda(repo.is_exists)
+
+    def __register_metric(self) -> None:
+        metric = Metrics()
+
+        metric.register_summary(self.api.guild.get, "wapi_guild_seconds", "Guild request seconds")
+        metric.register_summary(self.api.player.get_online_uuids, "wapi_onlineplayres_seconds", "Online Players request seconds")
+        metric.register_summary(self.api.player.get_full_stats, "wapi_player_seconds", "Player request seconds")
+
+        metric.register_counter(self.api.guild.get, "wapi_guild_count", "Guild request count")
+        metric.register_counter(self.api.player.get_online_uuids, "wapi_onlineplayres_count", "Online Players request count")
+        metric.register_counter(self.api.player.get_full_stats, "wapi_player_count", "Player request count")
+
+        metric.start()
