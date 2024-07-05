@@ -8,7 +8,7 @@ from fazdb.db.fazdb import FazdbDatabase
 from fazdb.heartbeat import SimpleHeartbeat
 from fazdb.util import RetryHandler
 
-from . import App, Config, Logger
+from . import App, Config, Logger, Metrics
 
 if TYPE_CHECKING:
     from fazdb import Api, Heartbeat, IFazdbDatabase
@@ -78,12 +78,38 @@ class FazDb(App):
     def __register_metric(self) -> None:
         metric = Metrics()
 
-        metric.register_summary(self.api.guild.get, "wapi_guild_seconds", "Guild request seconds")
-        metric.register_summary(self.api.player.get_online_uuids, "wapi_onlineplayres_seconds", "Online Players request seconds")
-        metric.register_summary(self.api.player.get_full_stats, "wapi_player_seconds", "Player request seconds")
+        # Summary metrics
+        metric.register_summary(
+            self.api.guild.get,
+            "wapi_request_guild_seconds",
+            "Wynncraft API total request duration on endpoint 'Guild'"
+        )
+        metric.register_summary(
+            self.api.player.get_online_uuids,
+            "wapi_request_onlineplayers_seconds",
+            "Wynncraft API total request duration on endpoint 'Online Players'"
+        )
+        metric.register_summary(
+            self.api.player.get_full_stats,
+            "wapi_request_player_seconds",
+            "Wynncraft API total request duration on endpoint 'Player'"
+        )
 
-        metric.register_counter(self.api.guild.get, "wapi_guild_count", "Guild request count")
-        metric.register_counter(self.api.player.get_online_uuids, "wapi_onlineplayres_count", "Online Players request count")
-        metric.register_counter(self.api.player.get_full_stats, "wapi_player_count", "Player request count")
+        # Counter metrics
+        metric.register_counter(
+            self.api.guild.get,
+            "wapi_request_guild_count",
+            "Wynncraft API request count on endpoint 'Guild'"
+        )
+        metric.register_counter(
+            self.api.player.get_online_uuids,
+            "wapi_request_onlineplayers_count",
+            "Wynncraft API request count on endpoint 'Online Players'"
+        )
+        metric.register_counter(
+            self.api.player.get_full_stats,
+            "wapi_request_player_count",
+            "Wynncraft API request count on endpoint 'Player'"
+        )
 
         metric.start()
