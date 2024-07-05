@@ -1,11 +1,13 @@
 from __future__ import annotations
 from abc import ABC
 from decimal import Decimal
+from os import replace
 from threading import Lock
-from typing import Any, Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING, Literal
 
 from sqlalchemy import Column, Tuple, delete, exists, select, text, tuple_
 from sqlalchemy.schema import CreateTable
+from sqlalchemy.dialects.mysql import insert
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,8 +23,7 @@ class Repository[T: BaseModel, ID](ABC):
         self._model_cls = model_cls
 
     async def table_disk_usage(self, session: None | AsyncSession = None) -> Decimal:
-        """
-        Calculate the size of the table in bytes.
+        """Calculate the size of the table in bytes.
 
         Parameters
         ----------
@@ -55,8 +56,7 @@ class Repository[T: BaseModel, ID](ABC):
             return ret
 
     async def create_table(self, session: None | AsyncSession = None) -> None:
-        """
-        Create the table associated with the repository if it does not already exist.
+        """Create the table associated with the repository if it does not already exist.
 
         Parameters
         ----------
@@ -69,9 +69,14 @@ class Repository[T: BaseModel, ID](ABC):
             stmt = CreateTable(table, if_not_exists=True)
             await session.execute(stmt)
 
-    async def insert(self, entity: Iterable[T] | T, session: None | AsyncSession = None) -> None:
-        """
-        Insert one or more entities into the database.
+    async def insert(
+        self,
+        entity: Iterable[T] | T,
+        session: None | AsyncSession = None,
+        ignore_on_duplicate: bool = False,
+        replace_on_duplicate: bool = False
+    ) -> None:
+        """Insert one or more entities into the database.
 
         Parameters
         ----------
@@ -81,14 +86,19 @@ class Repository[T: BaseModel, ID](ABC):
             Optional AsyncSession object to use for the database connection.
             If not provided, a new session will be created.
         """
+        if ignore_on_duplicate and replace_on_duplicate:
+            raise ValueError("ignore_on_duplicate and replace_on_duplicate cannot be both True")
+
         entities = self.__ensure_iterable(entity)
         async with self.database.must_enter_session(session) as session:
             for entity in entities:
                 entity_d = self.__to_dict(entity)
-                stmt = entity.get_table()\
-                        .insert()\
-                        .values(**entity_d)\
-                        .prefix_with("IGNORE")
+                if replace_on_duplicate:
+                    stmt = insert(entity.get_table()).values(entity_d).on_duplicate_key_update(entity_d)
+                else:
+                    stmt = entity.get_table().insert().values(entity_d)
+                    if ignore_on_duplicate:
+                        stmt = stmt.prefix_with("IGNORE")
                 await session.execute(stmt)
 
     async def delete(self, id_: Iterable[ID] | ID, session: AsyncSession | None = None) -> None:
@@ -105,14 +115,12 @@ class Repository[T: BaseModel, ID](ABC):
         """
         model = self.get_model_cls()
         to_compare = self.__convert_comparable(id_)
-
         async with self.database.must_enter_session(session) as session:
             stmt = delete(model).where(self.__get_primary_key().in_(to_compare))
             await session.execute(stmt)
 
     async def is_exists(self, id_: ID, session: None | AsyncSession = None) -> bool:
-        """
-        Check if an entry with the given primary key exists in the database.
+        """Check if an entry with the given primary key exists in the database.
 
         Parameters
         ----------
@@ -132,6 +140,19 @@ class Repository[T: BaseModel, ID](ABC):
             result = await session.execute(stmt)
             is_exist = result.scalar()
             return is_exist or False
+
+    async def truncate(self, session: None | AsyncSession = None) -> None:
+        """Truncates the table.
+
+        Parameters
+        ----------
+        session : AsyncSession, optional
+            Optional AsyncSession object to use for the database connection.
+            If not provided, a new session will be created.
+        """
+        model = self.get_model_cls()
+        async with self.database.must_enter_session(session) as session:
+            await session.execute(model.get_table().delete())
 
     def get_model_cls(self) -> type[T]:
         return self._model_cls
