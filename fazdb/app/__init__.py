@@ -1,6 +1,7 @@
 # type: ignore
-from .constants import __version__, __author__
-from .config import Config
+from ._constants import *
+from ._config import Config
+from ._logger import Logger
 
 from .app import App
 from .fazdb import FazDb

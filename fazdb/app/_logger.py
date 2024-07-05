@@ -1,7 +1,8 @@
+import os
 from loguru import logger
 from nextcord import Colour, Embed, SyncWebhook
 
-from . import LOG_PATH
+from . import LOG_DIR
 
 
 class Logger:
@@ -18,9 +19,9 @@ class Logger:
         logger.add(sink=cls.__unexpected_error_sink, level="UNEXPECTED", enqueue=True)
         logger.add(sink=cls.__error_sink, level="ERROR", enqueue=True)
 
-        logger.add(sink=LOG_PATH, level="CRITICAL", enqueue=True)
-        logger.add(sink=LOG_PATH, level="UNEXPECTED", enqueue=True)
-        logger.add(sink=LOG_PATH, level="ERROR", enqueue=True)
+        os.makedirs(LOG_DIR, exist_ok=True)
+        log_file = os.path.join(LOG_DIR, "fazdb.log")
+        logger.add(log_file, level="ERROR", rotation="10 MB", retention="10 days", compression="zip", enqueue=True)
 
     @classmethod
     def __critical_sink(cls, message: str) -> None:

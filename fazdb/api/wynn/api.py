@@ -3,13 +3,11 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
     from .endpoint import GuildEndpoint, PlayerEndpoint
-    from fazdb import Logger
     from .. import HttpRequest, RatelimitHandler
 
 
 class Api(Protocol):
     """<<interface>>"""
-    def __init__(self, logger: Logger) -> None: ...
     async def start(self) -> None: ...
     async def close(self) -> None: ...
     @property

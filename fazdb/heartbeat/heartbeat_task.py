@@ -1,17 +1,17 @@
 from __future__ import annotations
 from threading import Timer
 from time import perf_counter
-from typing import TYPE_CHECKING, Callable
+from typing import Callable, TYPE_CHECKING
+
+from loguru import logger
 
 if TYPE_CHECKING:
     from .task import Task
-    from fazdb import Logger
 
 
 class HeartbeatTask:
 
-    def __init__(self, logger: Logger, task: Task) -> None:
-        self._logger = logger
+    def __init__(self, task: Task) -> None:
         self._task = task
         self._timer: Timer = Timer(self.task.first_delay, self.get_task())
 
@@ -27,7 +27,7 @@ class HeartbeatTask:
         def run() -> None:
             t1 = perf_counter()
             self._task.run()
-            self._logger.console.success(f"Task {self.task.name} took {perf_counter() - t1:.2f} seconds")
+            logger.success(f"Task {self.task.name} took {perf_counter() - t1:.2f} seconds")
             self._reschedule()
         return run
 

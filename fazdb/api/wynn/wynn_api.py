@@ -7,16 +7,13 @@ from . import Api, WynnRatelimitHandler
 from .endpoint import GuildEndpoint, PlayerEndpoint
 
 if TYPE_CHECKING:
-    from fazdb import Logger
-
     from .. import RatelimitHandler
 
 
 class WynnApi(Api):
 
-    def __init__(self, logger: Logger) -> None:
-        self._logger = logger
-        self._ratelimit = WynnRatelimitHandler(5, 180, self._logger)
+    def __init__(self) -> None:
+        self._ratelimit = WynnRatelimitHandler(5, 180)
         self._request = HttpRequest(
                 "https://api.wynncraft.com",
                 ratelimit=self._ratelimit,

@@ -8,11 +8,10 @@ from fazdb.heartbeat.task.task_api_request import TaskApiRequest
 class TestTaskApiRequest(unittest.TestCase):
 
     def setUp(self):
-        self.logger = MagicMock()
         self.api = MagicMock()
         self.request_list = MagicMock()
         self.response_list = MagicMock()
-        self.task = TaskApiRequest(self.api, self.logger, self.request_list, self.response_list)
+        self.task = TaskApiRequest(self.api, self.request_list, self.response_list)
 
     async def test_setup(self):
         self.task.setup()
@@ -51,7 +50,6 @@ class TestTaskApiRequest(unittest.TestCase):
         task2 = MagicMock(done=MagicMock(return_value=True), exception=MagicMock(return_value=None), result=MagicMock())
         task3 = MagicMock(done=MagicMock(return_value=False))
         self.task._running_requests = [task1, task2, task3]
-        self.task._logger = MagicMock()
         self.task._response_list.put = MagicMock()
 
         self.task._check_responses()

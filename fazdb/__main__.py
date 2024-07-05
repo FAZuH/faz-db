@@ -1,6 +1,7 @@
 from __future__ import annotations
-import asyncio
 from time import sleep
+
+from loguru import logger
 
 from fazdb.app import FazDb
 
@@ -17,9 +18,5 @@ class Main:
 
 
 if __name__ == "__main__":
-    try:
+    with logger.catch(level="CRITICAL"):
         Main.main()
-    except Exception as e:
-        logger = Main.app.logger
-        logger.console.exception(str(e))
-        asyncio.run(logger.discord.error(f"FATAL ERROR", e))

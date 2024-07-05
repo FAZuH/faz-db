@@ -1,9 +1,8 @@
 from __future__ import annotations
-
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from fazdb import Api, Heartbeat, IFazdbDatabase, Logger
+    from fazdb import Api, Heartbeat, IFazdbDatabase
 
     from . import Config
 
@@ -20,5 +19,3 @@ class App(Protocol):
     def config(self) -> Config: ...
     @property
     def heartbeat(self) -> Heartbeat: ...
-    @property
-    def logger(self) -> Logger: ...

@@ -1,17 +1,12 @@
 from __future__ import annotations
 from asyncio import iscoroutinefunction
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, Iterable
+from typing import Any, Awaitable, Callable, Iterable
 
-from fazdb.logger import ConsoleLogger
-
-if TYPE_CHECKING:
-    from fazdb.logger import DiscordLogger
+from loguru import logger
 
 
 class RetryHandler:
-
-    _discord_logger: DiscordLogger | None = None
 
     @staticmethod
     def async_decorator[T, **P](
@@ -26,7 +21,7 @@ class RetryHandler:
                     try:
                         return await func(*args, **kwargs)
                     except exceptions:
-                        await RetryHandler.__log(
+                        logger.exception(
                             f"{func.__qualname__} failed. Retrying..."
                             f"args:{str(args)[:30]}\n"
                             f"kwargs:{str(kwargs)[:30]}"
@@ -48,7 +43,7 @@ class RetryHandler:
                     try:
                         return func(*args, **kwargs)
                     except exceptions:
-                        ConsoleLogger.exception(
+                        logger.exception(
                             f"{func.__qualname__} failed. Retrying..."
                             f"args:{str(args)[:30]}\n"
                             f"kwargs:{str(kwargs)[:30]}"
@@ -75,15 +70,4 @@ class RetryHandler:
             wrapper = RetryHandler.decorator(max_retries, exceptions)
 
         wrapped_func = wrapper(func)
-        setattr(func.__self__, func.__name__, wrapped_func)
-
-    @classmethod
-    async def __log(cls, message: str) -> None:
-        if cls._discord_logger is None:
-            ConsoleLogger.exception(message)
-        else:
-            await cls._discord_logger.error(message)
-
-    @classmethod
-    def set_discord_logger(cls, discord_logger: DiscordLogger) -> None:
-        cls._discord_logger = discord_logger
+        setattr(func.__self__, func.__name__, wrapped_func)  # type: ignore

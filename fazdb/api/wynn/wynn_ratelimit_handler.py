@@ -1,19 +1,17 @@
 from __future__ import annotations
 import asyncio
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from .model.headers import Headers
+from loguru import logger
+
 from .. import RatelimitHandler
-
-if TYPE_CHECKING:
-    from fazdb import Logger
+from .model.headers import Headers
 
 
 class WynnRatelimitHandler(RatelimitHandler):
 
-    def __init__(self, min_limit: int, total: int, logger: Logger) -> None:
+    def __init__(self, min_limit: int, total: int) -> None:
         self._min_limit = min_limit
-        self._logger = logger
         self._remaining = total
         self._total = total
 
@@ -24,7 +22,7 @@ class WynnRatelimitHandler(RatelimitHandler):
             await self.ratelimited()
 
     async def ratelimited(self) -> None:
-        self._logger.console.warning(f"Ratelimited, waiting for {self.reset}")
+        logger.warning(f"Ratelimited. Waiting for {self.reset}s")
         await asyncio.sleep(self.reset)
 
     def update(self, headers: dict[str, Any]) -> None:

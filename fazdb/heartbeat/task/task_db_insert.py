@@ -11,7 +11,7 @@ from .task import Task
 
 if TYPE_CHECKING:
     from . import RequestQueue, ResponseQueue
-    from fazdb import Api, IFazdbDatabase, Logger
+    from fazdb import Api, IFazdbDatabase
 
 
 class TaskDbInsert(Task):
@@ -21,13 +21,11 @@ class TaskDbInsert(Task):
         self,
         api: Api,
         db: IFazdbDatabase,
-        logger: Logger,
         request_list: RequestQueue,
         response_list: ResponseQueue,
     ) -> None:
         self._api = api
         self._db = db
-        self._logger = logger
         self._request_list = request_list
         self._response_list = response_list
 
