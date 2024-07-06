@@ -21,12 +21,9 @@ class RetryHandler:
                     try:
                         return await func(*args, **kwargs)
                     except exceptions:
-                        logger.exception(
-                            f"{func.__qualname__} failed. Retrying..."
-                            f"args:{str(args)[:30]}\n"
-                            f"kwargs:{str(kwargs)[:30]}"
-                        )
-                return await func(*args, **kwargs)
+                        pass
+                with logger.catch(level="ERROR", reraise=True):
+                    return await func(*args, **kwargs)
             return wrapper
         return decorator
 
@@ -43,12 +40,9 @@ class RetryHandler:
                     try:
                         return func(*args, **kwargs)
                     except exceptions:
-                        logger.exception(
-                            f"{func.__qualname__} failed. Retrying..."
-                            f"args:{str(args)[:30]}\n"
-                            f"kwargs:{str(kwargs)[:30]}"
-                        )
-                return func(*args, **kwargs)
+                        pass
+                with logger.catch(level="ERROR", reraise=True):
+                    return func(*args, **kwargs)
             return wrapper
         return decorator
 
