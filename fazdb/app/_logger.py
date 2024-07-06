@@ -17,14 +17,30 @@ class Logger:
         cls._webhook_url = webhook_url
         cls._admin_discord_id = admin_discord_id
 
-        logger.level(name="UNEXPECTED", no=45, color="<red>")
-
-        logger.add(sink=cls.__critical_sink, level="CRITICAL", enqueue=True, format=cls.__discord_formatter)
-        logger.add(sink=cls.__error_sink, level="ERROR", enqueue=True, format=cls.__discord_formatter)
-
         os.makedirs(LOG_DIR, exist_ok=True)
         log_file = os.path.join(LOG_DIR, "fazdb.log")
-        logger.add(log_file, level="ERROR", rotation="10 MB", compression="zip", enqueue=True, backtrace=True)
+        logger.add(
+            log_file,
+            level="INFO",
+            rotation="10 MB",
+            compression="zip",
+            enqueue=True,
+            backtrace=True,
+            diagnose=False
+        )
+
+        logger.add(
+            sink=cls.__critical_sink,
+            level="CRITICAL",
+            enqueue=True,
+            format=cls.__discord_formatter
+        )
+        logger.add(
+            sink=cls.__error_sink,
+            level="ERROR",
+            enqueue=True,
+            format=cls.__discord_formatter
+        )
 
     @classmethod
     def __critical_sink(cls, message: str) -> None:
