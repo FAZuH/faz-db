@@ -77,13 +77,25 @@ class TaskDbInsert(Task):
 
     async def _insert_online_players_response(self, resp: OnlinePlayersResponse | None) -> None:
         if not resp: return
-
         adapter = self._response_adapter.OnlinePlayers
-        await self._db.online_players_repository.insert_new_online_players(adapter.to_online_players(resp))
-        await self._db.player_activity_history_repository.insert(
-            adapter.to_player_activity_history(resp, self._response_handler.online_players),
-            replace_on_duplicate=True
-        )
+
+        db = self._db
+        async with db.enter_session() as session:
+            await db.online_players_repository.truncate(session)
+            await db.online_players_repository.insert(adapter.to_online_players(resp), session)
+            await session.flush()
+
+            await db.player_activity_history_repository.insert(
+                adapter.to_player_activity_history(resp, self._response_handler.online_players),
+                session=session,
+                replace_on_duplicate=True
+            )
+            await session.flush()
+
+            worlds = list(adapter.to_worlds(resp))
+            await db.worlds_repository.delete([world.name for world in worlds])
+            await db.worlds_repository.insert(worlds, replace_on_duplicate=True, columns_to_replace=["player_count"])
+            await session.flush()
 
     async def _insert_player_responses(self, resps: list[PlayerResponse]) -> None:
         if not resps: return
