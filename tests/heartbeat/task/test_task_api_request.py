@@ -36,8 +36,8 @@ class TestTaskApiRequest(unittest.TestCase):
 
     async def test_start_requests(self):
         # PREPARE
-        self.task._request_list = MagicMock()
-        self.task._request_list.dequeue.return_value = [MagicMock(), MagicMock()]
+        self.task._request_queue = MagicMock()
+        self.task._request_queue.dequeue.return_value = [MagicMock(), MagicMock()]
 
         # ACT
         await self.task._start_requests()
@@ -50,9 +50,9 @@ class TestTaskApiRequest(unittest.TestCase):
         task2 = MagicMock(done=MagicMock(return_value=True), exception=MagicMock(return_value=None), result=MagicMock())
         task3 = MagicMock(done=MagicMock(return_value=False))
         self.task._running_requests = [task1, task2, task3]
-        self.task._response_list.put = MagicMock()
+        self.task._response_queue.put = MagicMock()
 
         self.task._check_responses()
 
         self.assertEqual(len(self.task._running_requests), 1)
-        self.task._response_list.put.assert_called_once()
+        self.task._response_queue.put.assert_called_once()

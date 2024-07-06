@@ -21,24 +21,24 @@ class TaskDbInsert(Task):
         self,
         api: Api,
         db: IFazdbDatabase,
-        request_list: RequestQueue,
-        response_list: ResponseQueue,
+        request_queue: RequestQueue,
+        response_queue: ResponseQueue,
     ) -> None:
         self._api = api
         self._db = db
-        self._request_list = request_list
-        self._response_list = response_list
+        self._request_queue = request_queue
+        self._response_queue = response_queue
 
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = datetime.now()
         self._response_adapter = ApiResponseAdapter()
-        self._response_handler = self._ResponseHandler(self._api, self._request_list)
+        self._response_handler = self._ResponseHandler(self._api, self._request_queue)
         self._start_time = datetime.now()
 
     def setup(self) -> None:
         self._event_loop.run_until_complete(self._db.create_all())
         # NOTE: Initial request. Results in a chain reaction of requests.
-        self._request_list.enqueue(0, self._api.player.get_online_uuids(), priority=999)
+        self._request_queue.enqueue(0, self._api.player.get_online_uuids(), priority=999)
 
     def teardown(self) -> None: ...
 
@@ -55,7 +55,7 @@ class TaskDbInsert(Task):
         online_players_resp: None | OnlinePlayersResponse = None
         player_resps: list[PlayerResponse] = []
         guild_resps: list[GuildResponse] = []
-        for resp in self._response_list.get():
+        for resp in self._response_queue.get():
             if isinstance(resp, PlayerResponse):
                 player_resps.append(resp)
             elif isinstance(resp, OnlinePlayersResponse):
@@ -196,9 +196,9 @@ class TaskDbInsert(Task):
 
         def _requeue_onlineplayers(self, resp: OnlinePlayersResponse) -> None:
             self._request_list.enqueue(
-                    resp.headers.expires.to_datetime().timestamp(),
-                    self._api.player.get_online_uuids(),
-                    priority=500
+                resp.headers.expires.to_datetime().timestamp(),
+                self._api.player.get_online_uuids(),
+                priority=500
             )
 
         # PlayerResponse
@@ -243,8 +243,8 @@ class TaskDbInsert(Task):
                     continue
 
                 self._request_list.enqueue(
-                        resp.headers.expires.to_datetime().timestamp(),  # due to ratelimit
-                        self._api.player.get_full_stats(resp.body.uuid.uuid)
+                    resp.headers.expires.to_datetime().timestamp(),  # due to ratelimit
+                    self._api.player.get_full_stats(resp.body.uuid.uuid)
                 )
 
         # GuildResponse
@@ -254,8 +254,8 @@ class TaskDbInsert(Task):
                     continue
 
                 self._request_list.enqueue(
-                        resp.headers.expires.to_datetime().timestamp(),
-                        self._api.guild.get(resp.body.name)
+                    resp.headers.expires.to_datetime().timestamp(),
+                    self._api.guild.get(resp.body.name)
                 )
 
         @property

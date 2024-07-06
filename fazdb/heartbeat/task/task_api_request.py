@@ -18,10 +18,10 @@ class TaskApiRequest(Task):
 
     _CONCURRENT_REQUESTS = 15
 
-    def __init__(self, api: Api, request_list: RequestQueue, response_list: ResponseQueue) -> None:
+    def __init__(self, api: Api, request_queue: RequestQueue, response_queue: ResponseQueue) -> None:
         self._api = api
-        self._request_list = request_list
-        self._response_list = response_list
+        self._request_queue = request_queue
+        self._response_queue = response_queue
 
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = datetime.now()
@@ -59,7 +59,7 @@ class TaskApiRequest(Task):
             self._running_requests.extend(
                     self._event_loop.create_task(req)
                     # fill the event loop with eligible requests once there's slots open
-                    for req in self._request_list.dequeue(self._CONCURRENT_REQUESTS - running_req_amount)
+                    for req in self._request_queue.dequeue(self._CONCURRENT_REQUESTS - running_req_amount)
             )
 
     def _check_responses(self) -> None:
@@ -77,7 +77,7 @@ class TaskApiRequest(Task):
                 )
                 # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
                 if task.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
-                    self._request_list.enqueue(0, self._api.player.get_online_uuids())
+                    self._request_queue.enqueue(0, self._api.player.get_online_uuids())
             else:
                 # get_online_uuids will be requeued when the response is computed
                 ok_results.append(task.result())
@@ -87,7 +87,7 @@ class TaskApiRequest(Task):
 
         if len(ok_results) > 0:
             logger.debug(f"{len(ok_results)} responses from API")
-            self._response_list.put(ok_results)
+            self._response_queue.put(ok_results)
 
     @property
     def running_requests(self) -> list[asyncio.Task[AbstractWynnResponse[Any]]]:
