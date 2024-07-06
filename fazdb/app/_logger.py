@@ -17,10 +17,7 @@ class Logger:
         cls._webhook_url = webhook_url
         cls._admin_discord_id = admin_discord_id
 
-        logger.level(name="UNEXPECTED", no=45, color="<red>")
-
         logger.add(sink=cls.__critical_sink, level="CRITICAL", enqueue=True, format=cls.__discord_formatter)
-        logger.add(sink=cls.__unexpected_error_sink, level="UNEXPECTED", enqueue=True, format=cls.__discord_formatter)
         logger.add(sink=cls.__error_sink, level="ERROR", enqueue=True, format=cls.__discord_formatter)
 
         os.makedirs(LOG_DIR, exist_ok=True)
@@ -31,10 +28,6 @@ class Logger:
     def __critical_sink(cls, message: str) -> None:
         cls.__send_embed_to_webhook("CRITICAL ERROR", message, Colour.dark_red())
 
-    @classmethod
-    def __unexpected_error_sink(cls, message: str) -> None:
-        cls.__send_embed_to_webhook("UNEXPECTED ERROR", message, Colour.red())
-        
     @classmethod
     def __error_sink(cls, message: str) -> None:
         cls.__send_embed_to_webhook("ERROR", message, Colour.red())
