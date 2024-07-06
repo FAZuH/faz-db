@@ -8,6 +8,7 @@ from fazdb.db.fazdb.model import FazdbUptime
 from fazdb.util import ApiResponseAdapter
 
 from .task import Task
+from loguru import logger
 
 if TYPE_CHECKING:
     from . import RequestQueue, ResponseQueue
@@ -43,7 +44,8 @@ class TaskDbInsert(Task):
     def teardown(self) -> None: ...
 
     def run(self) -> None:
-        self._event_loop.run_until_complete(self._run())
+        with logger.catch(level="ERROR"):
+            self._event_loop.run_until_complete(self._run())
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:

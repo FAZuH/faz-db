@@ -38,7 +38,8 @@ class TaskApiRequest(Task):
             req.cancel()
 
     def run(self) -> None:
-        self._event_loop.run_until_complete(self._run())
+        with logger.catch(level="ERROR"):
+            self._event_loop.run_until_complete(self._run())
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:
