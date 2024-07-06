@@ -42,7 +42,7 @@ class Logger:
     def __send_embed_to_webhook(cls, title: str, description: str, colour: Colour | None = None) -> None:
         webhook = SyncWebhook.from_url(cls._webhook_url)
         embed = Embed(title=title, description=f"```{description[:4090]}```", colour=colour)
-        embed.add_field(name="Timestamp", value=f"<t:{datetime.now().timestamp()}:R")
+        embed.add_field(name="Timestamp", value=f"<t:{int(datetime.now().timestamp())}:R>")
         webhook.send(embed=embed)
 
     @staticmethod
