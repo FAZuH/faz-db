@@ -76,7 +76,7 @@ class TaskDbInsert(Task):
         await self._insert_guild_response(guild_resps)
 
     async def _insert_online_players_response(self, resp: OnlinePlayersResponse | None) -> None:
-        if not resp: return
+        if not resp or not resp.body.raw: return
         adapter = self._response_adapter.OnlinePlayers
 
         db = self._db
