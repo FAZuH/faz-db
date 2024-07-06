@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 from typing import Generator, TYPE_CHECKING
 
 from fazdb.db.fazdb.model import (
@@ -11,10 +12,10 @@ from fazdb.db.fazdb.model import (
     PlayerActivityHistory,
     PlayerHistory,
     PlayerInfo,
+    Worlds,
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
     from fazdb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
 
 
@@ -140,3 +141,18 @@ class ApiResponseAdapter:
                 for uuid in resp.body.players
                 if uuid.is_uuid() is True
             )
+        
+        @staticmethod
+        def to_worlds(resp: OnlinePlayersResponse) -> Generator[Worlds, None, None]:
+            worldlist: dict[str, int] = {}
+            for _, world in resp.body.iter_players():
+                if world not in worldlist:
+                    worldlist[world] = 0
+                else:
+                    worldlist[world] += 1
+            for world, player_count in worldlist.items():
+                yield Worlds(
+                    name=world,
+                    player_count=player_count,
+                    time_created=datetime.now(),
+                )
