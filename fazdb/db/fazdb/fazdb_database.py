@@ -15,6 +15,7 @@ from .repository import (
     PlayerActivityHistoryRepository,
     PlayerHistoryRepository,
     PlayerInfoRepository,
+    WorldsRepository
 )
 
 if TYPE_CHECKING:
@@ -37,6 +38,7 @@ class FazdbDatabase(BaseAsyncDatabase[BaseModel], IFazdbDatabase):
         self._player_activity_history_repository = PlayerActivityHistoryRepository(self)
         self._player_history_repository = PlayerHistoryRepository(self)
         self._player_info_repository = PlayerInfoRepository(self)
+        self._worlds_repository = WorldsRepository(self)
 
         self._repositories: list[Repository] = [
             self._character_history_repository,
@@ -49,6 +51,7 @@ class FazdbDatabase(BaseAsyncDatabase[BaseModel], IFazdbDatabase):
             self._player_activity_history_repository,
             self._player_history_repository,
             self._player_info_repository,
+            self._worlds_repository
         ]
 
     @property
@@ -94,6 +97,10 @@ class FazdbDatabase(BaseAsyncDatabase[BaseModel], IFazdbDatabase):
     @property
     def player_info_repository(self) -> PlayerInfoRepository:
         return self._player_info_repository
+
+    @property
+    def worlds_repository(self) -> WorldsRepository:
+        return self._worlds_repository
 
     # override
     @property
