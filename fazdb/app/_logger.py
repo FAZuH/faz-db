@@ -13,8 +13,9 @@ class Logger:
     _webhook_url: str
 
     @classmethod
-    def setup(cls, webhook_url: str) -> None:
+    def setup(cls, webhook_url: str, admin_discord_id: int) -> None:
         cls._webhook_url = webhook_url
+        cls._admin_discord_id = admin_discord_id
 
         logger.level(name="UNEXPECTED", no=45, color="<red>")
 
@@ -43,7 +44,8 @@ class Logger:
         webhook = SyncWebhook.from_url(cls._webhook_url)
         embed = Embed(title=title, description=f"```{description[:4090]}```", colour=colour)
         embed.add_field(name="Timestamp", value=f"<t:{int(datetime.now().timestamp())}:R>")
-        webhook.send(embed=embed)
+        admin_ping = f"<@{cls._admin_discord_id}>"
+        webhook.send(content=admin_ping, embed=embed)
 
     @staticmethod
     def __discord_formatter(record):

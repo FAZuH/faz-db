@@ -19,7 +19,10 @@ class FazDb(App):
     def __init__(self) -> None:
         self._config = Config()
         self._config.read()
-        Logger.setup(self._config.discord_log_webhook)
+        Logger.setup(
+            self._config.discord_log_webhook,
+            self._config.admin_discord_id
+        )
 
         self._api = WynnApi()
 
