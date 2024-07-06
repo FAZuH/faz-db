@@ -28,17 +28,16 @@ class TaskApiRequest(Task):
         self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
 
     def setup(self) -> None:
-        logger.debug(f"Setting up {self.name}")
         self._event_loop.run_until_complete(self._api.start())
 
     def teardown(self) -> None:
-        logger.debug(f"Tearing down {self.name}")
         self._event_loop.run_until_complete(self._api.close())
         for req in self._running_requests:
             req.cancel()
 
     def run(self) -> None:
-        self._event_loop.run_until_complete(self._run())
+        with logger.catch(level="ERROR"):
+            self._event_loop.run_until_complete(self._run())
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:

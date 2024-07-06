@@ -3,6 +3,8 @@ import asyncio
 from datetime import datetime
 from typing import Iterable, TYPE_CHECKING
 
+from loguru import logger
+
 from fazdb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
 from fazdb.db.fazdb.model import FazdbUptime
 from fazdb.util import ApiResponseAdapter
@@ -36,7 +38,8 @@ class TaskDbInsert(Task):
         self._start_time = datetime.now()
 
     def setup(self) -> None:
-        self._event_loop.run_until_complete(self._db.create_all())
+        with logger.catch(level="ERROR"):
+            self._event_loop.run_until_complete(self._db.create_all())
         # NOTE: Initial request. Results in a chain reaction of requests.
         self._request_queue.enqueue(0, self._api.player.get_online_uuids(), priority=999)
 
