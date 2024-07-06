@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Generator, TYPE_CHECKING
+from datetime import datetime
+from typing import TYPE_CHECKING
 
 from fazdb.db.fazdb.model import (
     CharacterHistory,
@@ -11,10 +12,10 @@ from fazdb.db.fazdb.model import (
     PlayerActivityHistory,
     PlayerHistory,
     PlayerInfo,
+    Worlds,
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
     from fazdb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
 
 
@@ -24,8 +25,8 @@ class ApiResponseAdapter:
     class Player:
 
         @staticmethod
-        def to_character_history(resp: PlayerResponse) -> Generator[CharacterHistory, None, None]:
-            return (CharacterHistory(
+        def to_character_history(resp: PlayerResponse) -> list[CharacterHistory]:
+            return [CharacterHistory(
                 character_uuid=ch_uuid.to_bytes(),
                 level=ch.level,
                 xp=ch.xp,
@@ -57,15 +58,15 @@ class ApiResponseAdapter:
                 quest_completions=len(ch.quests),
                 raid_completions=ch.raids.total,
                 datetime=resp.headers.to_datetime()
-            ) for ch_uuid, ch in resp.body.iter_characters())
+            ) for ch_uuid, ch in resp.body.iter_characters()]
 
         @staticmethod
-        def to_character_info(resp: PlayerResponse) -> Generator[CharacterInfo, None, None]:
-            return (CharacterInfo(
+        def to_character_info(resp: PlayerResponse) -> list[CharacterInfo]:
+            return [CharacterInfo(
                 character_uuid=character_uuid.to_bytes(),
                 uuid=resp.body.uuid.to_bytes(),
                 type=character.type.get_kind_str()
-            ) for character_uuid, character in resp.body.iter_characters())
+            ) for character_uuid, character in resp.body.iter_characters()]
 
         @staticmethod
         def to_player_history(resp: PlayerResponse) -> PlayerHistory:
@@ -112,26 +113,26 @@ class ApiResponseAdapter:
             )
 
         @staticmethod
-        def to_guild_member_history(resp: GuildResponse) -> Generator[GuildMemberHistory, None, None]:
-            return (GuildMemberHistory(
+        def to_guild_member_history(resp: GuildResponse) -> list[GuildMemberHistory]:
+            return [GuildMemberHistory(
                 uuid=uuid.to_bytes() if uuid.is_uuid() else memberinfo.uuid.to_bytes(),  # type: ignore
                 contributed=memberinfo.contributed,
                 joined=memberinfo.joined.to_datetime(),
                 datetime=resp.headers.to_datetime()
-            ) for rank, uuid, memberinfo in resp.body.members.iter_online_members())  # type: ignore
+            ) for rank, uuid, memberinfo in resp.body.members.iter_online_members()]  # type: ignore
 
     class OnlinePlayers:
 
         @staticmethod
-        def to_online_players(resp: OnlinePlayersResponse) -> Generator[OnlinePlayers, None, None]:
-            return (OnlinePlayers(uuid=uuid.to_bytes(), server=server) for uuid, server in resp.body.iter_players())
+        def to_online_players(resp: OnlinePlayersResponse) -> list[OnlinePlayers]:
+            return [OnlinePlayers(uuid=uuid.to_bytes(), server=server) for uuid, server in resp.body.iter_players()]
 
         @staticmethod
         def to_player_activity_history(
             resp: OnlinePlayersResponse,
             logon_timestamps: dict[str, datetime]
-        ) -> Generator[PlayerActivityHistory, None, None]:
-            return (
+        ) -> list[PlayerActivityHistory]:
+            return [
                 PlayerActivityHistory(
                     uuid=uuid.to_bytes(),  # the user's uuid
                     logon_datetime=logon_timestamps[uuid.username_or_uuid],  # when did the user logged on
@@ -139,4 +140,17 @@ class ApiResponseAdapter:
                 )
                 for uuid in resp.body.players
                 if uuid.is_uuid() is True
-            )
+            ]
+        
+        @staticmethod
+        def to_worlds(resp: OnlinePlayersResponse) -> list[Worlds]:
+            worldlist: dict[str, int] = {}
+            for _, world in resp.body.iter_players():
+                if world not in worldlist:
+                    worldlist[world] = 0
+                else:
+                    worldlist[world] += 1
+            return [
+                Worlds(name=world, player_count=player_count, time_created=datetime.now())
+                for world, player_count in worldlist.items()
+            ]
