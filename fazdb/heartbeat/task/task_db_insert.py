@@ -38,15 +38,13 @@ class TaskDbInsert(Task):
         self._start_time = datetime.now()
 
     def setup(self) -> None:
-        with logger.catch(level="ERROR"):
-            self._event_loop.run_until_complete(self._db.create_all())
+        self._event_loop.run_until_complete(self._db.create_all())
         # NOTE: Initial request. Results in a chain reaction of requests.
         self._request_queue.enqueue(0, self._api.player.get_online_uuids(), priority=999)
 
-    def teardown(self) -> None: ...
-
     def run(self) -> None:
-        self._event_loop.run_until_complete(self._run())
+        with logger.catch(level="ERROR"):
+            self._event_loop.run_until_complete(self._run())
         self._latest_run = datetime.now()
 
     async def _run(self) -> None:
