@@ -19,17 +19,20 @@ class FazDb(App):
     def __init__(self) -> None:
         self._config = Config()
         self._config.read()
-        Logger.setup(self._config.discord_log_webhook)
+        Logger.setup(
+            self.config.discord_log_webhook,
+            self.config.admin_discord_id
+        )
 
         self._api = WynnApi()
 
         self._db = FazdbDatabase(
             "mysql+aiomysql",
-            self._config.mysql_username,
-            self._config.mysql_password,
-            self._config.mysql_host,
-            self._config.mysql_port,
-            self._config.fazdb_db_name
+            self.config.mysql_username,
+            self.config.mysql_password,
+            self.config.mysql_host,
+            self.config.mysql_port,
+            self.config.fazdb_db_name
         )
         self._heartbeat = SimpleHeartbeat(self.api, self.db)
 
