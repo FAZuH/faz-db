@@ -69,14 +69,14 @@ class TaskApiRequest(Task):
                 continue
 
             tasks_to_remove.append(task)
-            if task.exception() is not None:
-                logger.exception(
-                    f"Error fetching from Wynn API ({task.get_coro().__qualname__})",
-                    task.exception()
-                )
+            exc = task.exception()
+            if exc is not None:
                 # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
                 if task.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
                     self._request_queue.enqueue(0, self._api.player.get_online_uuids())
+
+                with logger.catch(level="ERROR"):
+                    raise exc
             else:
                 # get_online_uuids will be requeued when the response is computed
                 ok_results.append(task.result())
