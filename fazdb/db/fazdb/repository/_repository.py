@@ -5,6 +5,7 @@ from os import replace
 from threading import Lock
 from typing import Any, Iterable, TYPE_CHECKING, Literal
 
+from loguru import logger
 from sqlalchemy import Column, Tuple, delete, exists, select, text, tuple_
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects.mysql import insert
@@ -74,7 +75,8 @@ class Repository[T: BaseModel, ID](ABC):
         entity: Iterable[T] | T,
         session: None | AsyncSession = None,
         ignore_on_duplicate: bool = False,
-        replace_on_duplicate: bool = False
+        replace_on_duplicate: bool = False,
+        columns_to_replace: Iterable[str] | None = None
     ) -> None:
         """Insert one or more entities into the database.
 
@@ -89,17 +91,20 @@ class Repository[T: BaseModel, ID](ABC):
         if ignore_on_duplicate and replace_on_duplicate:
             raise ValueError("ignore_on_duplicate and replace_on_duplicate cannot be both True")
 
-        entities = self.__ensure_iterable(entity)
+        entities = self._ensure_iterable(entity)
+        table = self.get_model_cls().get_table()
         async with self.database.must_enter_session(session) as session:
-            for entity in entities:
-                entity_d = self.__to_dict(entity)
-                if replace_on_duplicate:
-                    stmt = insert(entity.get_table()).values(entity_d).on_duplicate_key_update(entity_d)
-                else:
-                    stmt = entity.get_table().insert().values(entity_d)
-                    if ignore_on_duplicate:
-                        stmt = stmt.prefix_with("IGNORE")
-                await session.execute(stmt)
+            entity_d = self._to_dict(entities)
+            stmt = insert(table).values(entity_d)
+
+            if replace_on_duplicate:
+                if columns_to_replace is None:
+                    columns_to_replace = [c.name for c in table.columns if not c.primary_key]
+                stmt = stmt.on_duplicate_key_update(**{c: getattr(stmt.inserted, c) for c in columns_to_replace})
+
+            if ignore_on_duplicate:
+                stmt = stmt.prefix_with("IGNORE")
+            await session.execute(stmt)
 
     async def delete(self, id_: Iterable[ID] | ID, session: AsyncSession | None = None) -> None:
         """Deletes an entry from the repository based on `id_`
@@ -114,9 +119,9 @@ class Repository[T: BaseModel, ID](ABC):
             If not provided, a new session will be created.
         """
         model = self.get_model_cls()
-        to_compare = self.__convert_comparable(id_)
+        to_compare = self._convert_comparable(id_)
         async with self.database.must_enter_session(session) as session:
-            stmt = delete(model).where(self.__get_primary_key().in_(to_compare))
+            stmt = delete(model).where(self._get_primary_key().in_(to_compare))
             await session.execute(stmt)
 
     async def is_exists(self, id_: ID, session: None | AsyncSession = None) -> bool:
@@ -136,7 +141,7 @@ class Repository[T: BaseModel, ID](ABC):
             True if the entry exists, False otherwise.
         """
         async with self.database.must_enter_session(session) as session:
-            stmt = select(exists().where(self.__get_primary_key() == (id_,)))
+            stmt = select(exists().where(self._get_primary_key() == (id_,)))
             result = await session.execute(stmt)
             is_exist = result.scalar()
             return is_exist or False
@@ -165,7 +170,7 @@ class Repository[T: BaseModel, ID](ABC):
     def table_name(self) -> str:
         return self.get_model_cls().__tablename__
 
-    def __get_primary_key(self) -> Tuple[Column[Any], ...]:
+    def _get_primary_key(self) -> Tuple[Column[Any], ...]:
         model_cls = self.get_model_cls()
         primary_keys: tuple[Column[Any], ...] | Column[Any] = model_cls.__mapper__.primary_key
         if not isinstance(primary_keys, tuple):  # type: ignore
@@ -175,16 +180,19 @@ class Repository[T: BaseModel, ID](ABC):
         return tupl
 
     @staticmethod
-    def __ensure_iterable[U](obj: Iterable[U] | U) -> Iterable[U]:
+    def _ensure_iterable[U](obj: Iterable[U] | U) -> Iterable[U]:
         if isinstance(obj, Iterable):
             return obj
         else:
             return [obj]
 
-    def __convert_comparable(self, id_: Iterable[ID] | ID) -> list[tuple[ID, ...]]:
-        ids = self.__ensure_iterable(id_)
+    def _convert_comparable(self, id_: Iterable[ID] | ID) -> list[tuple[ID, ...]]:
+        ids = self._ensure_iterable(id_)
         ret = [(id__,) for id__ in ids]
         return ret
 
-    def __to_dict(self, obj: T) -> dict[str, Any]:
-        return {c.name: getattr(obj, c.name) for c in obj.get_table().columns}
+    def _to_dict(self, objs: Iterable[T]) -> list[dict[str, Any]]:
+        return [
+            {c.name: getattr(obj, c.name) for c in obj.get_table().columns}
+            for obj in objs
+        ]
