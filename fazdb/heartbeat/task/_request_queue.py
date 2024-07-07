@@ -21,23 +21,17 @@ class RequestQueue:
 
     def dequeue(self, amount: int) -> list[WynnRespCoro]:
         now = datetime.now().timestamp()
-
         ret: list[WynnRespCoro] = []
         with self._lock:
             for _ in range(amount):
-                item = self._dequeue_one(now)
+                item = self.__dequeue_one(now)
                 if item is None:
                     # Stop yielding because the rest of the list is not eligible
                     break
                 ret.append(item.coro)
         return ret
 
-    def enqueue(
-        self,
-        request_ts: float,
-        coro: WynnRespCoro,
-        priority: int = 100
-    ) -> None:
+    def enqueue(self, request_ts: float, coro: WynnRespCoro, priority: int = 100) -> None:
         with self._lock:
             item = RequestItem(coro, priority, request_ts)
             if item not in self._list:
@@ -47,7 +41,7 @@ class RequestQueue:
         with self._lock:
             yield from self._list
 
-    def _dequeue_one(self, ts: None | float) -> None | RequestItem:
+    def __dequeue_one(self, ts: None | float) -> None | RequestItem:
         if len(self._list) < 1:
             return None
 

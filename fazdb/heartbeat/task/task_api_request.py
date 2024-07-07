@@ -27,14 +27,17 @@ class TaskApiRequest(Task):
         self._latest_run = datetime.now()
         self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
 
+    # override
     def setup(self) -> None:
         self._event_loop.run_until_complete(self._api.start())
 
+    # override
     def teardown(self) -> None:
         self._event_loop.run_until_complete(self._api.close())
         for req in self._running_requests:
             req.cancel()
 
+    # override
     def run(self) -> None:
         with logger.catch(level="ERROR"):
             self._event_loop.run_until_complete(self._run())
@@ -56,24 +59,26 @@ class TaskApiRequest(Task):
         running_req_amount = len(self._running_requests)
         if running_req_amount < self._CONCURRENT_REQUESTS:
             self._running_requests.extend(
-                    self._event_loop.create_task(req)
-                    # fill the event loop with eligible requests once there's slots open
-                    for req in self._request_queue.dequeue(self._CONCURRENT_REQUESTS - running_req_amount)
+                self._event_loop.create_task(req)
+                # fill the event loop with eligible requests once there's slots open
+                for req in self._request_queue.dequeue(self._CONCURRENT_REQUESTS - running_req_amount)
             )
 
     def _check_responses(self) -> None:
         ok_results: list[AbstractWynnResponse[Any]] = []
+        # NOTE: remove tasks separately to avoid size changes during iteration
         tasks_to_remove = []
         for task in self._running_requests:
             if not task.done():
                 continue
 
             tasks_to_remove.append(task)
+
             exc = task.exception()
             if exc is not None:
                 # HACK: prevents WynnApiFetcher stopping when get_online_uuids is not requeued
                 if task.get_coro().__qualname__ == self._api.player.get_online_uuids.__qualname__:
-                    self._request_queue.enqueue(0, self._api.player.get_online_uuids())
+                    self._request_queue.enqueue(0, self._api.player.get_online_uuids(), priority=999)
 
                 with logger.catch(level="ERROR"):
                     raise exc
@@ -84,26 +89,30 @@ class TaskApiRequest(Task):
         for task in tasks_to_remove:
             self._running_requests.remove(task)
 
-        if len(ok_results) > 0:
-            logger.debug(f"{len(ok_results)} responses from API")
+        if ok_results:
+            logger.info(f"{len(ok_results)} responses from API")
             self._response_queue.put(ok_results)
 
     @property
     def running_requests(self) -> list[asyncio.Task[AbstractWynnResponse[Any]]]:
         return self._running_requests
 
+    # override
     @property
     def first_delay(self) -> float:
         return 2.0
 
+    # override
     @property
     def interval(self) -> float:
         return 1.0
 
+    # override
     @property
     def latest_run(self) -> datetime:
         return self._latest_run
 
+    # override
     @property
     def name(self) -> str:
         return self.__class__.__name__

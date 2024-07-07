@@ -126,7 +126,7 @@ class TestResponseHandler(unittest.TestCase):
         resp1.headers.to_datetime.return_value = datetime1
 
         # ACT
-        self._manager._process_onlineplayers_response(resp0)
+        self._manager.__process_online_players_response(resp0)
 
         # ASSERT
         # NOTE: Assert that player 1 and 2 has logged on.
@@ -138,7 +138,7 @@ class TestResponseHandler(unittest.TestCase):
         })
 
         # ACT
-        self._manager._process_onlineplayers_response(resp1)
+        self._manager.__process_online_players_response(resp1)
 
         # ASSERT
         # NOTE: Assert that only player 2 has logged on because player 1 is already logged on.
@@ -155,7 +155,7 @@ class TestResponseHandler(unittest.TestCase):
         self._manager._logged_on_players = {uuid0}
 
         # ACT
-        self._manager._enqueue_player()
+        self._manager.__enqueue_player()
 
         # ASSERT
         # NOTE: Assert that the correct player is being queued.
@@ -169,7 +169,7 @@ class TestResponseHandler(unittest.TestCase):
         resp.headers.expires.to_datetime().timestamp.return_value = 69
 
         # ACT
-        self._manager._requeue_onlineplayers(resp)
+        self._manager.__requeue_onlineplayers(resp)
 
         # ASSERT
         # NOTE: Assert that enqueue is called with the correct arguments.
@@ -198,7 +198,7 @@ class TestResponseHandler(unittest.TestCase):
         mock3.body.online = True
 
         # ACT
-        self._manager._process_player_response([mock1])
+        self._manager.__process_player_response([mock1])
 
         # ASSERT
         # NOTE: Assert that guild "test0" is logged on.
@@ -209,7 +209,7 @@ class TestResponseHandler(unittest.TestCase):
         })
 
         # ACT
-        self._manager._process_player_response([mock2, mock3])
+        self._manager.__process_player_response([mock2, mock3])
 
         # ASSERT
         # NOTE: Assert that only guild test1 is logged on, because test0 is already logged on.
@@ -224,7 +224,7 @@ class TestResponseHandler(unittest.TestCase):
         mock3.body.online = False
 
         # ACT
-        self._manager._process_player_response([mock3])
+        self._manager.__process_player_response([mock3])
 
         # ASSERT
         # NOTE: Assert that guild test1 is no longer online.
@@ -238,7 +238,7 @@ class TestResponseHandler(unittest.TestCase):
         self._manager._logged_on_guilds = {guild0}
 
         # ACT
-        self._manager._enqueue_guild()
+        self._manager.__enqueue_guild()
 
         # ASSERT
         # NOTE: Assert that the correct guild is being queued.
@@ -255,7 +255,7 @@ class TestResponseHandler(unittest.TestCase):
         resp2.body.online = False
 
         # ACT
-        self._manager._requeue_player([resp2, resp1])
+        self._manager.__requeue_player([resp2, resp1])
 
         # ASSERT
         # NOTE: Assert that self._api.player.get_online_uuids() is called with the correct arguments
@@ -276,7 +276,7 @@ class TestResponseHandler(unittest.TestCase):
         testResp2.body.members.get_online_members.return_value = 0
 
         # ACT
-        self._manager._requeue_guild([testResp1, testResp2])
+        self._manager.__requeue_guild([testResp1, testResp2])
 
         # ASSERT
         # NOTE: Assert that self._api.guild.get() is called with the correct arguments

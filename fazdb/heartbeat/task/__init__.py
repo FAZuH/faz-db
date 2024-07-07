@@ -1,4 +1,5 @@
 # type: ignore
+from ._api_response_adapter import ApiResponseAdapter
 from ._request_item import RequestItem
 from ._request_queue import RequestQueue
 from ._response_queue import ResponseQueue
