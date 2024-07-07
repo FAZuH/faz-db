@@ -11,6 +11,7 @@ class OnlinePlayers:
         self._players = {
             UsernameOrUuidField(usernameoruuid): server
             for usernameoruuid, server in raw["players"].items()
+            if server is not None
         }
 
     def iter_players(self) -> Generator[tuple[UsernameOrUuidField, str], Any, None]:
