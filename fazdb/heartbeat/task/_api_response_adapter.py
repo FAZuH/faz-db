@@ -147,10 +147,10 @@ class ApiResponseAdapter:
             worldlist: dict[str, int] = {}
             for _, world in resp.body.iter_players():
                 if world not in worldlist:
-                    worldlist[world] = 0
+                    worldlist[world] = 1
                 else:
                     worldlist[world] += 1
             return [
-                Worlds(name=world, player_count=player_count, time_created=datetime.now())
+                Worlds(name=world, player_count=player_count, time_created=resp.headers.to_datetime())
                 for world, player_count in worldlist.items()
             ]

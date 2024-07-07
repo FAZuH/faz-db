@@ -7,9 +7,8 @@ from loguru import logger
 
 from fazdb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
 from fazdb.db.fazdb.model import FazdbUptime
-from fazdb.util import ApiResponseAdapter
 
-from .task import Task
+from . import ApiResponseAdapter, Task
 
 if TYPE_CHECKING:
     from . import RequestQueue, ResponseQueue
