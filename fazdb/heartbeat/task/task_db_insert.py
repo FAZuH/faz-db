@@ -93,8 +93,7 @@ class TaskDbInsert(Task):
             await session.flush()
 
             worlds = list(adapter.to_worlds(resp))
-            await db.worlds_repository.delete(world.name, session=session)
-            await db.worlds_repository.insert(worlds, session=session, replace_on_duplicate=True, columns_to_replace=["player_count"])
+            await db.worlds_repository.update_worlds(worlds, session=session)
             await session.flush()
 
     async def _insert_player_responses(self, resps: list[PlayerResponse]) -> None:
