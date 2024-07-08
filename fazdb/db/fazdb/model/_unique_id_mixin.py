@@ -17,5 +17,5 @@ class UniqueIdMixin(BaseModel):
             if col.name not in {"unique_id", "datetime"}
         ]
         to_hash = ''.join(columns).encode()
-        hashed_columns = hashlib.sha256(to_hash).digest()
+        hashed_columns = hashlib.md5(to_hash).digest()
         self.unique_id = hashed_columns
