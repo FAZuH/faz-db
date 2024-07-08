@@ -21,7 +21,7 @@ class Repository[T: BaseModel, ID](ABC):
         self._database = database
         self._model_cls = model_cls
 
-    async def table_disk_usage(self, session: None | AsyncSession = None) -> Decimal:
+    async def table_disk_usage(self, *, session: None | AsyncSession = None) -> Decimal:
         """Calculate the size of the table in bytes.
 
         Parameters
@@ -54,7 +54,7 @@ class Repository[T: BaseModel, ID](ABC):
             ret = Decimal(row["size_bytes"]) if (row and row["size_bytes"] is not None) else Decimal(0)  # type: ignore
             return ret
 
-    async def create_table(self, session: None | AsyncSession = None) -> None:
+    async def create_table(self, *, session: None | AsyncSession = None) -> None:
         """Create the table associated with the repository if it does not already exist.
 
         Parameters
@@ -71,6 +71,7 @@ class Repository[T: BaseModel, ID](ABC):
     async def insert(
         self,
         entity: Iterable[T] | T,
+        *,
         session: None | AsyncSession = None,
         ignore_on_duplicate: bool = False,
         replace_on_duplicate: bool = False,
@@ -104,7 +105,7 @@ class Repository[T: BaseModel, ID](ABC):
                 stmt = stmt.prefix_with("IGNORE")
             await session.execute(stmt)
 
-    async def delete(self, id_: ID, session: AsyncSession | None = None) -> None:
+    async def delete(self, id_: ID, *, session: AsyncSession | None = None) -> None:
         """Deletes an entry from the repository based on `id_`
 
         Parameters
@@ -122,7 +123,7 @@ class Repository[T: BaseModel, ID](ABC):
             stmt = delete(model).where(primary_keys == id_)
             await session.execute(stmt)
 
-    async def is_exists(self, id_: ID, session: None | AsyncSession = None) -> bool:
+    async def is_exists(self, id_: ID, *, session: None | AsyncSession = None) -> bool:
         """Check if an entry with the given primary key exists in the database.
 
         Parameters
@@ -144,7 +145,7 @@ class Repository[T: BaseModel, ID](ABC):
             is_exist = result.scalar()
             return is_exist or False
 
-    async def truncate(self, session: None | AsyncSession = None) -> None:
+    async def truncate(self, *, session: None | AsyncSession = None) -> None:
         """Truncates the table.
 
         Parameters

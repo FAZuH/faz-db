@@ -33,8 +33,8 @@ class CommonRepositoryTest:
                 "faz-db_test"
             )
             async with self.database.enter_session() as session:
-                await self._repo.create_table(session)
-                await self._repo.truncate(session)
+                await self._repo.create_table(session=session)
+                await self._repo.truncate(session=session)
 
             return await super().asyncSetUp()
 
