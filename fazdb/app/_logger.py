@@ -26,7 +26,6 @@ class Logger:
             compression="zip",
             enqueue=True,
             backtrace=True,
-            diagnose=False
         )
 
         logger.add(
