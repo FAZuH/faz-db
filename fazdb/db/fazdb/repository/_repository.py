@@ -1,11 +1,9 @@
 from __future__ import annotations
 from abc import ABC
 from decimal import Decimal
-from os import replace
 from threading import Lock
-from typing import Any, Iterable, TYPE_CHECKING, Literal
+from typing import Any, Iterable, TYPE_CHECKING
 
-from loguru import logger
 from sqlalchemy import Column, Tuple, delete, exists, select, text, tuple_
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects.mysql import insert
@@ -106,7 +104,7 @@ class Repository[T: BaseModel, ID](ABC):
                 stmt = stmt.prefix_with("IGNORE")
             await session.execute(stmt)
 
-    async def delete(self, id_: Iterable[ID] | ID, session: AsyncSession | None = None) -> None:
+    async def delete(self, id_: ID, session: AsyncSession | None = None) -> None:
         """Deletes an entry from the repository based on `id_`
 
         Parameters
@@ -119,9 +117,9 @@ class Repository[T: BaseModel, ID](ABC):
             If not provided, a new session will be created.
         """
         model = self.get_model_cls()
-        to_compare = self._convert_comparable(id_)
+        primary_keys = self._get_primary_key()
         async with self.database.must_enter_session(session) as session:
-            stmt = delete(model).where(self._get_primary_key().in_(to_compare))
+            stmt = delete(model).where(primary_keys == id_)
             await session.execute(stmt)
 
     async def is_exists(self, id_: ID, session: None | AsyncSession = None) -> bool:
@@ -141,7 +139,7 @@ class Repository[T: BaseModel, ID](ABC):
             True if the entry exists, False otherwise.
         """
         async with self.database.must_enter_session(session) as session:
-            stmt = select(exists().where(self._get_primary_key() == (id_,)))
+            stmt = select(exists().where(self._get_primary_key() == id_))
             result = await session.execute(stmt)
             is_exist = result.scalar()
             return is_exist or False
@@ -170,14 +168,17 @@ class Repository[T: BaseModel, ID](ABC):
     def table_name(self) -> str:
         return self.get_model_cls().__tablename__
 
-    def _get_primary_key(self) -> Tuple[Column[Any], ...]:
+    def _get_primary_key(self) -> Tuple[Column[Any], ...] | Column[Any]:
         model_cls = self.get_model_cls()
         primary_keys: tuple[Column[Any], ...] | Column[Any] = model_cls.__mapper__.primary_key
+
         if not isinstance(primary_keys, tuple):  # type: ignore
-            tupl = tuple_(primary_keys)
-        else:
-            tupl = tuple_(*primary_keys)
-        return tupl
+            return tuple_(primary_keys)
+
+        if len(primary_keys) == 1:
+            return primary_keys[0]
+
+        return tuple_(*primary_keys)
 
     @staticmethod
     def _ensure_iterable[U](obj: Iterable[U] | U) -> Iterable[U]:
