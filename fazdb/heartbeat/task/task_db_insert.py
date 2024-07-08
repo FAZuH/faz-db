@@ -163,7 +163,7 @@ class TaskDbInsert(Task):
             self._logged_on_players: set[str] = set()
 
         def handle_onlineplayers_response(self, resp: None | OnlinePlayersResponse) -> None:
-            if not resp: return
+            if not resp or not resp.body.raw: return
             self._process_onlineplayers_response(resp)
             self._requeue_onlineplayers(resp)
             self._enqueue_player()
