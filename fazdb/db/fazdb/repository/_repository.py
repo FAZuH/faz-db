@@ -9,6 +9,7 @@ from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects.mysql import insert
 
 if TYPE_CHECKING:
+    from sqlalchemy import Table
     from sqlalchemy.ext.asyncio import AsyncSession
     from ..model import BaseModel
     from ... import BaseAsyncDatabase
@@ -48,11 +49,13 @@ class Repository[T: BaseModel, ID](ABC):
             "schema": self._database.database,
             "table_name": self.table_name
         }
+
         async with self._database.must_enter_session(session) as session:
             result = await session.execute(text(SQL), params)
-            row = result.fetchone()
-            ret = Decimal(row["size_bytes"]) if (row and row["size_bytes"] is not None) else Decimal(0)  # type: ignore
-            return ret
+
+        row = result.fetchone()
+        ret = Decimal(row["size_bytes"]) if (row and row["size_bytes"] is not None) else Decimal(0)  # type: ignore
+        return ret
 
     async def create_table(self, *, session: None | AsyncSession = None) -> None:
         """Create the table associated with the repository if it does not already exist.
@@ -63,9 +66,8 @@ class Repository[T: BaseModel, ID](ABC):
             Optional AsyncSession object to use for the database connection.
             If not provided, a new session will be created.
         """
+        stmt = CreateTable(self.table, if_not_exists=True)
         async with self.database.must_enter_session(session) as session:
-            table = self.get_model_cls().get_table()
-            stmt = CreateTable(table, if_not_exists=True)
             await session.execute(stmt)
 
     async def insert(
@@ -92,17 +94,18 @@ class Repository[T: BaseModel, ID](ABC):
 
         entities = self._ensure_iterable(entity)
         table = self.get_model_cls().get_table()
+        entity_d = self._to_dict(entities)
+        stmt = insert(table).values(entity_d)
+
+        if replace_on_duplicate:
+            if columns_to_replace is None:
+                columns_to_replace = [c.name for c in table.columns if not c.primary_key]
+            stmt = stmt.on_duplicate_key_update(**{c: getattr(stmt.inserted, c) for c in columns_to_replace})
+
+        if ignore_on_duplicate:
+            stmt = stmt.prefix_with("IGNORE")
+
         async with self.database.must_enter_session(session) as session:
-            entity_d = self._to_dict(entities)
-            stmt = insert(table).values(entity_d)
-
-            if replace_on_duplicate:
-                if columns_to_replace is None:
-                    columns_to_replace = [c.name for c in table.columns if not c.primary_key]
-                stmt = stmt.on_duplicate_key_update(**{c: getattr(stmt.inserted, c) for c in columns_to_replace})
-
-            if ignore_on_duplicate:
-                stmt = stmt.prefix_with("IGNORE")
             await session.execute(stmt)
 
     async def delete(self, id_: ID, *, session: AsyncSession | None = None) -> None:
@@ -117,10 +120,9 @@ class Repository[T: BaseModel, ID](ABC):
             Optional AsyncSession object to use for the database connection.
             If not provided, a new session will be created.
         """
-        model = self.get_model_cls()
         primary_keys = self._get_primary_key()
+        stmt = self.table.delete().where(primary_keys == id_)
         async with self.database.must_enter_session(session) as session:
-            stmt = delete(model).where(primary_keys == id_)
             await session.execute(stmt)
 
     async def is_exists(self, id_: ID, *, session: None | AsyncSession = None) -> bool:
@@ -139,11 +141,13 @@ class Repository[T: BaseModel, ID](ABC):
         bool
             True if the entry exists, False otherwise.
         """
+        primary_keys = self._get_primary_key()
+        stmt = select(exists().where(primary_keys == id_))
         async with self.database.must_enter_session(session) as session:
-            stmt = select(exists().where(self._get_primary_key() == id_))
             result = await session.execute(stmt)
-            is_exist = result.scalar()
-            return is_exist or False
+
+        is_exist = result.scalar()
+        return is_exist or False
 
     async def truncate(self, *, session: None | AsyncSession = None) -> None:
         """Truncates the table.
@@ -166,8 +170,16 @@ class Repository[T: BaseModel, ID](ABC):
         return self._database
 
     @property
+    def model(self) -> type[T]:
+        return self.get_model_cls()
+
+    @property
+    def table(self) -> Table:
+        return self.model.get_table()
+
+    @property
     def table_name(self) -> str:
-        return self.get_model_cls().__tablename__
+        return self.model.__tablename__
 
     def _get_primary_key(self) -> Tuple[Column[Any], ...] | Column[Any]:
         model_cls = self.get_model_cls()
