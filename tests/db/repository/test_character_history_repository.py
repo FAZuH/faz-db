@@ -1,64 +1,38 @@
-# pyright: reportPrivateUsage=none
 from datetime import datetime
 from uuid import UUID
 
-from tests.fixtures_api import FixturesApi
 from fazdb.db.fazdb.model import CharacterHistory
-from fazdb.db.fazdb.repository import CharacterHistoryRepository
 
-from ._base_repository_testcase import BaseRepositoryTestCase
+from ._common_repository_test import CommonRepositoryTest
 
 
-class TestCharacterHistoryRepository(BaseRepositoryTestCase[CharacterHistory]):
+class TestCharacterHistoryRepository(CommonRepositoryTest.Test[CharacterHistory, int]):
 
-    def __init__(self, methodName: str) -> None:
-        super().__init__(CharacterHistoryRepository, methodName)
+    # override
+    def _get_mock_data(self):
+        uuid1 = UUID("b30f5e97-957d-47f6-bf1e-9e48d9fea200").bytes
+        uuid2 = UUID("33c3ad56-5e9b-4bfe-9685-9fc4df2a67fa").bytes
 
-    async def test_create_table(self) -> None:
-        # ACT
-        await self._repo.create_table()
+        model = self._repo.get_model_cls()
+        mock_data1 = model(
+            character_uuid=uuid1, level=1, xp=1, wars=1, playtime=1.0,
+            mobs_killed=1, chests_found=1, logins=1, deaths=1, discoveries=1,
+            hardcore=False, ultimate_ironman=False, ironman=False, craftsman=False,
+            hunted=False, alchemism=1.0, armouring=1.0, cooking=1.0, jeweling=1.0,
+            scribing=1.0, tailoring=1.0, weaponsmithing=1.0, woodworking=1.0,
+            mining=1.0, woodcutting=1.0, farming=1.0, fishing=1.0, dungeon_completions=1,
+            quest_completions=1, raid_completions=1, datetime=datetime.now().replace(microsecond=0),
+        )
+        mock_data2 = mock_data1.clone()
+        mock_data3 = mock_data1.clone()
+        mock_data3.character_uuid = uuid2
+        del mock_data3.unique_id
+        mock_data3 = mock_data3.clone()
+        mock_data4 = mock_data1.clone()
+        mock_data4.level = 2
+        return (mock_data1, mock_data2, mock_data3, mock_data4, "level")
 
-        # ASSERT
-        await self.assert_table_exists()
-
-    async def test_insert(self) -> None:
-        # ACT
-        n = await self._repo.insert(self._testData)
-
-        # ASSERT
-        # NOTE: Assert if the number of inserted entities is correct
-        self.assertEqual(10, n)
-
-        # PREPARE
-        toTest1: list[CharacterHistory] = self._testData[1:]
-        as_dict = self._repo._model_to_dict(self._testData[0])
-        as_dict["level"] += 1
-        as_dict.pop("unique_id")  # type: ignore
-        toTest1.append(CharacterHistory(**as_dict))  # type: ignore
-
-        # ACT
-        n = await self._repo.insert(toTest1)
-
-        # ASSERT
-        # NOTE: Assert unique constraints of character_uuid and datetime
-        self.assertEqual(1, n)
-
-    def _get_data(self) -> list[CharacterHistory]:
-        fixtures = FixturesApi()
-        raw_test_data = [
-                e
-                for datum in fixtures.get_players()[:10]
-                for e in self._adapter.Player.to_character_history(datum)
-        ]
-        raw_test_data = raw_test_data[:10]  # Get 10
-        self.assertEqual(10, len(raw_test_data))
-
-        testDatetime = datetime.fromtimestamp(1709181095)
-        testData: list[CharacterHistory] = []
-        for i, e in enumerate(raw_test_data):  # Modify the e id
-            as_dict = self._repo._model_to_dict(e)
-            as_dict["character_uuid"] = UUID(int=i).bytes
-            as_dict["datetime"] = testDatetime
-            as_dict.pop("unique_id")  # type: ignore
-            testData.append(e.__class__(**as_dict))  # type: ignore
-        return testData
+    # override
+    @property
+    def _repo(self):
+        return self.database.character_history_repository
