@@ -1,8 +1,9 @@
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from . import BaseModel
 
-from sqlalchemy.dialects.mysql import VARCHAR, SMALLINT, DATETIME
+from sqlalchemy.dialects.mysql import DATETIME, SMALLINT, VARCHAR
+from sqlalchemy.orm import Mapped, mapped_column
+
+from . import BaseModel
 
 
 class Worlds(BaseModel):
