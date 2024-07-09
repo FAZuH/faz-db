@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Sequence, TYPE_CHECKING
 import unittest
 
@@ -172,6 +173,10 @@ class CommonRepositoryTest:
         def _get_table_names(connection: Connection) -> list[str]:
             inspector = inspect(connection)
             return inspector.get_table_names()
+
+        @staticmethod
+        def _get_mock_datetime() -> datetime:
+            return datetime.now().replace(microsecond=0)
 
         @abstractmethod
         def _get_mock_data(self) -> tuple[T, T, T, T, str]:

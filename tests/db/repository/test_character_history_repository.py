@@ -25,8 +25,8 @@ class TestCharacterHistoryRepository(CommonRepositoryTest.Test[CharacterHistory,
         )
         mock_data2 = mock_data1.clone()
         mock_data3 = mock_data1.clone()
-        mock_data3.character_uuid = uuid2
         del mock_data3.unique_id
+        mock_data3.character_uuid = uuid2
         mock_data3 = mock_data3.clone()
         mock_data4 = mock_data1.clone()
         mock_data4.level = 2

@@ -1,7 +1,13 @@
-from unittest.mock import MagicMock
+import unittest
+import sys
+
+from loguru import logger
+
+from tests.db.repository import TestWorldsRepository
 
 
-a = MagicMock()
-a.body.guild.name = "Test"
-print(a.body.guild.name)
-
+if __name__ == "__main__":
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestWorldsRepository)
+    logger.debug(suite.countTestCases())
+    runner = unittest.TextTestRunner(stream=sys.stderr, verbosity=2)
+    runner.run(suite)
