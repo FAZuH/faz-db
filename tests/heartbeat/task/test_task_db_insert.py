@@ -1,15 +1,10 @@
-# pyright: reportPrivateUsage=false
 from datetime import datetime
 import unittest
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 from fazdb.api import WynnApi
-from fazdb.api.wynn.response import (
-    GuildResponse,
-    OnlinePlayersResponse,
-    PlayerResponse,
-)
-from fazdb.db.fazdb import FazDbDatabase
+from fazdb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
+from fazdb.db.fazdb import FazdbDatabase
 from fazdb.heartbeat.task import RequestQueue, ResponseQueue, TaskDbInsert
 
 
@@ -17,10 +12,10 @@ class TestTaskDbInsert(unittest.TestCase):
 
     def setUp(self) -> None:
         self._api = Mock(spec=WynnApi)
-        self._db = Mock(spec=FazDbDatabase)
+        self._db = Mock(spec=FazdbDatabase)
         self._request_list = Mock(spec_set=RequestQueue)
         self._response_list = Mock(spec_set=ResponseQueue)
-        self._task = TaskDbInsert(self._api, self._db, MagicMock(), self._request_list, self._response_list)
+        self._task = TaskDbInsert(self._api, self._db, self._request_list, self._response_list)
 
     def test_setup(self) -> None:
         # PREPARE

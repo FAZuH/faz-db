@@ -5,27 +5,28 @@ from typing import Any, TYPE_CHECKING
 
 from loguru import logger
 
-from . import Task
+from . import ITask
 
 if TYPE_CHECKING:
-    from . import RequestQueue, ResponseQueue
-    from fazdb import Api
-    from fazdb.api.wynn.response import AbstractWynnResponse
+    from .request_queue import RequestQueue
+    from .response_queue import ResponseQueue
+    from fazdb.api import WynnApi, BaseResponse
+    type BaseResponse_ = BaseResponse[Any, Any]
 
 
-class TaskApiRequest(Task):
+class TaskApiRequest(ITask):
     """implements `TaskBase`"""
 
     _CONCURRENT_REQUESTS = 15
 
-    def __init__(self, api: Api, request_list: RequestQueue, response_list: ResponseQueue) -> None:
+    def __init__(self, api: WynnApi, request_queue: RequestQueue, response_queue: ResponseQueue) -> None:
         self._api = api
-        self._request_list = request_list
-        self._response_list = response_list
+        self._request_list = request_queue
+        self._response_list = response_queue
 
         self._event_loop = asyncio.new_event_loop()
         self._latest_run = datetime.now()
-        self._running_requests: list[asyncio.Task[AbstractWynnResponse[Any]]] = []
+        self._running_requests: list[asyncio.Task[BaseResponse_]] = []
 
     def setup(self) -> None:
         logger.debug(f"Setting up {self.name}")
@@ -58,13 +59,13 @@ class TaskApiRequest(Task):
         running_req_amount = len(self._running_requests)
         if running_req_amount < self._CONCURRENT_REQUESTS:
             self._running_requests.extend(
-                    self._event_loop.create_task(req)
-                    # fill the event loop with eligible requests once there's slots open
-                    for req in self._request_list.dequeue(self._CONCURRENT_REQUESTS - running_req_amount)
+                self._event_loop.create_task(req)
+                # fill the event loop with eligible requests once there's slots open
+                for req in self._request_list.dequeue(self._CONCURRENT_REQUESTS - running_req_amount)
             )
 
     def _check_responses(self) -> None:
-        ok_results: list[AbstractWynnResponse[Any]] = []
+        ok_results: list[BaseResponse_] = []
         tasks_to_remove = []
         for task in self._running_requests:
             if not task.done():
@@ -89,10 +90,6 @@ class TaskApiRequest(Task):
         if len(ok_results) > 0:
             logger.debug(f"{len(ok_results)} responses from API")
             self._response_list.put(ok_results)
-
-    @property
-    def running_requests(self) -> list[asyncio.Task[AbstractWynnResponse[Any]]]:
-        return self._running_requests
 
     @property
     def first_delay(self) -> float:

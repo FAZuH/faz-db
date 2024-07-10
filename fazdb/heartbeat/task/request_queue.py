@@ -4,7 +4,7 @@ from threading import Lock
 from typing import TYPE_CHECKING, Any, Coroutine, Generator
 
 if TYPE_CHECKING:
-    from fazdb.api.wynn.response import AbstractWynnResponse
+    from fazdb.api.wynn.response import BaseWynnResponse
 
 
 class RequestQueue:
@@ -14,10 +14,10 @@ class RequestQueue:
         self._list: list[RequestQueue.RequestItem] = []
         self._lock: Lock = Lock()
 
-    def dequeue(self, amount: int) -> list[Coroutine[AbstractWynnResponse[Any], Any, Any]]:
+    def dequeue(self, amount: int) -> list[Coroutine[BaseWynnResponse[Any], Any, Any]]:
         now = datetime.now().timestamp()
 
-        ret: list[Coroutine[AbstractWynnResponse[Any], Any, Any]] = []
+        ret: list[Coroutine[BaseWynnResponse[Any], Any, Any]] = []
         with self._lock:
             for _ in range(amount):
                 item = self._dequeue_one(now)
@@ -30,7 +30,7 @@ class RequestQueue:
     def enqueue(
         self,
         request_ts: float,
-        coro: Coroutine[AbstractWynnResponse[Any], Any, Any],
+        coro: Coroutine[BaseWynnResponse[Any], Any, Any],
         priority: int = 100
     ) -> None:
         with self._lock:
@@ -56,7 +56,7 @@ class RequestQueue:
 
         def __init__(
             self,
-            coro: Coroutine[AbstractWynnResponse[Any], Any, Any],
+            coro: Coroutine[BaseWynnResponse[Any], Any, Any],
             priority: int,
             req_ts: float,
         ) -> None:
@@ -96,7 +96,7 @@ class RequestQueue:
             return self._req_ts
 
         @property
-        def coro(self) -> Coroutine[AbstractWynnResponse[Any], Any, Any]:
+        def coro(self) -> Coroutine[BaseWynnResponse[Any], Any, Any]:
             return self._coro
 
         @property

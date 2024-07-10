@@ -1,5 +1,4 @@
-from ._base_model import BaseModel
-from ._unique_id_mixin import UniqueIdMixin
+from .base_fazdb_model import BaseFazdbModel
 
 from .character_history import CharacterHistory
 from .character_info import CharacterInfo

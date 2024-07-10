@@ -1,7 +1,7 @@
-# type: ignore
-from .ratelimit_handler import RatelimitHandler
-from .response_set import ResponseSet
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .base_ratelimit_handler import BaseRatelimitHandler
+    from .base_response import BaseResponse
 
-from .http_request import HttpRequest  # RatelimitHandler, ResponseSet
-
-from .wynn import *
+from .wynn import WynnApi

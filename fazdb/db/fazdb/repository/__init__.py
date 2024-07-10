@@ -1,5 +1,3 @@
-from ._repository import Repository
-
 from .character_history_repository import CharacterHistoryRepository
 from .character_info_repository import CharacterInfoRepository
 from .fazdb_uptime_repository import FazdbUptimeRepository

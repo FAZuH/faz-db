@@ -1,27 +1,29 @@
 from __future__ import annotations
 import asyncio
 from datetime import datetime
-from typing import Iterable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
+
+from loguru import logger
 
 from fazdb.api.wynn.response import GuildResponse, OnlinePlayersResponse, PlayerResponse
 from fazdb.db.fazdb.model import FazdbUptime
 from fazdb.util import ApiResponseAdapter
-
-from .task import Task
-from loguru import logger
+from .itask import ITask
 
 if TYPE_CHECKING:
-    from . import RequestQueue, ResponseQueue
-    from fazdb import Api, IFazdbDatabase
+    from fazdb.api import WynnApi
+    from fazdb.db.fazdb import FazdbDatabase
+    from .request_queue import RequestQueue
+    from .response_queue import ResponseQueue
 
 
-class TaskDbInsert(Task):
+class TaskDbInsert(ITask):
     """ Inserts API responses to database. """
 
     def __init__(
         self,
-        api: Api,
-        db: IFazdbDatabase,
+        api: WynnApi,
+        db: FazdbDatabase,
         request_list: RequestQueue,
         response_list: ResponseQueue,
     ) -> None:
@@ -152,7 +154,7 @@ class TaskDbInsert(Task):
     class _ResponseHandler:
         """ Handles Wynncraft response processing, queueing, and requeuing. """
 
-        def __init__(self, api: Api, request_list: RequestQueue) -> None:
+        def __init__(self, api: WynnApi, request_list: RequestQueue) -> None:
             self._api = api
             self._request_list = request_list
 

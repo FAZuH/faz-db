@@ -1,40 +1,36 @@
 from __future__ import annotations
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable
 
 from loguru import logger
 
 from fazdb.api import WynnApi
 from fazdb.db.fazdb import FazdbDatabase
-from fazdb.heartbeat import SimpleHeartbeat
+from fazdb.heartbeat import Heartbeat
 from fazdb.util import RetryHandler
 
-from . import App, Config, Logger, Metrics
+from ._logger_setup import LoggerSetup
+from ._metrics import Metrics
+from .properties import Properties
 
-if TYPE_CHECKING:
-    from fazdb import Api, Heartbeat, IFazdbDatabase
 
-
-class FazDb(App):
+class FazDb:
 
     def __init__(self) -> None:
-        self._config = Config()
-        self._config.read()
-        Logger.setup(
-            self.config.discord_log_webhook,
-            self.config.admin_discord_id
-        )
+        self._properties = Properties()
+        p = self.properties
+        p.setup()
+        LoggerSetup.setup(p.LOG_DIR, p.DISCORD_LOG_WEBHOOK, p.ADMIN_DISCORD_ID)
 
         self._api = WynnApi()
-
         self._db = FazdbDatabase(
             "mysql+aiomysql",
-            self.config.mysql_username,
-            self.config.mysql_password,
-            self.config.mysql_host,
-            self.config.mysql_port,
-            self.config.fazdb_db_name
+            p.MYSQL_USERNAME,
+            p.MYSQL_PASSWORD,
+            p.MYSQL_HOST,
+            p.MYSQL_PORT,
+            p.FAZDB_DB_NAME
         )
-        self._heartbeat = SimpleHeartbeat(self.api, self.db)
+        self._heartbeat = Heartbeat(self.api, self.db)
 
         self.__register_retry_handler()
         self.__register_metric()
@@ -48,15 +44,15 @@ class FazDb(App):
         self.heartbeat.stop()
 
     @property
-    def api(self) -> Api:
+    def api(self) -> WynnApi:
         return self._api
 
     @property
-    def config(self) -> Config:
-        return self._config
+    def properties(self) -> Properties:
+        return self._properties
 
     @property
-    def db(self) -> IFazdbDatabase:
+    def db(self) -> FazdbDatabase:
         return self._db
 
     @property
@@ -66,7 +62,7 @@ class FazDb(App):
     def __register_retry_handler(self) -> None:
         """Registers retry handler to this appp"""
         register_lambda: Callable[[Callable[..., Any]], None] = lambda func: RetryHandler.register(
-            func, self.config.fazdb_db_max_retries, Exception
+            func, self.properties.FAZDB_DB_MAX_RETRIES, Exception
         )
         
         # Register retry handler to database

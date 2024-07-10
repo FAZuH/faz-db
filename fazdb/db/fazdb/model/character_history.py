@@ -12,10 +12,10 @@ from sqlalchemy.dialects.mysql import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from . import UniqueIdMixin
+from ._unique_id_model import UniqueIdModel
 
 
-class CharacterHistory(UniqueIdMixin):
+class CharacterHistory(UniqueIdModel):
     __tablename__ = "character_history"
 
     character_uuid: Mapped[bytes] = mapped_column(BINARY(16), nullable=False, primary_key=True)

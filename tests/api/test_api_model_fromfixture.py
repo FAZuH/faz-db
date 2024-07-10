@@ -8,22 +8,20 @@ from fazdb.api.wynn.model.field import (
     CharacterTypeField,
     GamemodeField,
     UsernameOrUuidField,
-    UuidField
+    UuidField,
 )
-from tests.fixtures_api import FixturesApi
+from tests._fixtures_api import FixturesLoader
 
 
-class TestApiModelFromfixture(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        # self.wynnapi = self.mockwynnapi.wynnapi
-        # await self.wynnapi.start()
+class TestApiModelFromfixture(unittest.TestCase):
 
-        fixtures_api = FixturesApi()
+    def setUp(self) -> None:
+        fixtures_api = FixturesLoader()
         self.guilds = fixtures_api.get_guilds()
         self.online_uuids = fixtures_api.get_online_uuids()
         self.players = fixtures_api.get_players()
 
-    async def test_guild_response(self) -> None:
+    def test_guild_response(self) -> None:
         for guildstat in self.guilds:
             body = guildstat.body
             self.assertIsInstance(body, Guild)
@@ -84,7 +82,7 @@ class TestApiModelFromfixture(unittest.IsolatedAsyncioTestCase):
                 self.assertGreaterEqual(season_rank_info.final_territories, 0)
                 self.assertGreaterEqual(season_rank_info.rating, 0)
 
-    async def test_player_response(self) -> None:
+    def test_player_response(self) -> None:
         for playerstat in self.players:
             body = playerstat.body
             self.assertIsInstance(body, Player)
@@ -255,7 +253,7 @@ class TestApiModelFromfixture(unittest.IsolatedAsyncioTestCase):
 
                 self.assertIsInstance(ch.quests, list)
 
-    async def test_online_players_response(self) -> None:
+    def test_online_players_response(self) -> None:
         players = self.online_uuids
         self.assertGreaterEqual(players.body.total, 0)
         self.assertIsInstance(players.body.players, dict)
@@ -266,7 +264,3 @@ class TestApiModelFromfixture(unittest.IsolatedAsyncioTestCase):
             else:
                 self.assertIsInstance(usernameoruuid.username, str)
             self.assertIsInstance(server, str)
-
-    async def asyncTearDown(self) -> None:
-        # await self.wynnapi.close()
-        return

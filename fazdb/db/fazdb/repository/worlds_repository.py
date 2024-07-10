@@ -1,15 +1,15 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import Any, Iterable, TYPE_CHECKING
 
+from ...base_repository import BaseRepository
 from ..model import Worlds
-from ._repository import Repository
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
-    from ... import BaseAsyncDatabase
+    from ...base_async_database import BaseAsyncDatabase
 
 
-class WorldsRepository(Repository[Worlds, Any]):
+class WorldsRepository(BaseRepository[Worlds, Any]):
 
     def __init__(self, database: BaseAsyncDatabase[Any]) -> None:
         super().__init__(database, Worlds)
